@@ -67,3 +67,27 @@ void fluxShader::setgeofac3fv(REAL * ya){
 void fluxShader::setgeofac3f(REAL x, REAL y, REAL z){
     glUniform3f(geofacloc, x, y, z);
 }
+
+
+
+void minMaxShader::setsppos(REAL x, REAL y){
+
+    GLint loc = glGetUniformLocation(shader->progmObj,"sppos");
+    if(loc == -1){
+        printf("no sppos! Are you using the correct shader?\n" );
+    }else{
+        glUniform2f(loc, x, y);
+    }
+    
+}
+
+void minMaxShader::setparams(REAL mapsize, REAL blocksize, REAL scale){
+
+    GLint loc = glGetUniformLocation(shader->progmObj,"params");
+    if(loc == -1){
+        printf("no params! Are you using the correct shader?\n" );
+    }else{
+        glUniform3f(loc, mapsize, blocksize, scale);
+    }
+}
+

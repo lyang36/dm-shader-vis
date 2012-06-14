@@ -13,6 +13,8 @@ private:
     colorShader * cshader;
     fluxBuffer * fbuffer;
     colorBuffer * cbuffer;
+    minMaxShader * mshader;
+    minmaxBuffer * mbuffer;
     
     GLuint textureIni;  //initial empty texture
 
@@ -23,6 +25,7 @@ private:
     void init();
     void drawFlux();
     void drawImage();
+    void setMinMaxTex();
 
     bool initialed;     //is initialed?
 public:
@@ -33,13 +36,6 @@ public:
             pointSize = 256;
             initialed = false;
             orthsize = 10.0;
-/*            fshader = new fluxShader();
-            cshader = new colorShader();
-            fbuffer = new fluxBuffer(windowSize, windowSize);
-            cbuffer = new colorBuffer(windowSize, windowSize);
-                FB->setBuffer();
-    CB->setBuffer();
-*/
     };
     void start(int argc, char **argv);
 };

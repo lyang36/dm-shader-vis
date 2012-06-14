@@ -36,8 +36,6 @@ public:
 
 class fluxShader:public Shader{
 private:
-    REAL vpos[3];
-    REAL opos[3];
     GLint xaxisloc, yaxisloc, zaxisloc;
     GLint oposloc;
     GLint geofacloc;
@@ -56,8 +54,8 @@ public:
     void setgeofac3fv(REAL * geo);
     
     fluxShader(){
-        vfile = "./flux.vert";
-        ffile = "./flux.frag";
+        vfile = "./shaderfiles/flux.vert";
+        ffile = "./shaderfiles/flux.frag";
         shaderManager SM;
         shader = SM.loadShaderFile(vfile.c_str(), ffile.c_str());
         if(shader == 0){
@@ -78,24 +76,55 @@ public:
     };  
 };
 
-/*
-class minMaxShader{
+
+class minMaxShader:public Shader{
 private:
-    string vfile, ffile;
-    shaderObj * shader;
-    //shaderManager SM;
+    //use pixstep to do search in pixscale * pixscale region
+    void searchstep(int pixstep, int pixscale);  
+    string fillfile;
+    shaderObj * fillshader;
+
 public:
-    minMaxShader();
-    void begin();
-    void end();
+    minMaxShader(){
+        vfile = "./shaderfiles/coor.vert";
+        ffile = "./shaderfiles/minmax.frag";
+        fillfile = "./shaderfiles/fill.frag";
+        shaderManager SM, SM1;
+        shader = SM.loadShaderFile(vfile.c_str(), ffile.c_str());
+        fillshader = SM1.loadShaderFile(vfile.c_str(), fillfile.c_str());
+        if(shader == 0 || fillshader == 0){
+            printf("Shader error!\n");
+            exit(0);
+        }
+        if(shader->progmObj == 0 || fillshader->progmObj == 0){
+            printf("Shader error!\n");
+            exit(0);
+            //good = false;
+        }else{
+            good = true;
+        }
+    };
+    void setsppos(REAL x, REAL y);  //setup the sppos in the fill shader
+    void setparams(REAL mapsize, REAL blocksize, REAL scales);  //setup params in the minmax shader
+    void beginfill(){
+        fillshader->begin();
+    };       //begin the fill shader
+    void beginsearching(){
+        shader->begin();
+    };  //begin the min max searching shader
+    void end(){
+        shader->end();
+        fillshader->end();
+    };
+ 
 };
-*/
+
 
 class colorShader:public Shader{
 public:
     colorShader(){
-        vfile = "./color.vert";
-        ffile = "./color.frag";
+        vfile = "./shaderfiles/color.vertm";
+        ffile = "./shaderfiles/color.fragm";
         shaderManager SM;
         shader = SM.loadShaderFile(vfile.c_str(), ffile.c_str());
         if(shader == 0){

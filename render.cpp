@@ -56,6 +56,13 @@ void render::init(){
 }
 
 
+void render::setMinMaxTex(){
+    glActiveTexture(GL_TEXTURE0_ARB);
+    fbuffer->bindTex();
+    glActiveTexture(GL_TEXTURE1_ARB);
+    mbuffer->bindTex();
+}
+
 
 void render::drawFlux(){
     Particles part;
@@ -157,7 +164,8 @@ void render::drawFlux(){
 }
 
 void render::drawImage(){
-    fbuffer->bindTex();
+    setMinMaxTex();
+    //fbuffer->bindTex();
     cshader ->begin();
     cbuffer ->bindBuf();
 
@@ -243,6 +251,8 @@ void KeyboardFunc(unsigned char key, int x, int y)
 
 
 void render::start(int argc, char **argv){
+    windowSize = params->WSIZE;
+    pointSize = params->PSIZE;
 
     //initialize glut and glew
     glutInit(&argc, argv);
@@ -259,9 +269,14 @@ void render::start(int argc, char **argv){
         cshader = new colorShader();
         fbuffer = new fluxBuffer(windowSize, windowSize);
         cbuffer = new colorBuffer(windowSize, windowSize);
+        mbuffer = new minmaxBuffer(windowSize, windowSize);
+        mshader = new minMaxShader();
+        mbuffer->setsize(windowSize, 2);
+        mbuffer->mshader = mshader;
         cbuffer->setBuffer();
         fbuffer->setBuffer();
-        initialed = false;
+        mbuffer->setBuffer();
+        initialed = true;
     }
 
     //set the global pointers
@@ -288,12 +303,15 @@ void render::start(int argc, char **argv){
 		printf("No GLSL support\n");
 		exit(1);
     }
-
+    
+    //starting drawing
     cout << "Start rendering..." << endl;
     timeval tim;
     gettimeofday(&tim, NULL);
     double t1=tim.tv_sec+(tim.tv_usec/1000000.0);
     drawFlux();
+    fbuffer->bindTex();
+    mbuffer->findMinMax();
     drawImage();
     gettimeofday(&tim, NULL);
     double t2=tim.tv_sec+(tim.tv_usec/1000000.0);

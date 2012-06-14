@@ -3,6 +3,7 @@
 #include <string>
 #include <glew.h>
 #include <GLUT/glut.h>
+#include "shaders.h"
 
 using namespace std;
 
@@ -13,6 +14,8 @@ protected:
     GLuint fboId, rboId;   //framebuffer and renderbuffer ID
     unsigned int twidth, theight; //the width and height of the buffer
     void checkbuffer();     //check whether buffer is ok
+    bool  issetup;
+    
 public:     
     buffer(unsigned int w, unsigned int h);
     ~buffer();
@@ -42,10 +45,34 @@ public:
 };
 
 class minmaxBuffer:public buffer{     //min max buffer, for calculating min and max
+private:
+    GLuint textureId2;       //second texture map used for finding the min max
+    unsigned int mapsize;
+    unsigned int scale;
+    bool  texgenned; 
+    void gentex2();
+    void draw();
+    
 public:
+    minMaxShader * mshader;
     minmaxBuffer(unsigned int w, unsigned int h):buffer(w,h){
-        
+        mapsize = 512;
+        scale = 2;
+        texgenned = false;
+        issetup = false;
     };
+    
+    void setsize(int msize, int ss){
+        mapsize = msize;
+        scale = ss;
+    };
+    
+    //find the min and max inside the disk of radius 1
+    //use scale to do search for min and max
+    //for example, there is 512*512 pixels, use scale of 4
+    //the first step search for min and max in 4*4 pixels
+    //and then search in 16*16 pixels and then 64*64 ...
+    void findMinMax();  //do find the minmax. And finally store the map to be in textureId for bindTex to read
     
 };                      
 
