@@ -72,7 +72,7 @@ void fluxShader::setgeofac3f(REAL x, REAL y, REAL z){
 
 void minMaxShader::setsppos(REAL x, REAL y){
 
-    GLint loc = glGetUniformLocation(shader->progmObj,"sppos");
+    GLint loc = glGetUniformLocation(fillshader->progmObj,"sppos");
     if(loc == -1){
         printf("no sppos! Are you using the correct shader?\n" );
     }else{

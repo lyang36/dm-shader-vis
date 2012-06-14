@@ -56,6 +56,9 @@ char * shaderManager::textFileRead(const char * fn){
                 content[count] = '\0';
             }
             fclose(fp);
+        }else{
+            printf("no shader file: %s\n", fn);
+            exit(0);
         }
     }
     return content;
