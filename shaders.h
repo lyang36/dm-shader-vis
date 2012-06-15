@@ -83,7 +83,7 @@ private:
     void searchstep(int pixstep, int pixscale);  
     string fillfile;
     shaderObj * fillshader;
-
+    
 public:
     minMaxShader(){
         vfile = "./shaderfiles/coor.vert";
@@ -138,6 +138,16 @@ public:
         }else{
             good = true;
         }
+    };
+    
+    void setmultitex(){
+        int loc1 = glGetUniformLocationARB(shader->progmObj, "tex1");
+        int loc2 = glGetUniformLocationARB(shader->progmObj, "tex2");
+        if(loc1 == -1 || loc2 == -1){
+            printf("cannot find tex1 or tex2\n");
+        }
+        glUniform1iARB(loc1, 0);
+        glUniform1iARB(loc2, 1);
     };
 };
 #endif

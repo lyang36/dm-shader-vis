@@ -9,5 +9,6 @@ void main(){
     if(color.r == 0.0){
         color = texture2D(tex,sppos);
     }
+    //color = vec4(1.0, 1.0, 0.0, 0.0);
     gl_FragColor = color;
 }

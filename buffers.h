@@ -47,6 +47,7 @@ public:
 class minmaxBuffer:public buffer{     //min max buffer, for calculating min and max
 private:
     GLuint textureId2;       //second texture map used for finding the min max
+    GLuint textureInput;     //input texture
     unsigned int mapsize;
     unsigned int scale;
     bool  texgenned; 
@@ -67,6 +68,9 @@ public:
         scale = ss;
     };
     
+    void setInput(GLuint tex){
+        textureInput = tex;
+    };
     //find the min and max inside the disk of radius 1
     //use scale to do search for min and max
     //for example, there is 512*512 pixels, use scale of 4

@@ -168,6 +168,7 @@ void minmaxBuffer::draw(){
     
     glDisable(GL_DEPTH_TEST);
     glDisable(GL_POINT_SPRITE);
+    glEnable(GL_TEXTURE_2D);
     glClearColor(0, 0, 0, 0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
@@ -180,11 +181,11 @@ void minmaxBuffer::draw(){
     glLoadIdentity();
     
     glBegin(GL_QUADS);
-    
-    glTexCoord2i(0, 0); glVertex3f(-orthsize, -orthsize, 10);
-    glTexCoord2i(0, 1); glVertex3f(-orthsize, orthsize, 10);
-    glTexCoord2i(1, 1); glVertex3f(orthsize,  orthsize, 10);
-    glTexCoord2i(1, 0); glVertex3f(orthsize,  -orthsize, 10);
+    //glColor4f(1.0,0.0,0.0,1.0);
+    glTexCoord2f(0, 0); glVertex3f(-orthsize, -orthsize, 10);
+    glTexCoord2f(0, 1); glVertex3f(-orthsize, orthsize, 10);
+    glTexCoord2f(1, 1); glVertex3f(orthsize,  orthsize, 10);
+    glTexCoord2f(1, 0); glVertex3f(orthsize,  -orthsize, 10);
     
     glEnd();
     glFinish(); //finish the drawing
@@ -203,6 +204,7 @@ void minmaxBuffer::findMinMax(){
     //fill the map
     mshader->beginfill();   //start the fill shader
     mshader->setsppos(0.5, 0.5);    //set to the center point, must set
+    glBindTexture(GL_TEXTURE_2D, textureInput);
     draw();                 //draw a sqare on the whole screen
     mshader->end();
     
@@ -216,7 +218,8 @@ void minmaxBuffer::findMinMax(){
     glBindTexture(GL_TEXTURE_2D, textureId2);
     mshader->beginsearching();
     int blocksize = 1;
-    while(blocksize < mapsize){
+    //scale = 8;
+    while(blocksize <= mapsize){
         mshader->setparams(mapsize, blocksize, scale);
         draw();         //draw a square
         glBindTexture(GL_TEXTURE_2D, 0);

@@ -58,7 +58,7 @@ char * shaderManager::textFileRead(const char * fn){
             fclose(fp);
         }else{
             printf("no shader file: %s\n", fn);
-            exit(0);
+            exit(1);
         }
     }
     return content;
@@ -77,6 +77,7 @@ void shaderManager::printLog(GLhandleARB obj){
         glGetInfoLogARB(obj, infologLength, &charsWritten, infoLog);
         printf("%s\n",infoLog);
         free(infoLog);
+        exit(1);
     }
 }
 

@@ -57,10 +57,17 @@ void render::init(){
 
 
 void render::setMinMaxTex(){
-    glActiveTexture(GL_TEXTURE0_ARB);
+
+    glEnable(GL_TEXTURE_2D);
+    glActiveTexture(GL_TEXTURE0);
     fbuffer->bindTex();
-    glActiveTexture(GL_TEXTURE1_ARB);
+    glEnable(GL_TEXTURE_2D);
+    //glTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE_EXT);
+    
+    glActiveTexture(GL_TEXTURE1);
     mbuffer->bindTex();
+    glEnable(GL_TEXTURE_2D);
+    //glTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE_EXT);
 }
 
 
@@ -141,8 +148,8 @@ void render::drawFlux(){
             reader->readParticle(&part);
             glColor4f(part.mass, part.density, part.hsmooth, 1);
             glVertex3f(part.xpos, part.ypos, part.zpos);
-            //glColor4f(1,2,1,100);   
-            //glVertex3f(40, 0, -30);
+            glColor4f(1,2,1,100);   
+            glVertex3f(40, 0, -30);
 
 
         }
@@ -166,8 +173,9 @@ void render::drawFlux(){
 void render::drawImage(){
     setMinMaxTex();
     //fbuffer->bindTex();
-    cshader ->begin();
-    cbuffer ->bindBuf();
+    cshader -> begin();
+    cshader -> setmultitex();
+    cbuffer -> bindBuf();
 
     glDisable(GL_DEPTH_TEST);
     glDisable(GL_POINT_SPRITE);
@@ -183,10 +191,23 @@ void render::drawImage(){
 
     glBegin(GL_QUADS);
 
-    glTexCoord2i(0, 0); glVertex3f(-orthsize, -orthsize, 10);
+    glMultiTexCoord2f(GL_TEXTURE0, 0.0, 0.0);
+    glMultiTexCoord2f(GL_TEXTURE1, 0.0, 0.0);
+    glVertex3f(-orthsize, -orthsize, 10);
+    glMultiTexCoord2f(GL_TEXTURE0, 0.0, 1.0);
+    glMultiTexCoord2f(GL_TEXTURE1, 0.0, 1.0);
+    glVertex3f(-orthsize, orthsize, 10);
+    glMultiTexCoord2f(GL_TEXTURE0, 1.0, 1.0);
+    glMultiTexCoord2f(GL_TEXTURE1, 1.0, 1.0);
+    glVertex3f(orthsize,  orthsize, 10);
+    glMultiTexCoord2f(GL_TEXTURE0, 1.0, 0.0);
+    glMultiTexCoord2f(GL_TEXTURE1, 1.0, 0.0);
+    glVertex3f(orthsize,  -orthsize, 10);
+    
+    /*glTexCoord2i(0, 0); glVertex3f(-orthsize, -orthsize, 10);
     glTexCoord2i(0, 1); glVertex3f(-orthsize, orthsize, 10);
     glTexCoord2i(1, 1); glVertex3f(orthsize,  orthsize, 10);
-    glTexCoord2i(1, 0); glVertex3f(orthsize,  -orthsize, 10);
+    glTexCoord2i(1, 0); glVertex3f(orthsize,  -orthsize, 10);*/
 
     glEnd();
     glBindTexture(GL_TEXTURE_2D, 0);
@@ -200,6 +221,8 @@ void render::drawImage(){
 }
 
 void rendsenc(){
+    //glClientActiveTexture(GL_TEXTURE0);
+    glActiveTexture(GL_TEXTURE0);
 
     CB ->unbindBuf();
     
@@ -310,13 +333,15 @@ void render::start(int argc, char **argv){
     gettimeofday(&tim, NULL);
     double t1=tim.tv_sec+(tim.tv_usec/1000000.0);
     drawFlux();
-    fbuffer->bindTex();
+    mbuffer->setInput(fbuffer->getTex());
     mbuffer->findMinMax();
     drawImage();
     gettimeofday(&tim, NULL);
     double t2=tim.tv_sec+(tim.tv_usec/1000000.0);
     printf("End rendering. %.6lf seconds elapsed\n", t2-t1);
     cout << "--------------------------------------------------"<<endl;
+    //CB->setTex(fbuffer->getTex());
+    //CB->setTex(mbuffer->getTex());
     glutMainLoop();
 
 }

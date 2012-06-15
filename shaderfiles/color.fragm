@@ -4,11 +4,14 @@ uniform sampler2D tex2;
 
 void main()
 {
-    vec4 color = texture2D(tex1, vec2(gl_TexCoord[0]));
-    vec4 minmax = texture2D(tex2, vec2(gl_TexCoord[1]));
     vec2 xy=vec2(gl_TexCoord[0].st);
+    vec4 color = texture2D(tex1, xy);
+    vec4 minmax = texture2D(tex2, xy);
+    //color.r = minmax.g;
     float MIN = minmax.r;
     float MAX = minmax.g;
+    //MIN = 1.0e-20;
+    //MAX = 1.0e4;
     if(MIN == 0.0){
         MIN == 1.0e-20;
     }
@@ -27,5 +30,6 @@ void main()
     }else{
         color = vec4(0.0, 0.0, 0.0, 0.0);
     }
+    //color = vec4(1.0, 1.0+xy.y, 0, 0);
 	gl_FragColor = color;
 }
