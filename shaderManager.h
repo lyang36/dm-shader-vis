@@ -1,7 +1,15 @@
 #ifndef __LY_SHADERMANAGER__
 #define __LY_SHADERMANAGER__
+//#include <glew.h>
+//#include <GLUT/glut.h>
+#ifdef __APPLE__
 #include <glew.h>
-#include <GLUT/glut.h>
+#include <GLUT/glut.h> // darwin uses glut.h rather than GL/glut.h
+#else
+#include <GL/glew.h>
+#include <GL/glut.h>
+#endif
+
 
 class shaderObj{
 public: 

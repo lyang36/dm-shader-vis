@@ -1,5 +1,12 @@
+#ifdef __APPLE__
 #include <glew.h>
-#include <GLUT/glut.h>
+#include <GLUT/glut.h> // darwin uses glut.h rather than GL/glut.h
+#else
+#include <GL/glew.h>
+#include <GL/glut.h>
+#endif
+
+
 #include "buffers.h"
 #include "shaders.h"
 #include "render.h"

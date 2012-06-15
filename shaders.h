@@ -1,5 +1,6 @@
 #ifndef __LY_PARTICLESHADER__
 #define __LY_PARTICLESHADER__
+#include <cstdio>
 #include "types.h"
 #include "shaderManager.h"
 #include <string>

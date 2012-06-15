@@ -1,6 +1,4 @@
 #include <stdlib.h>
-#include <glew.h>
-#include <GLUT/glut.h> // darwin uses glut.h rather than GL/glut.h
 #include <stdio.h>
 #include <fcntl.h>
 #include <string.h>
@@ -8,6 +6,13 @@
 #include <unistd.h> 
 #include <sys/types.h>
 #include <stdlib.h>
+#ifdef __APPLE__
+#include <glew.h>
+#include <GLUT/glut.h> // darwin uses glut.h rather than GL/glut.h
+#else
+#include <GL/glew.h>
+#include <GL/glut.h>
+#endif
 #include "shaderManager.h"
 
 
