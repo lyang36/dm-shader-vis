@@ -7,15 +7,18 @@ varying vec4 particle;
 
 float profile(vec3 r1,float dtheta){ 
     vec3 r0 = vec3(particle.gba);
+    float costheta = dot(r0, r1);
     //float theta = acos(dot(r1, r0));
     //use taylor series
     //float d2 = theta / dtheta;
     //d2 = d2 * d2;
     //return exp(- 1.5 * d2);
     //use tylor seriers
-    float t2 = 2.0 * ( 1.0 - dot(r0, r1));
+    
+    float t2 = 2.0 * ( 1.0 - costheta);// + 1.0/3.0*(costheta - 1.0)*(costheta - 1.0) - 4.0/45.0 * (costheta - 1.0) *(costheta - 1.0)*(costheta - 1.0);
     float d2 = t2 / dtheta / dtheta;
-    return clamp(1.0 - 1.5 * d2, 0.0, 1.0);
+    return exp(- 1.5 * d2);
+    //return clamp(1.0 - 1.5 * d2, 0.0, 1.0);
 }
 
 //reverse stereoprojection

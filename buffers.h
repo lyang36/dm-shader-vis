@@ -77,7 +77,12 @@ public:
     //the first step search for min and max in 4*4 pixels
     //and then search in 16*16 pixels and then 64*64 ...
     void findMinMax();  //do find the minmax. And finally store the map to be in textureId for bindTex to read
-    
+    ~minmaxBuffer(){
+        glDeleteFramebuffers(1, &fboId);
+        glDeleteRenderbuffers(1, &rboId);
+        glDeleteTextures(1, &textureId);
+        glDeleteTextures(1, &textureId2);
+    };
 };                      
 
 class colorBuffer:public buffer{      //buffer for final output

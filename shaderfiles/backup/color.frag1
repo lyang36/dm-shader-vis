@@ -1,0 +1,33 @@
+//enabling multiexteure
+uniform sampler2D tex1;
+uniform sampler2D tex2;
+
+void main()
+{
+    vec4 color = texture2D(tex1, vec2(gl_TexCoord[0]));
+    vec4 minmax = texture2D(tex2, vec2(gl_TexCoord[1]));
+    vec2 xy=vec2(gl_TexCoord[0].st);
+    float MIN = minmax.r;
+    float MAX = minmax.g;
+    MIN = 1.0e-20;
+    MAX = 1.0e3;
+    if(MIN == 0.0){
+        MIN == 1.0e-20;
+    }
+    float flux = color.r;
+    if(flux == 0.0){
+        flux = MIN;
+    }
+    //flux = .1;
+    float ff;
+    ff= clamp((log(flux) - log(MIN))/(log(MAX)-log(MIN)), 0.0 , 1.0);
+    //ff = clamp((flux - MIN)/(MAX - MIN), 0.0 , 1.0);
+    //color = vec4(ff, 0, 0.5, 1);
+    
+    if(dot(xy-0.5,xy-0.5) <= 0.25){
+        color = vec4(ff, (ff*(1.0 - ff) * 4.0), (1.0 - ff),1);
+    }else{
+        color = vec4(0.0, 0.0, 0.0, 0.0);
+    }
+	gl_FragColor = color;
+}

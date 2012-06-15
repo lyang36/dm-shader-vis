@@ -296,9 +296,8 @@ void render::start(int argc, char **argv){
         mshader = new minMaxShader();
         mbuffer->setsize(windowSize, 2);
         mbuffer->mshader = mshader;
-        cbuffer->setBuffer();
         fbuffer->setBuffer();
-        mbuffer->setBuffer();
+        //mbuffer->setBuffer();
         initialed = true;
     }
 
@@ -331,13 +330,34 @@ void render::start(int argc, char **argv){
     cout << "Start rendering..." << endl;
     timeval tim;
     gettimeofday(&tim, NULL);
-    double t1=tim.tv_sec+(tim.tv_usec/1000000.0);
+    double t1=tim.tv_sec+(tim.tv_usec/1000000.0);   
+
     drawFlux();
+    /*float a[windowSize*windowSize];
+    glReadPixels(0,
+                 0,
+                 windowSize,
+                 windowSize,
+                 GL_RED,
+                 GL_FLOAT,
+                 a);*/
     mbuffer->setInput(fbuffer->getTex());
     mbuffer->findMinMax();
+    cbuffer->setBuffer();
     drawImage();
+    delete fbuffer;
+    delete mbuffer;
+    /*float b = 0;
+    for(int i = 0; i<windowSize; i++){
+        for(int j =0; j< windowSize; j++){
+            b = max(b, a[i*windowSize + j]);
+            
+        }
+    }
+    printf("%g\n",b);*/
     gettimeofday(&tim, NULL);
     double t2=tim.tv_sec+(tim.tv_usec/1000000.0);
+    
     printf("End rendering. %.6lf seconds elapsed\n", t2-t1);
     cout << "--------------------------------------------------"<<endl;
     //CB->setTex(fbuffer->getTex());

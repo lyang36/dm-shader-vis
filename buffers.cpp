@@ -236,3 +236,4 @@ void minmaxBuffer::findMinMax(){
     
     unbindBuf();    //finished
 }
+
