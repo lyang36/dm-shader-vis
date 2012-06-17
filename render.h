@@ -11,13 +11,14 @@ private:
     //L for the lower sphere
     //U for the upper sphere
     fluxShader * fshaderL;
-    //minMaxShader * mshader;
     colorShader * cshaderL;
     fluxBuffer * fbufferL;
     colorBuffer * cbufferL;
-    //minMaxShader * mshaderL;
-    //minmaxBuffer * mbufferL;
     
+    fluxShader * fshaderU;
+    colorShader * cshaderU;
+    fluxBuffer * fbufferU;
+    colorBuffer * cbufferU;
     
     
     
