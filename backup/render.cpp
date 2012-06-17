@@ -65,7 +65,7 @@ void render::init(){
 
 void render::setMinMaxTex(){
 
-    //glEnable(GL_TEXTURE_2D);
+    glEnable(GL_TEXTURE_2D);
     //glActiveTexture(GL_TEXTURE0);
     fbufferL->bindTex();
     glEnable(GL_TEXTURE_2D);
@@ -331,10 +331,10 @@ void render::start(int argc, char **argv){
         cshaderL = new colorShader();
         fbufferL = new fluxBuffer(windowSize, windowSize);
         cbufferL = new colorBuffer(windowSize, windowSize);
-        //mbufferL = new minmaxBuffer(windowSize, windowSize);
-        //mshaderL = new minMaxShader();
-        //mbufferL->setsize(windowSize, 2);
-        //mbufferL->mshader = mshaderL;
+        mbufferL = new minmaxBuffer(windowSize, windowSize);
+        mshaderL = new minMaxShader();
+        mbufferL->setsize(windowSize, 2);
+        mbufferL->mshader = mshaderL;
         fbufferL->setBuffer();
         //mbuffer->setBuffer();
         initialed = true;

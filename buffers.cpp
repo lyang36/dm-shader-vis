@@ -1,10 +1,6 @@
 #include <stdlib.h>
 #include <glew.h>
-#ifdef __APPLE__
 #include <GLUT/glut.h> // darwin uses glut.h rather than GL/glut.h
-#else
-#include <GL/glut.h>
-#endif
 #include <stdio.h>
 #include <string>
 #include "buffers.h"
@@ -25,7 +21,6 @@ void buffer::checkbuffer(){
 buffer::buffer(unsigned int w, unsigned int h){
     twidth = w;
     theight = h;
-    issetup = false;
 }
 
 
@@ -107,11 +102,6 @@ void buffer::genBuffer(){
 }
 
 void buffer::setBuffer(){
-    if(issetup){
-        return;
-    }
-    issetup = true;
-    
     genTex();
     genBuffer();
     attachTex();
@@ -134,110 +124,5 @@ void buffer::readTex(void* tex){
 
 void buffer::saveImg(string filename){
     
-}
-
-
-
-void minmaxBuffer::gentex2(){
-    if(texgenned){
-        return;
-    }
-    texgenned = true;
-    glGenTextures(1, &textureId2);
-    glBindTexture(GL_TEXTURE_2D, textureId2);
-    
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F_ARB, twidth, theight, 0,
-                 GL_RGBA, GL_UNSIGNED_BYTE, 0);
-    
-    // set its parameters
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    
-    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-    
-    // setup some generic opengl options
-    glClampColorARB(GL_CLAMP_VERTEX_COLOR_ARB, GL_FALSE);
-    glClampColorARB(GL_CLAMP_FRAGMENT_COLOR_ARB, GL_FALSE);
-    glClampColorARB(GL_CLAMP_READ_COLOR_ARB, GL_FALSE);
-    
-    glBindTexture(GL_TEXTURE_2D, 0);
-}
-
-void minmaxBuffer::draw(){
-    
-    glPushAttrib(GL_VIEWPORT_BIT | GL_COLOR_BUFFER_BIT); 
-    glViewport(0,0,mapsize, mapsize); 
-    
-    glDisable(GL_DEPTH_TEST);
-    glDisable(GL_POINT_SPRITE);
-    glEnable(GL_TEXTURE_2D);
-    glClearColor(0, 0, 0, 0);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    
-    int orthsize = 10;
-    
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    glOrtho(-orthsize, orthsize, -orthsize, orthsize, -100, 100);
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-    
-    glBegin(GL_QUADS);
-    //glColor4f(1.0,0.0,0.0,1.0);
-    glTexCoord2f(0, 0); glVertex3f(-orthsize, -orthsize, 10);
-    glTexCoord2f(0, 1); glVertex3f(-orthsize, orthsize, 10);
-    glTexCoord2f(1, 1); glVertex3f(orthsize,  orthsize, 10);
-    glTexCoord2f(1, 0); glVertex3f(orthsize,  -orthsize, 10);
-    
-    glEnd();
-    glFinish(); //finish the drawing
-    
-    glPopAttrib();
-
-}
-
-void minmaxBuffer::findMinMax(){
-    GLuint temptex;
-    //first step: fill the map
-    setBuffer();
-    gentex2();
-    bindBuf();
-    
-    //fill the map
-    mshader->beginfill();   //start the fill shader
-    mshader->setsppos(0.5, 0.5);    //set to the center point, must set
-    glBindTexture(GL_TEXTURE_2D, textureInput);
-    draw();                 //draw a sqare on the whole screen
-    mshader->end();
-    
-    //swap the texture
-    temptex = textureId;
-    setTex(textureId2);
-    attachTex();            //attach to the buffer
-    textureId2 = temptex;   //now textureId2 has the filled map
-    
-    //second step ... nth step find the minmax 
-    glBindTexture(GL_TEXTURE_2D, textureId2);
-    mshader->beginsearching();
-    int blocksize = 1;
-    //scale = 8;
-    while(blocksize <= mapsize){
-        mshader->setparams(mapsize, blocksize, scale);
-        draw();         //draw a square
-        glBindTexture(GL_TEXTURE_2D, 0);
-        
-        //swap the texture
-        temptex = textureId;
-        setTex(textureId2);
-        attachTex();            //attach to the buffer
-        textureId2 = temptex;   //now textureId2 has the nexstage map
-        
-        glBindTexture(GL_TEXTURE_2D, textureId2);
-        blocksize *= scale;
-    }
-    
-    unbindBuf();    //finished
 }
 

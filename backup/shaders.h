@@ -124,8 +124,8 @@ public:
 class colorShader:public Shader{
 public:
     colorShader(){
-        vfile = "./shaderfiles/color.vert";
-        ffile = "./shaderfiles/color.frag";
+        vfile = "./shaderfiles/color.vertm";
+        ffile = "./shaderfiles/color.fragm";
         shaderManager SM;
         shader = SM.loadShaderFile(vfile.c_str(), ffile.c_str());
         if(shader == 0){
