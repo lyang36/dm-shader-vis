@@ -40,6 +40,10 @@ public:
     void setPath(string path);         //set path
     void loadBuffer();      //load buffer
     Particles * getBuf();   //get buffer
+    int getMemparts(){
+        return memParts;
+    };
+    void move2bufEnd();     //move the memCursor to then end of the memory
     unsigned int getBufSize(); //get mparts
     bool open();    //open the file and load the buffer
     bool isOpen();  //check is open?

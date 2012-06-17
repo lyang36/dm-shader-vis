@@ -119,6 +119,11 @@ bool DataReader::readParticle(Particles * part){
     return true;
 }
 
+void DataReader::move2bufEnd(){
+    readCursor += memParts - memCursor;
+    memCursor = memParts;
+}
+
 void DataReader::close(){
     if(buffer != NULL)
         delete(buffer);

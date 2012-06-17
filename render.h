@@ -8,13 +8,18 @@
 
 class render{
 private:
-    fluxShader * fshader;
+    //L for the lower sphere
+    //U for the upper sphere
+    fluxShader * fshaderL;
     //minMaxShader * mshader;
-    colorShader * cshader;
-    fluxBuffer * fbuffer;
-    colorBuffer * cbuffer;
-    minMaxShader * mshader;
-    minmaxBuffer * mbuffer;
+    colorShader * cshaderL;
+    fluxBuffer * fbufferL;
+    colorBuffer * cbufferL;
+    minMaxShader * mshaderL;
+    minmaxBuffer * mbufferL;
+    
+    
+    
     
     GLuint textureIni;  //initial empty texture
 

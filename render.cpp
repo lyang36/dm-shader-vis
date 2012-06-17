@@ -15,7 +15,7 @@
 #include <cmath>
 using namespace std;
 
-colorBuffer * CB;       //for final rendering
+colorBuffer * CBL;       //for final rendering
 static unsigned int WSIZE, PSIZE;
 
 void render::init(){
@@ -67,12 +67,12 @@ void render::setMinMaxTex(){
 
     glEnable(GL_TEXTURE_2D);
     glActiveTexture(GL_TEXTURE0);
-    fbuffer->bindTex();
+    fbufferL->bindTex();
     glEnable(GL_TEXTURE_2D);
     //glTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE_EXT);
     
     glActiveTexture(GL_TEXTURE1);
-    mbuffer->bindTex();
+    mbufferL->bindTex();
     glEnable(GL_TEXTURE_2D);
     //glTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE_EXT);
 }
@@ -84,17 +84,18 @@ void render::drawFlux(){
         reader->open();
     }
 
+    
     //bind buffer
-    fbuffer->bindBuf();
-
+    fbufferL->bindBuf();
+    
     //bind texture
     glBindTexture(GL_TEXTURE_2D, textureIni);
-
+    
     //begin shader
-    fshader->begin();
-
+    fshaderL->begin();
+    
     //setup shader parameters 
-    fshader->setgeofac3f(orthsize, windowSize, pointSize);
+    fshaderL->setgeofac3f(orthsize, windowSize, pointSize);
     
     REAL vx = params->vposx;
     REAL vy = params->vposy;
@@ -113,13 +114,14 @@ void render::drawFlux(){
         cosphi = vx / sintheta;
         sinphi = vy / sintheta;
     }
-    //now use the rotatation matrix
-    printf("%f, %f, %f, %f\n", costheta, sintheta, cosphi, sinphi);
-    fshader->setzaxis3f(vx, vy, vz);
-    fshader->setyaxis3f(-sinphi, cosphi, 0);
-    fshader->setxaxis3f(cosphi*costheta, sinphi*costheta, -sintheta);
     
-    fshader->setopos3f(params->oposx, params->oposy, params->oposz);
+    //now use the rotatation matrix
+    //printf("%f, %f, %f, %f\n", costheta, sintheta, cosphi, sinphi);
+    fshaderL->setzaxis3f(vx, vy, vz);
+    fshaderL->setyaxis3f(-sinphi, cosphi, 0);
+    fshaderL->setxaxis3f(cosphi*costheta, sinphi*costheta, -sintheta);
+    fshaderL->setopos3f(params->oposx, params->oposy, params->oposz);
+    //fshaderL->end();    
     
     //start drawing
     glPushAttrib(GL_VIEWPORT_BIT | GL_COLOR_BUFFER_BIT); 
@@ -140,9 +142,42 @@ void render::drawFlux(){
     cout << "--------------------------------------------------"<<endl;
     cout << ("..10%..20%..30%..40%..50%..60%..70%..80%..90%.100%\n");
     int kk = 0; //particle number counter
-    int outc = reader->getPartNum() * 2 / 100;
+    
+    int outc = reader->getPartNum() * 2 / 100 / (params->CPU_MEM) ;
+    if(outc == 0){
+        outc = 1;
+    }
+    
     while(reader->hasNext()){
-        glBegin(GL_POINTS);
+
+        //fbufferL->bindBuf();
+        //fshaderL->begin();
+        
+        reader->loadBuffer();
+        GLfloat * vetexarray = (GLfloat *) reader->getBuf();
+        glEnableClientState (GL_VERTEX_ARRAY);
+        glEnableClientState (GL_COLOR_ARRAY);
+        glColorPointer (3, GL_FLOAT, 6*sizeof(GLfloat), &(vetexarray[0]));
+        glVertexPointer (3, GL_FLOAT, 6*sizeof(GLfloat), &(vetexarray[3]));
+        
+        glDrawArrays(GL_POINTS, 0, reader->getMemparts());
+        
+        reader -> move2bufEnd();
+        
+        glDisableClientState (GL_VERTEX_ARRAY);
+        glDisableClientState (GL_COLOR_ARRAY);
+        //cout << reader->getMemparts() << endl;
+        
+        kk++;
+        if(kk % (outc) == 0){
+            cout << "*";
+            cout.flush();
+        }
+        //glFlush();
+        //fshaderL->end();
+        //fbufferL->unbindBuf();
+        //
+        /*glBegin(GL_POINTS);
         int tp = 0;
         while(reader->hasNext() && tp < 10000){
             kk++;
@@ -155,14 +190,10 @@ void render::drawFlux(){
             reader->readParticle(&part);
             glColor4f(part.mass, part.density, part.hsmooth, 1);
             glVertex3f(part.xpos, part.ypos, part.zpos);
-            glColor4f(1,2,1,100);   
-            glVertex3f(40, 0, -30);
-
-
+            //glColor4f(1,2,1,100);   
+            //glVertex3f(40, 0, -30);
         }
-        glEnd();
-        glFlush();
-
+        glEnd();*/
     }
     cout << endl;
     cout.flush();
@@ -172,17 +203,17 @@ void render::drawFlux(){
     glBindTexture(GL_TEXTURE_2D, 0);
 
     glPopAttrib();
-    fshader->end(); 
-    fbuffer->unbindBuf();
     reader->close();
+    fshaderL->end();
+    fbufferL->unbindBuf();
 }
 
 void render::drawImage(){
     setMinMaxTex();
     //fbuffer->bindTex();
-    cshader -> begin();
-    cshader -> setmultitex();
-    cbuffer -> bindBuf();
+    cshaderL -> begin();
+    cshaderL -> setmultitex();
+    cbufferL -> bindBuf();
 
     glDisable(GL_DEPTH_TEST);
     glDisable(GL_POINT_SPRITE);
@@ -221,8 +252,8 @@ void render::drawImage(){
     glFlush();
 
 
-    cbuffer ->unbindBuf();
-    cshader -> end();
+    cbufferL ->unbindBuf();
+    cshaderL -> end();
 
 
 }
@@ -231,9 +262,9 @@ void rendsenc(){
     //glClientActiveTexture(GL_TEXTURE0);
     glActiveTexture(GL_TEXTURE0);
 
-    CB ->unbindBuf();
+    CBL ->unbindBuf();
     
-    CB->bindTex();
+    CBL->bindTex();
 
     glDisable(GL_DEPTH_TEST);
     glDisable(GL_POINT_SPRITE);
@@ -295,15 +326,15 @@ void render::start(int argc, char **argv){
 
     //set up shaders and buffers
     if(!initialed){
-        fshader = new fluxShader();
-        cshader = new colorShader();
-        fbuffer = new fluxBuffer(windowSize, windowSize);
-        cbuffer = new colorBuffer(windowSize, windowSize);
-        mbuffer = new minmaxBuffer(windowSize, windowSize);
-        mshader = new minMaxShader();
-        mbuffer->setsize(windowSize, 2);
-        mbuffer->mshader = mshader;
-        fbuffer->setBuffer();
+        fshaderL = new fluxShader();
+        cshaderL = new colorShader();
+        fbufferL = new fluxBuffer(windowSize, windowSize);
+        cbufferL = new colorBuffer(windowSize, windowSize);
+        mbufferL = new minmaxBuffer(windowSize, windowSize);
+        mshaderL = new minMaxShader();
+        mbufferL->setsize(windowSize, 2);
+        mbufferL->mshader = mshaderL;
+        fbufferL->setBuffer();
         //mbuffer->setBuffer();
         initialed = true;
     }
@@ -311,7 +342,7 @@ void render::start(int argc, char **argv){
     //set the global pointers
     WSIZE = windowSize;
     PSIZE = pointSize;
-    CB = cbuffer;
+    CBL = cbufferL;
 
     //initialize enviroment    
     init();
@@ -340,6 +371,11 @@ void render::start(int argc, char **argv){
     double t1=tim.tv_sec+(tim.tv_usec/1000000.0);   
 
     drawFlux();
+    
+    //fbufferL->bindBuf();
+    
+    //free the cpu memery
+    
     /*float a[windowSize*windowSize];
     glReadPixels(0,
                  0,
@@ -347,21 +383,24 @@ void render::start(int argc, char **argv){
                  windowSize,
                  GL_RED,
                  GL_FLOAT,
-                 a);*/
-    mbuffer->setInput(fbuffer->getTex());
-    mbuffer->findMinMax();
-    cbuffer->setBuffer();
-    drawImage();
-    delete fbuffer;
-    delete mbuffer;
-    /*float b = 0;
+                 a);
+    float b = 0;
     for(int i = 0; i<windowSize; i++){
         for(int j =0; j< windowSize; j++){
             b = max(b, a[i*windowSize + j]);
-            
+     
         }
     }
     printf("%g\n",b);*/
+    
+    
+    /*mbufferL->setInput(fbufferL->getTex());
+    mbufferL->findMinMax();*/
+    cbufferL->setBuffer();
+    drawImage();
+    delete fbufferL;
+    delete mbufferL;
+
     gettimeofday(&tim, NULL);
     double t2=tim.tv_sec+(tim.tv_usec/1000000.0);
     
@@ -372,3 +411,6 @@ void render::start(int argc, char **argv){
     glutMainLoop();
 
 }
+
+
+
