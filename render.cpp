@@ -62,22 +62,6 @@ void render::init(){
     glPointSize(pointSize);
 }
 
-
-void render::setMinMaxTex(){
-
-    //glEnable(GL_TEXTURE_2D);
-    //glActiveTexture(GL_TEXTURE0);
-    fbufferL->bindTex();
-    glEnable(GL_TEXTURE_2D);
-    //glTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE_EXT);
-    
-    /*glActiveTexture(GL_TEXTURE1);
-    mbufferL->bindTex();
-    glEnable(GL_TEXTURE_2D);
-    //glTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE_EXT);*/
-}
-
-
 void render::drawFlux(){
     Particles part;
     if(!reader->isOpen()){
@@ -116,7 +100,6 @@ void render::drawFlux(){
     }
     
     //now use the rotatation matrix
-    //printf("%f, %f, %f, %f\n", costheta, sintheta, cosphi, sinphi);
     fshaderL->setzaxis3f(vx, vy, vz);
     fshaderL->setyaxis3f(-sinphi, cosphi, 0);
     fshaderL->setxaxis3f(cosphi*costheta, sinphi*costheta, -sintheta);
@@ -149,9 +132,6 @@ void render::drawFlux(){
     }
     
     while(reader->hasNext()){
-
-        //fbufferL->bindBuf();
-        //fshaderL->begin();
         
         reader->loadBuffer();
         GLfloat * vetexarray = (GLfloat *) reader->getBuf();
@@ -173,27 +153,6 @@ void render::drawFlux(){
             cout << "*";
             cout.flush();
         }
-        //glFlush();
-        //fshaderL->end();
-        //fbufferL->unbindBuf();
-        //
-        /*glBegin(GL_POINTS);
-        int tp = 0;
-        while(reader->hasNext() && tp < 10000){
-            kk++;
-            tp++;
-            if(kk % (outc) == 0){
-                cout << "*";
-                cout.flush();
-            }
-
-            reader->readParticle(&part);
-            glColor4f(part.mass, part.density, part.hsmooth, 1);
-            glVertex3f(part.xpos, part.ypos, part.zpos);
-            //glColor4f(1,2,1,100);   
-            //glVertex3f(40, 0, -30);
-        }
-        glEnd();*/
     }
     cout << endl;
     cout.flush();
@@ -208,11 +167,50 @@ void render::drawFlux(){
     fbufferL->unbindBuf();
 }
 
+
+void render::findMinMax(float &fluxmin, float &fluxmax){
+    fbufferL->bindBuf();
+    float *pic = new float[windowSize*windowSize];
+    glReadPixels(0, 0, windowSize, windowSize,
+                 GL_RED, GL_FLOAT, pic);
+    fluxmax = 0;
+    fluxmin = 1.0e36;
+    float average;
+    int pixss = windowSize * windowSize;
+    for(int i = 0; i < pixss; i++){
+        float x = i/windowSize - windowSize / 2.0;
+        float y = i%windowSize - windowSize / 2.0;
+        float r = windowSize / 2.0;
+        if(pic[i] == 0 ){
+            pic[i] = pic[pixss / 2];
+        }
+        if(x*x + y*y < r*r-10){
+            average += pic[i] / (float) pixss;
+        }
+        if(fluxmax <= pic[i]) fluxmax = pic[i];
+        else if(fluxmin >= pic[i]) fluxmin = pic[i];
+        
+    }
+    fluxmin = average / 10.0;
+    fluxmax = average * 10.0;
+    printf("min = %f, max = %f, middle: %f\n", fluxmin, fluxmax, pic[pixss/2]);
+    delete pic;
+}
+
 void render::drawImage(){
-    setMinMaxTex();
-    //fbuffer->bindTex();
+    float fluxmax;
+    float fluxmin;
+    
+    findMinMax(fluxmin, fluxmax);
+    
+    fbufferL->bindBuf();
+    //free the cpu memery
+    
+    //setMinMaxTex();
+    fbufferL->bindTex();
     cshaderL -> begin();
-    cshaderL -> setmultitex();
+    cshaderL -> setminmax(fluxmin, fluxmax);
+    //cshaderL -> setmultitex();
     cbufferL -> bindBuf();
 
     glDisable(GL_DEPTH_TEST);
@@ -331,12 +329,7 @@ void render::start(int argc, char **argv){
         cshaderL = new colorShader();
         fbufferL = new fluxBuffer(windowSize, windowSize);
         cbufferL = new colorBuffer(windowSize, windowSize);
-        //mbufferL = new minmaxBuffer(windowSize, windowSize);
-        //mshaderL = new minMaxShader();
-        //mbufferL->setsize(windowSize, 2);
-        //mbufferL->mshader = mshaderL;
         fbufferL->setBuffer();
-        //mbuffer->setBuffer();
         initialed = true;
     }
 
@@ -372,36 +365,10 @@ void render::start(int argc, char **argv){
     double t1=tim.tv_sec+(tim.tv_usec/1000000.0);   
 
     drawFlux();
-    
-    //fbufferL->bindBuf();
-    
-    //free the cpu memery
-    
-    /*float a[windowSize*windowSize];
-    glReadPixels(0,
-                 0,
-                 windowSize,
-                 windowSize,
-                 GL_RED,
-                 GL_FLOAT,
-                 a);
-    float b = 0;
-    for(int i = 0; i<windowSize; i++){
-        for(int j =0; j< windowSize; j++){
-            b = max(b, a[i*windowSize + j]);
-     
-        }
-    }
-    printf("%g\n",b);*/
-    
-    
-    /*mbufferL->setInput(fbufferL->getTex());
-    mbufferL->findMinMax();*/
+
     cbufferL->setBuffer();
     drawImage();
     delete fbufferL;
-    //delete mbufferL;
-
     gettimeofday(&tim, NULL);
     double t2=tim.tv_sec+(tim.tv_usec/1000000.0);
     

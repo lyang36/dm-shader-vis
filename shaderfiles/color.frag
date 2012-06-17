@@ -1,9 +1,17 @@
-#define MAX 6.0e6
-#define MIN 1.0e4
+uniform float FMAX;
+uniform float FMIN;
 uniform sampler2D tex;
 
 void main()
 {
+    float MIN = FMIN;
+    float MAX = FMAX;
+    if(FMIN == 0.0){
+        MIN = 1.0e-20;
+    }
+    if(FMAX == 0.0){
+        MAX = 1.0;
+    }
     vec2 xy = vec2(gl_TexCoord[0].st);
     vec4 color = texture2D(tex,xy);
     float flux = color.r;

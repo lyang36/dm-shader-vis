@@ -30,9 +30,9 @@ private:
     void init();
     void drawFlux();
     void drawImage();
-    void setMinMaxTex();
 
     bool initialed;     //is initialed?
+    void findMinMax(float &fluxmax, float &fluxmin);
 public:
     DataReader * reader;
     Parameter * params;

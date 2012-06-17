@@ -141,7 +141,7 @@ public:
         }
     };
     
-    void setmultitex(){
+    /*void setmultitex(){
         int loc1 = glGetUniformLocationARB(shader->progmObj, "tex1");
         int loc2 = glGetUniformLocationARB(shader->progmObj, "tex2");
         if(loc1 == -1 || loc2 == -1){
@@ -149,6 +149,17 @@ public:
         }
         glUniform1iARB(loc1, 0);
         glUniform1iARB(loc2, 1);
-    };
+    };*/
+    
+    void setminmax(float fmin, float fmax){
+        int lmax = glGetUniformLocationARB(shader->progmObj, "FMAX");
+        int lmin = glGetUniformLocationARB(shader->progmObj, "FMIN");
+        if(lmax == -1 || lmin == -1){
+            printf("cannot find MAX or MIN\n");
+        }
+        ///printf("mm: %f, %f \n", fmin, fmax);
+        glUniform1fARB(lmax, fmax);
+        glUniform1fARB(lmin, fmin);
+    }
 };
 #endif
