@@ -24,9 +24,9 @@ void main()
     ff= clamp((log(flux) - log(MIN))/(log(MAX)-log(MIN)), 0.0 , 1.0);
     //ff = clamp((flux - MIN)/(MAX - MIN), 0.0 , 1.0);
     //color = vec4(ff, 0, 0.5, 1);
-    
+    //(ff*(1.0 - ff) * 4.0)
     if(dot(xy-0.5,xy-0.5) <= 0.25){
-        color = vec4(ff, (ff*(1.0 - ff) * 4.0), (1.0 - ff),1);
+        color = vec4(ff, (ff*(1.0 - ff) * 4.0) * (ff*(1.0 - ff) * 4.0), (1.0 - ff),1);
     }else{
         color = vec4(0.0, 0.0, 0.0, 0.0);
     }

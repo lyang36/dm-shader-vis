@@ -45,10 +45,13 @@ void main(){
             vec2 xyr = xy  * dsize;
             xyr = xyr + xyc;           //be careful to the orientation
 
-            //&& dot(xyr, xyr) <= 1.0
-            if(dot(xy, xy) <= 1.0 && dot(xyr, xyr) <= 1.0){
+            float rho2 = dot(xyr,xyr);
+            //&& dot(xyr, xyr) <= 1.0  && rho2 <= 1.0
+            if(dot(xy, xy) <= 1.0 && rho2 <= 1.0){
                 //flux = projprofile(xyr, xyc, fluxfac, dtheta);
-                flux = projprofile(xyr, fluxfac, dtheta);
+                float fact = 4.0 / (1.0 + rho2);
+                flux = projprofile(xyr, fluxfac * fact, dtheta);
+                //float fact = 4.0 * xyr.x * (xyr.x + xyr.x * xyr.x * xyr.x + xyr.x * xyr.y * xyr.y - 2.0 * xyr.y * sqrt(rho2))/rho2/(1.0+rho2)/(1.0+rho2)/(1.0+rho2);
                 //projprofile(xy, xyc, fluxfac, dtheta);
                 //flux = fluxfac;
                 //flux = fluxfac * exp(-dot(xy, xy)/0.1);

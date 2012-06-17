@@ -1,6 +1,6 @@
 CC=g++
 #MACOS
-LFLAGS= -lGL -lglut
+LFLAGS=-framework Carbon -framework OpenGL -framework GLUT
 IFLAG= -I /usr/include/GL/ 
 GLEWO=/usr/lib/libGLEW.a 
 
