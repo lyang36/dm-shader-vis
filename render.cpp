@@ -13,15 +13,20 @@
 #include <iostream>
 #include <sys/time.h>
 #include <cmath>
+#include <fstream>
+#include "healpix.h"
+#include "types.h"
+
 using namespace std;
 
 colorBuffer * CB, *CBL, *CBU;       //for final rendering
 static unsigned int WSIZE, PSIZE;
+string picfile;
 
 void render::init(){
     glEnable(GL_TEXTURE_2D);
     glDisable(GL_DEPTH_TEST);
-    glPixelStorei(GL_UNPACK_ALIGNMENT, 4);  
+    //glPixelStorei(GL_UNPACK_ALIGNMENT, 4);  
 
     glGenTextures(1, &textureIni);
     glBindTexture(GL_TEXTURE_2D, textureIni);
@@ -228,66 +233,72 @@ void render::drawFlux(){
     glPopAttrib();
     reader->close();
 }
+ 
+void render::readFluxMap(){
+    glPixelStorei(GL_PACK_ALIGNMENT, 4);  
+    fluxmapL = new float[windowSize*windowSize];
+    fluxmapU = new float[windowSize*windowSize];
 
+    fbufferL -> bindTex();
+    glGetTexImage(GL_TEXTURE_2D,0,GL_RED,GL_FLOAT,fluxmapL);
+    fbufferL->unbindTex();
+    
+    fbufferU -> bindTex();
+    glGetTexImage(GL_TEXTURE_2D,0,GL_RED,GL_FLOAT,fluxmapU);
+    fbufferU->unbindTex();
+     
+    if(params->OUTFILE != ""){
+        printf("Save to file \"%s\"...\n", (params->OUTFILE).c_str());
+        saveFluxMap();
+    }
+    
+    if(params->HEALPIXFILE != ""){
+        printf("Convert and save to healpix file \"%s\"...\n", (params->HEALPIXFILE).c_str());
+        saveHealPix();
+    }
+    
+}
 
 void render::findMinMax(float &fluxmin, float &fluxmax){
     //lower buffer
-    fbufferL->bindBuf();
-    float *pic = new float[windowSize*windowSize];
-    glReadPixels(0, 0, windowSize, windowSize,
-                 GL_RED, GL_FLOAT, pic);
+    //fbufferL->bindBuf();
+    //float *pic = new float[windowSize*windowSize];
+    //glReadPixels(0, 0, windowSize, windowSize,
+    //             GL_RED, GL_FLOAT, pic);
     fluxmax = 0;
     fluxmin = 1.0e36;
     float average;
     int pixss = windowSize * windowSize;
     for(int i = 0; i < pixss; i++){
-        float x = i/windowSize - windowSize / 2.0;
-        float y = i%windowSize - windowSize / 2.0;
+        float x = (int)(i/windowSize) - windowSize / 2.0;
+        float y = (int)(i%windowSize) - windowSize / 2.0;
         float r = windowSize / 2.0;
-        if(pic[i] == 0 ){
-            pic[i] = pic[pixss / 2];
+        if(x*x + y*y <= r*r){
+            average += (fluxmapL[i] + fluxmapU[i])/ (float) pixss;
+        }else{
+            continue;
         }
-        if(x*x + y*y < r*r-10){
-            average += pic[i] / (float) pixss;
-        }
-        if(fluxmax <= pic[i]) fluxmax = pic[i];
-        else if(fluxmin >= pic[i]) fluxmin = pic[i];
-        
+        if(fluxmax <= fluxmapL[i]) fluxmax = fluxmapL[i];
+        else if(fluxmin >= fluxmapL[i]) fluxmin = fluxmapL[i];
+        if(fluxmax <= fluxmapU[i]) fluxmax = fluxmapU[i];
+        else if(fluxmin >= fluxmapU[i]) fluxmin = fluxmapU[i];
     }
-    fbufferL->unbindBuf();
     
-    
-    fbufferU->bindBuf();
-    glReadPixels(0, 0, windowSize, windowSize,
-                 GL_RED, GL_FLOAT, pic);
-    for(int i = 0; i < pixss; i++){
-        float x = i/windowSize - windowSize / 2.0;
-        float y = i%windowSize - windowSize / 2.0;
-        float r = windowSize / 2.0;
-        if(pic[i] == 0 ){
-            pic[i] = pic[pixss / 2];
-        }
-        if(x*x + y*y < r*r-10){
-            average += pic[i] / (float) pixss;
-        }
-        if(fluxmax <= pic[i]) fluxmax = pic[i];
-        else if(fluxmin >= pic[i]) fluxmin = pic[i];
-        
-    }
     average /= 2.0;
-    printf("min = %f, max = %f, middle: %f\n", fluxmin, fluxmax, pic[pixss/2]);
-    fluxmin = average / 10.0;
-    fluxmax = average * 10.0;
+    printf("min = %f, max = %f\n", fluxmin, fluxmax);
+    fluxmax = (fluxmax + average) / 4;
+    fluxmin = (average + fluxmin) / 8;
     printf("fmin = %f, fmax = %f, average: %f\n", fluxmin, fluxmax, average);
-    fbufferU->unbindBuf();
+    //fbufferU->unbindBuf();
     
-    delete pic;
+    //delete pic;
 }
 
 void render::drawImage(){
-    float fluxmax;
-    float fluxmin;
+    float fluxmax=0;
+    float fluxmin=0;
     
+    readFluxMap();
     findMinMax(fluxmin, fluxmax);
     
     fbufferL->bindTex();
@@ -402,7 +413,8 @@ void rendsenc(){
     glTexCoord2i(1, 0); glVertex3f(4,  -2, 10);
     glEnd();
     //glPopMatrix();
-  
+
+    
     glBindTexture(GL_TEXTURE_2D, 0);
     glFlush();
     glutSwapBuffers();
@@ -421,14 +433,38 @@ void KeyboardFunc(unsigned char key, int x, int y)
   foo = x + y; //Has no effect: just to avoid a warning 
   if ('q' == key || 'Q' == key || 27 == key)
       exit(0);
-  /*else if(key == 'c'){
-      if(CB == CBL){
-          CB = CBU;
+  else if(key == 's' && picfile!=""){
+      glReadBuffer(GL_FRONT);
+      printf("Save pic to file: %s\n", picfile.c_str());
+      //save to file
+      ofstream fScreenshot(picfile.c_str(), ios::out | ios::binary);
+      if (!fScreenshot.good()) {
+          printf("Open pic file error.\n");
       }else{
-          CB = CBL;
+          GLubyte pixels[WSIZE*2*WSIZE*3];
+          glReadPixels(0, 0, WSIZE*2, WSIZE, GL_RGB, 
+                       GL_UNSIGNED_BYTE, pixels);
+          unsigned char TGAheader[12]={0,0,2,0,0,0,0,0,0,0,0,0};
+          unsigned char header[6] = {WSIZE*2%256,WSIZE*2/256,
+              WSIZE%256,WSIZE/256,24,0};
+          //convert to BGR format    
+          unsigned char temp;
+          int i = 0;
+          while (i < WSIZE*2*WSIZE*3)
+          {
+              temp = pixels[i];       //grab blue
+              pixels[i] = pixels[i+2];//assign red to blue
+              pixels[i+2] = temp;     //assign blue to red
+              i += 3;     //skip to next blue byte
+          }
+          fScreenshot.write((char *)TGAheader, 12);
+          fScreenshot.write((char *)header, 6);
+          fScreenshot.write((char *)pixels, WSIZE*2*WSIZE*3);
+          fScreenshot.close();
+          printf("Saving ok.\n");
       }
-      glutPostRedisplay();
-  }*/
+
+  }
 }
 
 
@@ -495,10 +531,14 @@ void render::start(int argc, char **argv){
     gettimeofday(&tim, NULL);
     double t1=tim.tv_sec+(tim.tv_usec/1000000.0);   
 
+    //cbufferL->setBuffer();
+    //cbufferU->setBuffer();
+    
     drawFlux();
 
     cbufferL->setBuffer();
     cbufferU->setBuffer();
+    
     drawImage();
     delete fbufferL;
     delete fbufferU;
@@ -506,9 +546,133 @@ void render::start(int argc, char **argv){
     double t2=tim.tv_sec+(tim.tv_usec/1000000.0);
     printf("End rendering. %.6lf seconds elapsed\n", t2-t1);
     cout << "--------------------------------------------------"<<endl;
+    delete fluxmapL;
+    delete fluxmapU;
+    picfile = params->PICFILE;
     glutMainLoop();
 
 }
 
 
+void render::saveHealPix(){
+    double * healmap;
+    int nside = params -> NSIDE;
+    int pixss = windowSize * windowSize;
+    int npix = nside * nside * 12;
+    healmap = (double *) calloc(npix, sizeof(double));
+    double domega = 4.0 * PI / (double) npix;
+    double detheta = sqrt(domega);
+    double theta;
+    double phi;
+    
+    double _rffmin = 1.0e36;
+    double _rffmax = 0.0;
+    for(int i = 0; i < npix; i++){
+        double x, y,r, factor;
+        int j;
+        pix2ang_ring(nside, i, &theta, &phi);
+        //now we have theta and phi and dtheta
+        //converte (theta, phi, dtheta) to the projectio plane, we have
+        bool isupshere = false;
+        if(theta < PI/2){
+            theta = PI - theta;
+            isupshere = true;
+        }
+        double sintpr = sin(theta+detheta);
+        double sintmr = sin(theta-detheta);
+        double costpr = cos(theta+detheta);
+        double costmr = cos(theta-detheta);
+        double pr = (sintmr/(1-costmr)-sintpr/(1-costpr))/2.0;
+        double pxc = (sintmr/(1-costmr)+sintpr/(1-costpr))/2.0 * cos(phi);
+        double pyc = (sintmr/(1-costmr)+sintpr/(1-costpr))/2.0 * sin(phi);
+        //printf("%f, %f, %f \n", pxc, pyc, pr);
+        pr *= windowSize/2;
+        pxc *= (pxc + 1)*windowSize/2;
+        pyc *= (pyc + 1)*windowSize/2;
+        int lx = (int)(pxc - pr);
+        int ly = (int)(pyc - pr);
+        int ux = (int)(pxc + pr);
+        int uy = (int)(pyc + pr);
+        
+        if(lx < 0) lx = 0;
+        if(ly < 0) ly = 0;
+        if(ux > windowSize) ux = windowSize;
+        if(uy > windowSize) uy = windowSize;
+        
+        int n = 0;
+        double flux = 0;
+        for(int ix = lx; ix < ux; ix ++){
+            for(int  iy = ly; iy < uy; iy ++){
+                double _flux = 0;
+                if(!isupshere){
+                    _flux = fluxmapL[ix * windowSize + iy];
+                }
+                else{
+                    _flux = fluxmapU[ix * windowSize + iy];
+                }
+                if(_flux > 0){
+                    flux += _flux;
+                    n++;
+                }
+                
+            }
+        }
+        if(n>0){
+            double r = sin(theta)/(1+abs(cos(theta)));
+            flux /=(double)n;
+            flux *= 4.0 / (1 + r*r)/(1 + r*r); 
+            healmap[i] = flux/1e6;
+            if(flux > _rffmax) _rffmax = flux;
+            if(flux < _rffmin) _rffmin = flux;
+            //printf("%d %d-> %f\n", i, n, healmap[i]);
+        }
+        
+        /*r = sin(theta)/(1+abs(cos(theta)));
+        x = r*(cos(phi) + 1.0)/2.0*windowSize;
+        y = r*(sin(phi) + 1.0)/2.0*windowSize;
+        j = (int)(y*windowSize + x); //get the nearest pixel
+        int j1 = j + 1;
+        int j2 = j - 1;
+        int j3 = j + windowSize;
+        int j4 = j - windowSize;
+        
+        if(j1 >= windowSize * windowSize) j1 = j;
+        if(j2 < 0) j2 = 0;
+        if(j3 >= windowSize*windowSize) j3 = j;
+        if(j4 < 0) j4 = j;
+        
+        factor = 4.0 / (1 + r*r)/(1 + r*r); 
+        if(theta > PI / 2.0){
+            healmap[i] = (fluxmapL[j] +fluxmapL[j1] +fluxmapL[j2] +fluxmapL[j3] +fluxmapL[j4]) / 5.0 / factor;
+            //printf("L %d  %f\n", j, healmap[i] );
+        }else{
+            healmap[i] = (fluxmapU[j] +fluxmapU[j1] +fluxmapU[j2] +fluxmapU[j3] +fluxmapU[j4]) / 5.0 / factor;
+            //printf("U %d  %f\n", j, healmap[i] );
+        }*/
+        
+    }
+    
+    printf("%f %f \n", _rffmax, _rffmin);
+        
+    ofstream output_file ((params->HEALPIXFILE).c_str(), ios::out | ios::binary);
+    if(output_file.good()){
+        output_file.write ((char *)healmap, 12 * nside * nside * sizeof(double));
+    }else{
+        cout << "Writing Error!";
+    }
+    output_file.close();
+}
+
+void render::saveFluxMap(){
+    ofstream output_file ((params->OUTFILE).c_str(), ios::out | ios::binary);
+    if(output_file.good()){
+        int si = (int) (params -> WSIZE);
+        output_file.write ((char *) &si, sizeof(int)); 
+        output_file.write ((char *)fluxmapL, si * si * sizeof(Real));
+        output_file.write ((char *)fluxmapU, si * si * sizeof(Real));
+    }else{
+        cout << "Writing Error!";
+    }
+    output_file.close();
+}
 

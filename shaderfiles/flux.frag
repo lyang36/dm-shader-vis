@@ -49,7 +49,7 @@ void main(){
             //&& dot(xyr, xyr) <= 1.0  && rho2 <= 1.0
             if(dot(xy, xy) <= 1.0 && rho2 <= 1.0){
                 //flux = projprofile(xyr, xyc, fluxfac, dtheta);
-                float fact = 4.0 / (1.0 + rho2);
+                float fact = 4.0 / (1.0 + rho2) / (1.0 + rho2);
                 flux = projprofile(xyr, fluxfac * fact, dtheta);
                 //float fact = 4.0 * xyr.x * (xyr.x + xyr.x * xyr.x * xyr.x + xyr.x * xyr.y * xyr.y - 2.0 * xyr.y * sqrt(rho2))/rho2/(1.0+rho2)/(1.0+rho2)/(1.0+rho2);
                 //projprofile(xy, xyc, fluxfac, dtheta);

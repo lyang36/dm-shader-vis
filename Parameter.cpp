@@ -20,6 +20,9 @@ Parameter::Parameter(){
     PSIZE = 256;
     WSIZE = 512;
     TEST = -1;
+    OUTFILE = "";
+    HEALPIXFILE = "";
+    PICFILE = "";
 }
 
 bool Parameter::readParameter(){
@@ -71,6 +74,18 @@ bool Parameter::readParameter(){
                 if(TEST != -1){
                     cout << "Test with " << TEST << " particles" << endl; 
                 }
+            }else if(word == "OUTFILE"){
+                line_buf >> OUTFILE;
+                cout << "OUTFILE " << OUTFILE << endl; 
+            }else if(word == "HEALPIXFILE"){
+                line_buf >> HEALPIXFILE;
+                cout << "HEALPIXFILE " << HEALPIXFILE << endl; 
+            }else if(word == "NSIDE"){
+                line_buf >> NSIDE;
+                cout << "NSIDE " << NSIDE << endl; 
+            }else if(word == "PICFILE"){
+                line_buf >> PICFILE;
+                cout << "PICFILE " << PICFILE << endl; 
             }
         }
         //cout << word << " -- " << line << endl;

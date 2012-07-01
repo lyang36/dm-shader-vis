@@ -29,6 +29,12 @@ public:
     REAL WSIZE, PSIZE;           //size of the projection plane (a side)
     string DATAFILE;          //Data file path
     int TEST;                 //how many particles are used to test
+    string OUTFILE;           //output the data
+    string HEALPIXFILE;       //convert healpix file
+    string PICFILE;           //picture file save
+    
+    int NSIDE;                //NSIDE for healpix map
+    
 
     //initialization
     Parameter();

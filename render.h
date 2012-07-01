@@ -21,7 +21,6 @@ private:
     colorBuffer * cbufferU;
     
     
-    
     GLuint textureIni;  //initial empty texture
 
     unsigned int windowSize;       //2^m
@@ -34,6 +33,14 @@ private:
 
     bool initialed;     //is initialed?
     void findMinMax(float &fluxmax, float &fluxmin);
+    
+    REAL * fluxmapL, *fluxmapU;  //L and U map
+    
+    void readFluxMap();         //read map from the GPU
+    
+    void saveHealPix();         //save healpix map to the file
+    void saveFluxMap();         //save flux map to the file
+    
 public:
     DataReader * reader;
     Parameter * params;
