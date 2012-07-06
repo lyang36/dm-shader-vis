@@ -51,24 +51,30 @@ bool Parameter::readParameter(){
             }else if(word == "DATAFILE"){
                 line_buf >> DATAFILE;
                 cout << "DATAFILE " << DATAFILE << endl;
-            }else if(word == "OPOSX"){
+            }else if(word == "OPOS"){
                 line_buf >> oposx;
-                cout << "oposx " << oposx << endl;
-            }else if(word == "OPOSY"){
                 line_buf >> oposy;
-                cout << "oposy " << oposy << endl;
-            }else if(word == "OPOSZ"){
                 line_buf >> oposz;
-                cout << "oposz " << oposz << endl;
-            }else if(word == "VPOSX"){
+                opos[0] = oposx;
+                opos[1] = oposy;
+                opos[2] = oposz;
+                printf("OPOS: %f, %f, %f\n", oposx, oposy, oposz);
+            }else if(word == "CPOS"){
+                line_buf >> cposx;
+                line_buf >> cposy;
+                line_buf >> cposz;
+                cpos[0] = cposx;
+                cpos[1] = cposy;
+                cpos[2] = cposz;
+                printf("CPOS: %f, %f, %f\n", cposx, cposy, cposz);
+            }else if(word == "VVEC"){
                 line_buf >> vposx;
-                cout << "vposx " << vposx << endl;
-            }else if(word == "VPOSY"){
                 line_buf >> vposy;
-                cout << "vposy " << vposy << endl;
-            }else if(word == "VPOSZ"){
                 line_buf >> vposz;
-                cout << "vposz " << vposz << endl;
+                vvec[0] = vposx;
+                vvec[1] = vposy;
+                vvec[2] = vposz;
+                printf("VPOS: %f, %f, %f\n", vposx, vposy, vposz);
             }else if(word == "TEST"){
                 line_buf >> TEST;
                 if(TEST != -1){

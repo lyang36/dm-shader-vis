@@ -37,22 +37,30 @@ public:
 
 class fluxShader:public Shader{
 private:
-    GLint xaxisloc, yaxisloc, zaxisloc;
+    //GLint xaxisloc, yaxisloc, zaxisloc;
+    GLint rotmloc;
     GLint oposloc;
     GLint geofacloc;
-    
+    void setrotm(bool updown);  //setup rotation matrix, 9 variables
+                                //updown: true/up; false/down
     void loadUniform();
+    REAL * align_vec;
+    REAL * opos;
+    REAL * cpos;
+    REAL rotmatrix[9];
 public:
-    void setzaxis3f(REAL x, REAL y, REAL z); //set vpos
-    void setzaxis3fv(REAL * vpos);
-    void setyaxis3f(REAL x, REAL y, REAL z); //set vpos
-    void setyaxis3fv(REAL * vpos);
-    void setxaxis3f(REAL x, REAL y, REAL z); //set vpos
-    void setxaxis3fv(REAL * vpos);
+    //void setzaxis3f(REAL x, REAL y, REAL z); //set vpos
+    //void setzaxis3fv(REAL * vpos);
+    //void setyaxis3f(REAL x, REAL y, REAL z); //set vpos
+    //void setyaxis3fv(REAL * vpos);
+    //void setxaxis3f(REAL x, REAL y, REAL z); //set vpos
+    //void setxaxis3fv(REAL * vpos);
     void setopos3f(REAL x, REAL y, REAL z); //set opos
     void setopos3fv(REAL * opos);
     void setgeofac3f(REAL x, REAL y, REAL z); //set opos
     void setgeofac3fv(REAL * geo);
+    void setrotmatrix(REAL * alignvec, REAL * obsvec, REAL * centervec, bool updown);     //setup rotation matrix
+                                            //alignvec has 3 vars
     
     fluxShader(){
         vfile = "./shaderfiles/flux.vert";

@@ -23,9 +23,16 @@ public:
     bool is_ready;
     int CPU_MEM;              //how many particles is in the CPU memory
     REAL FLUXFACTOR;
+    
     //int NSIDE;                //pixels on one side
     REAL oposx, oposy, oposz; //standing position
+    REAL opos[3];
     REAL vposx, vposy, vposz; //viewing vector
+    REAL vvec[3];
+    REAL cposx, cposy, cposz; //center position
+    REAL cpos[3];
+    
+    
     REAL WSIZE, PSIZE;           //size of the projection plane (a side)
     string DATAFILE;          //Data file path
     int TEST;                 //how many particles are used to test

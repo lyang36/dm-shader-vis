@@ -108,10 +108,11 @@ void render::drawFlux(){
         fshaderL->setgeofac3f(orthsize, windowSize, pointSize);
         
         //now use the rotatation matrix
-        fshaderL->setzaxis3f(vx, vy, vz);
-        fshaderL->setyaxis3f(-sinphi, cosphi, 0);
-        fshaderL->setxaxis3f(cosphi*costheta, sinphi*costheta, -sintheta);
+        //fshaderL->setzaxis3f(vx, vy, vz);
+        //fshaderL->setyaxis3f(-sinphi, cosphi, 0);
+        //fshaderL->setxaxis3f(cosphi*costheta, sinphi*costheta, -sintheta);
         fshaderL->setopos3f(params->oposx, params->oposy, params->oposz);
+        fshaderL->setrotmatrix(params->vvec, params->opos, params->cpos, false);
         fshaderL->end();    
     
         //begin shader
@@ -121,10 +122,9 @@ void render::drawFlux(){
         fshaderU->setgeofac3f(orthsize, windowSize, pointSize);
     
         //now use the rotatation matrix
-        fshaderU->setzaxis3f(-vx, -vy, -vz);
-        fshaderU->setyaxis3f(-sinphi, cosphi, 0);
-        fshaderU->setxaxis3f(cosphi*costheta, sinphi*costheta, -sintheta);
         fshaderU->setopos3f(params->oposx, params->oposy, params->oposz);
+        //reflect the view vector
+        fshaderU->setrotmatrix(params->vvec, params->opos, params->cpos, true);
         fshaderU->end();     
     
     }
@@ -178,7 +178,8 @@ void render::drawFlux(){
         outc = 1;
     }
 
-    while(reader->hasNext()){
+    while(reader->hasNext())
+    {
         
         
         
@@ -567,12 +568,46 @@ void render::saveHealPix(){
     
     double _rffmin = 1.0e36;
     double _rffmax = 0.0;
+    /*for(int i = 0; i < npix; i++){
+        healmap[i] = 0;
+    }
+    
+    for(int ix = 0; ix < windowSize; ix ++){
+        for(int iy = 0; iy < windowSize; iy ++){
+            double _x = (ix - windowSize/2.0) / (windowSize/2.0);
+            double _y = (iy - windowSize/2.0) / (windowSize/2.0);
+            double _r = sqrt(_x * _x + _y * _y);
+            if(_r <= 1.0){
+                double _phi = (_r == 0.0)? 0 : asin(_y/_r);
+                if( _x < 0){
+                    _phi = PI - _phi;
+                }else if(_y < 0){
+                    _phi = 2*PI + _phi;
+                }
+                double _theta;
+                _theta = (_r == 0.0) ? PI : 2.0 * atan(1.0 / _r);
+                int ipx1 = 0;
+                int ipx2 = 0;
+                ang2pix_ring(nside, _theta, _phi, &ipx1);
+                healmap[ipx1] +=fluxmapL[(windowSize - iy) * windowSize + ix];
+                ang2pix_ring(nside, PI - _theta, _phi, &ipx2);
+                if(_r < 1.0){
+                    healmap[ipx2] +=fluxmapU[(windowSize - iy) * windowSize + ix];
+                }
+                //printf("%f %f %i %i\n", _theta, _phi, ipx1, ipx2);
+            }
+        }
+    }*/    
+    
     for(int i = 0; i < npix; i++){
         double x, y,r, factor;
         int j;
         pix2ang_ring(nside, i, &theta, &phi);
         //now we have theta and phi and dtheta
         //converte (theta, phi, dtheta) to the projectio plane, we have
+        phi = 2*PI - phi + PI;
+
+        
         bool isupshere = false;
         if(theta < PI/2){
             theta = PI - theta;
@@ -586,69 +621,91 @@ void render::saveHealPix(){
         double pxc = (sintmr/(1-costmr)+sintpr/(1-costpr))/2.0 * cos(phi);
         double pyc = (sintmr/(1-costmr)+sintpr/(1-costpr))/2.0 * sin(phi);
         //printf("%f, %f, %f \n", pxc, pyc, pr);
-        pr *= windowSize/2;
-        pxc *= (pxc + 1)*windowSize/2;
-        pyc *= (pyc + 1)*windowSize/2;
-        int lx = (int)(pxc - pr);
-        int ly = (int)(pyc - pr);
-        int ux = (int)(pxc + pr);
-        int uy = (int)(pyc + pr);
+        double __r = pr;
         
-        if(lx < 0) lx = 0;
-        if(ly < 0) ly = 0;
-        if(ux > windowSize) ux = windowSize;
-        if(uy > windowSize) uy = windowSize;
+        pr = pr * windowSize/2;
+        pxc = (pxc + 1)*windowSize/2;
+        pyc = (pyc + 1)*windowSize/2;
+        
+        //printf("%f, %f, %f \n", pxc, pyc, pr);
+        
+        int lx = floor(pxc - pr);
+        int ly = floor(pyc - pr);
+        int ux = ceil(pxc + pr);
+        int uy = ceil(pyc + pr);
         
         int n = 0;
         double flux = 0;
+        double _flux = 0;
+        /*if(!isupshere){
+            _flux = fluxmapL[(int)((windowSize - pyc) * windowSize + pxc)];
+        }
+        else{
+            _flux = fluxmapU[(int)((windowSize - pyc) * windowSize + pxc)];
+        }
+        
+        if(_flux > 0){
+            flux += _flux;// * 4.0 / (1 + __r*__r)/(1 + __r*__r);
+            n++;
+        }*/
+ 
         for(int ix = lx; ix < ux; ix ++){
             for(int  iy = ly; iy < uy; iy ++){
-                double _flux = 0;
-                if(!isupshere){
-                    _flux = fluxmapL[ix * windowSize + iy];
-                }
-                else{
-                    _flux = fluxmapU[ix * windowSize + iy];
-                }
-                if(_flux > 0){
-                    flux += _flux;
-                    n++;
-                }
+                double _x = (ix - windowSize/2.0) / (windowSize/2.0);
+                double _y = (iy - windowSize/2.0) / (windowSize/2.0);
+                double _r = sqrt(_x * _x + _y * _y);
+                if( _r < 1 ){
+                    double _flux = 0;
+                    if(!isupshere){
+                        _flux = fluxmapL[(windowSize - iy) * windowSize + ix];
+                    }
+                    else{
+                        _flux = fluxmapU[(windowSize - iy) * windowSize + ix];
+                    }
+                    if(_flux > 0){
+                        flux += _flux / (4.0 / (1 + _r*_r)/(1 + _r*_r));
+                        n++;
+                    }
                 
+                }else{
+                    //converted it to theta phi and add it to another sphere
+                    double _sinphi = _y / _r;
+                    double _cosphi = _x / _r;
+                    double _theta;
+                    _theta = (_r == 0.0) ? PI : 2.0 * atan(1.0 / _r);
+                    _theta = PI - _theta;
+                    double r1 = sin(_theta)/(1-cos(theta));
+                    double _px = r1 * _cosphi;
+                    double _py = r1 * _sinphi;
+                    int kx = floor((_px + 1.0) * windowSize / 2);
+                    int ky = floor((_py + 1.0) * windowSize / 2);
+                    
+                    double _flux = 0;
+                    if(!isupshere){
+                        _flux = fluxmapU[(windowSize - ky) * windowSize + kx];
+                    }
+                    else{
+                        _flux = fluxmapL[(windowSize - ky) * windowSize + kx];
+                    }
+                    //printf("%d %f %f", n, flux, _flux);
+                    if(_flux > 0){
+                        flux += _flux / ( 4.0 / (1 + r1*r1)/(1 + r1*r1));
+                        n++;
+                    }
+                    //printf(" %f\n", flux / n);
+                    
+                }
             }
         }
+        
         if(n>0){
             double r = sin(theta)/(1+abs(cos(theta)));
             flux /=(double)n;
-            flux *= 4.0 / (1 + r*r)/(1 + r*r); 
-            healmap[i] = flux/1e6;
+            healmap[i] = flux * params->FLUXFACTOR;
             if(flux > _rffmax) _rffmax = flux;
             if(flux < _rffmin) _rffmin = flux;
             //printf("%d %d-> %f\n", i, n, healmap[i]);
         }
-        
-        /*r = sin(theta)/(1+abs(cos(theta)));
-        x = r*(cos(phi) + 1.0)/2.0*windowSize;
-        y = r*(sin(phi) + 1.0)/2.0*windowSize;
-        j = (int)(y*windowSize + x); //get the nearest pixel
-        int j1 = j + 1;
-        int j2 = j - 1;
-        int j3 = j + windowSize;
-        int j4 = j - windowSize;
-        
-        if(j1 >= windowSize * windowSize) j1 = j;
-        if(j2 < 0) j2 = 0;
-        if(j3 >= windowSize*windowSize) j3 = j;
-        if(j4 < 0) j4 = j;
-        
-        factor = 4.0 / (1 + r*r)/(1 + r*r); 
-        if(theta > PI / 2.0){
-            healmap[i] = (fluxmapL[j] +fluxmapL[j1] +fluxmapL[j2] +fluxmapL[j3] +fluxmapL[j4]) / 5.0 / factor;
-            //printf("L %d  %f\n", j, healmap[i] );
-        }else{
-            healmap[i] = (fluxmapU[j] +fluxmapU[j1] +fluxmapU[j2] +fluxmapU[j3] +fluxmapU[j4]) / 5.0 / factor;
-            //printf("U %d  %f\n", j, healmap[i] );
-        }*/
         
     }
     

@@ -7,15 +7,70 @@
 //the new coordinate system based on the vpos
 #define PI 3.1415926535897932
 
-uniform vec3 zaxis;     //vpos
-uniform vec3 xaxis;
-uniform vec3 yaxis;
+uniform mat3 rotmatrix; //rotation matrix
 uniform vec3 opos;
 uniform vec3 geofac;
                 //geometry fact{size(square),viewportsize, maxpointsize }
 //uniform float sdthetha;
 
 varying vec4 particle;    //the radius of the particle circle and the coordianate
+        //size, x, y, z
+            
+float profile(vec3 r1, vec3 r0, float dtheta){ 
+    //vec3 r0 = vec3(particle.gba);
+    float costheta = dot(r0, r1);
+    //use tylor seriers
+    float t2 = 2.0 * ( 1.0 - costheta);
+    float d2 = t2 / dtheta / dtheta;
+    return exp(- 1.5 * d2);
+}
+
+//reverse stereoprojection
+vec3 prev(vec2 xy){
+    float r2 = xy.x*xy.x + xy.y*xy.y;
+    return vec3(2.0 * xy.x/(1.0 + r2), 2.0 * xy.y/(1.0 + r2), (r2 - 1.0)/(r2 + 1.0));
+}
+
+float projprofile(vec2 xy, vec3 r0, float fc, float dtheta){
+    return fc * profile(prev(xy), r0, dtheta);
+}
+
+
+float calc_norm(vec2 svec, vec3 r0, float dsize, float dtheta){
+    //use the particle variable
+    float wsize = geofac.y;
+    vec2 coor = svec * wsize / 2.0;
+    int i, j;
+    float norm = 0.0;
+    float rho2, fact;
+    
+    int lx = int(- dsize * wsize / 2.0);
+    int ux = int(+ dsize * wsize / 2.0);
+    int ly = int(- dsize * wsize / 2.0);
+    int uy = int(+ dsize * wsize / 2.0);
+    
+    for(i = lx; i < ux; i++){
+        for(j = ly; j < uy; j++){
+            vec2 xy = vec2(float(i) / (wsize/2.0), float(j) / (wsize/2.0));
+            vec2 xyr = xy + svec;
+            rho2 = dot(xyr, xyr);
+            fact = 4.0 / (1.0 + rho2) / (1.0 + rho2);
+            //fact = 1.0;
+            if( dot(xy, xy) <= 1.0){
+                norm += projprofile(xyr,  r0, fact, dtheta);
+                //norm += fact * exp(-dot(xyr - svec, xyr - svec));
+            }
+        }        
+    }
+    //norm = projprofile(svec, r0, fact, dtheta);
+    if(norm > 0.0){
+        return  1.0/norm;
+    }else{
+        return 1.0;
+    }
+    
+}
+
 
 void main(){
 /*    gl_PointSize = 100.0;
@@ -37,20 +92,19 @@ void main(){
  
     
     float distance = length(pvec);
+    
+    
     dtheta = parameter.b / distance;    //2.186
     
-    vec3 npvec = normalize(pvec);
-
-    vec3 nzaxis = normalize(zaxis);
-    vec3 nxaxis = normalize(xaxis);
-    vec3 nyaxis = normalize(yaxis);
+    //rotation and normalize
+    vec3 npvec = normalize(rotmatrix * pvec);
     
     
-    float costheta = dot(npvec, nzaxis);
+    float costheta = npvec.z;//dot(npvec, nzaxis);
     //costheta -3.0 / 5.0;
     float theta = acos(costheta);      //0.955
     
-    vec3 newpvec = vec3(dot(npvec, nxaxis), dot(npvec, nyaxis),costheta);
+    //vec3 newpvec = vec3(dot(npvec, nxaxis), dot(npvec, nyaxis),costheta);
     
     if((theta > PI / 2.0 || theta + dtheta >= PI / 2.0) && dtheta < PI / 2.0){
         float sintheta = sin(theta);
@@ -61,8 +115,8 @@ void main(){
             sinphi = 0.0;
             cosphi = 1.0;
         }else{
-            sinphi = newpvec.y / sintheta;
-            cosphi = newpvec.x / sintheta;
+            sinphi = npvec.y/sintheta;//newpvec.y / sintheta;
+            cosphi = npvec.x/sintheta;//newpvec.x / sintheta;
         }
         
         //phi= PI / 2.0;
@@ -87,7 +141,6 @@ void main(){
         float newsize = r *geofac.y;
 
         
-        
         newpos = vec4(xc * geofac.x, yc * geofac.x, 0.0, 1.0);
         
         if(newsize > geofac.z){
@@ -102,23 +155,30 @@ void main(){
         }
         gl_PointSize = newsize;  //point size
     
-    
+
+        //calculate normfac
+        //particle must be written before fhe nomal fac
+        particle = vec4(dsize, npvec.x, npvec.y, npvec.z);
+        
+        
+        float normfac;
         //calculate the flux infomation
         float c = 1.5;
         float d2 = dtheta * dtheta;
-        float normfac;
         if(newsize == 1.0){ //only one pixel!
             normfac = 1.0;
             dtheta = 0.0;
         }else{
-            normfac = c * exp(c) / (exp(c) - 1.0) / PI / d2; //(normalize the gaussian profile)
+            //normfac = c * exp(c) / (exp(c) - 1.0) / PI / d2; //(normalize the gaussian profile)
+            //normfac = 1.0 / PI / d2;
+            normfac = calc_norm(vec2(xc, yc), vec3(npvec.x, npvec.y, npvec.z), dsize, dtheta);
+            //normfac = 1.0;// / 1000.0;
         }
-        //Integrate[2 \[Pi] A Exp[-c \[Theta]^2/\[Theta]0^2] \[Theta], {\[Theta],0, \[Theta]0}] == 1
         
         //Must add another vector (xc, yc)
-        gl_FrontColor = vec4(xc, yc, normfac * flux , dtheta);
-        particle = vec4(dsize, newpvec.x, newpvec.y, newpvec.z);
+        gl_FrontColor = vec4(xc, yc, flux * normfac , dtheta);
     
+        //gl_FrontColor = vec4(xc, yc, normfac , dtheta);
         //texture
         gl_TexCoord[0] = gl_MultiTexCoord0;
     }else{

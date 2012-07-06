@@ -2,23 +2,23 @@
 
 #define PI 3.1415926535897932
 uniform vec3 geofac;
+            //orthsize, windowsize, pointsize
 
 varying vec4 particle;
 
 float profile(vec3 r1,float dtheta){ 
     vec3 r0 = vec3(particle.gba);
     float costheta = dot(r0, r1);
-    //float theta = acos(dot(r1, r0));
-    //use taylor series
-    //float d2 = theta / dtheta;
-    //d2 = d2 * d2;
-    //return exp(- 1.5 * d2);
     //use tylor seriers
     
     float t2 = 2.0 * ( 1.0 - costheta);// + 1.0/3.0*(costheta - 1.0)*(costheta - 1.0) - 4.0/45.0 * (costheta - 1.0) *(costheta - 1.0)*(costheta - 1.0);
+    //float t2 = acos(costheta);
+    //t2 = t2*t2;
     float d2 = t2 / dtheta / dtheta;
     return exp(- 1.5 * d2);
-    //return clamp(1.0 - 1.5 * d2, 0.0, 1.0);
+     
+    //try flat distribution
+    //return 1.0;
 }
 
 //reverse stereoprojection
@@ -44,17 +44,19 @@ void main(){
             vec2 xy = (gl_TexCoord[0].st - vec2(0.5, 0.5)) * 2.0;
             vec2 xyr = xy  * dsize;
             xyr = xyr + xyc;           //be careful to the orientation
-
+            
+            xyr = floor(xyr * geofac.y/2.0)/geofac.y*2.0;
+            
             float rho2 = dot(xyr,xyr);
             //&& dot(xyr, xyr) <= 1.0  && rho2 <= 1.0
-            if(dot(xy, xy) <= 1.0 && rho2 <= 1.0){
-                //flux = projprofile(xyr, xyc, fluxfac, dtheta);
+            if(dot(xy, xy) <= 1.0){
+
                 float fact = 4.0 / (1.0 + rho2) / (1.0 + rho2);
+                //actual distribution
                 flux = projprofile(xyr, fluxfac * fact, dtheta);
-                //float fact = 4.0 * xyr.x * (xyr.x + xyr.x * xyr.x * xyr.x + xyr.x * xyr.y * xyr.y - 2.0 * xyr.y * sqrt(rho2))/rho2/(1.0+rho2)/(1.0+rho2)/(1.0+rho2);
-                //projprofile(xy, xyc, fluxfac, dtheta);
-                //flux = fluxfac;
-                //flux = fluxfac * exp(-dot(xy, xy)/0.1);
+                //flat distribution
+                //flux = gl_Color.b;
+                
             }
         }else{
             flux = fluxfac; 
