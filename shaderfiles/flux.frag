@@ -8,12 +8,13 @@ varying vec4 particle;
 
 float profile(vec3 r1,float dtheta){ 
     vec3 r0 = vec3(particle.gba);
-    float costheta = dot(r0, r1);
+    float costheta = dot(normalize(r0), normalize(r1));
     //use tylor seriers
     
-    float t2 = 2.0 * ( 1.0 - costheta);// + 1.0/3.0*(costheta - 1.0)*(costheta - 1.0) - 4.0/45.0 * (costheta - 1.0) *(costheta - 1.0)*(costheta - 1.0);
-    //float t2 = acos(costheta);
-    //t2 = t2*t2;
+    //float t2 = 2.0 * ( 1.0 - costheta);// + 1.0/3.0*(costheta - 1.0)*(costheta - 1.0) - 4.0/45.0 * (costheta - 1.0) *(costheta - 1.0)*(costheta - 1.0);
+    costheta = clamp(costheta, 0.0, 1.0);
+    float t2 = acos(costheta);
+    t2 = t2*t2;
     float d2 = t2 / dtheta / dtheta;
     return exp(- 1.5 * d2);
      

@@ -1,0 +1,85 @@
+This is pdfTeX, Version 3.1415926-2.3-1.40.12 (TeX Live 2011) (format=pdftex 2012.4.12)  6 JUL 2012 09:47
+entering extended mode
+ restricted \write18 enabled.
+ %&-line parsing enabled.
+**report_07_06.tex
+(./report_07_06.tex
+! Undefined control sequence.
+l.3 \documentclass
+                  [english]{article}
+? 
+! Undefined control sequence.
+l.4 \usepackage
+               [T1]{fontenc}
+? 
+! Undefined control sequence.
+l.5 \usepackage
+               {graphicx}
+? 
+! Undefined control sequence.
+l.6 \usepackage
+               {babel}
+? 
+! Undefined control sequence.
+l.7 \usepackage
+               {xunicode}
+? 
+! Undefined control sequence.
+l.8 \begin
+          {document}
+? 
+! Undefined control sequence.
+l.19 \includegraphics
+                     [scale=0.5]{first_run}
+? 
+! Missing $ inserted.
+<inserted text> 
+                $
+<to be read again> 
+                   _
+l.19 \includegraphics[scale=0.5]{first_
+                                       run}
+? 
+! Extra }, or forgotten $.
+l.19 \includegraphics[scale=0.5]{first_run}
+                                           
+? 
+! Missing $ inserted.
+<inserted text> 
+                $
+<to be read again> 
+                   \par 
+l.20 
+     
+? 
+! Undefined control sequence.
+l.21 \includegraphics
+                     [scale=0.5]{sky}
+? 
+! Undefined control sequence.
+l.23 \includegraphics
+                     [scale=0.7]{original}
+? 
+! Undefined control sequence.
+l.25 \includegraphics
+                     [scale=0.7]{new}
+? 
+! Undefined control sequence.
+l.27 \includegraphics
+                     [scale=0.7]{diff}
+? 
+[1{/usr/local/texlive/2011/texmf-var/fonts/map/pdftex/updmap/pdftex.map}] )
+(\end occurred inside a group at level 1)
+
+### simple group (level 1) entered at line 19 ({)
+### bottom level</usr/local/texlive/2011/texmf-dist/fonts/type1/public/amsfonts
+/cm/cmmi10.pfb></usr/local/texlive/2011/texmf-dist/fonts/type1/public/amsfonts/
+cm/cmmi7.pfb></usr/local/texlive/2011/texmf-dist/fonts/type1/public/amsfonts/cm
+/cmr10.pfb>
+Output written on report_07_06.pdf (1 page, 36147 bytes).
+PDF statistics:
+ 20 PDF objects out of 1000 (max. 8388607)
+ 13 compressed objects within 1 object stream
+ 0 named destinations out of 1000 (max. 500000)
+ 1 words of extra memory for PDF output out of 10000 (max. 10000000)
+

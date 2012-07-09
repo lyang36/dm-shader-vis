@@ -554,6 +554,46 @@ void render::start(int argc, char **argv){
 
 }
 
+double render::_getpixflux(int x1, int y1, bool isupshere){
+    //inside the circle
+    double f11 = 0;
+    int d = round(windowSize / 2.0);
+    double _r = sqrt((double)(x1 * x1 + y1 * y1)/(double)(d * d));
+    if(x1 * x1 + y1 * y1 <= d * d){
+        if(isupshere){
+            f11 = fluxmapU[(d - y1) * windowSize + x1 + d];
+        }else{
+            f11 = fluxmapL[(d - y1) * windowSize + x1 + d];
+        }
+        f11 =  f11 / (4.0 / (1 + _r*_r)/(1 + _r*_r));
+    }else{
+        //converted it to theta phi and add it to another sphere
+        double _y = (double) y1 / (double)d;
+        double _x = (double) x1 / (double)d;
+        double _sinphi = _y / _r;
+        double _cosphi = _x / _r;
+        double _theta;
+        _theta = (_r == 0.0) ? PI : 2.0 * atan(1.0 / _r);
+        _theta = PI - _theta;
+        double r1 = sin(_theta)/(1-cos(_theta));
+        double _px = r1 * _cosphi;
+        double _py = r1 * _sinphi;
+        int kx = floor((_px + 1.0) * windowSize / 2);
+        int ky = floor((_py + 1.0) * windowSize / 2);
+        
+        double _flux = 0;
+        if(!isupshere){
+            _flux = fluxmapU[(windowSize - ky) * windowSize + kx];
+        }
+        else{
+            _flux = fluxmapL[(windowSize - ky) * windowSize + kx];
+        }
+        f11 = _flux / (4.0 / (1 + r1*r1)/(1 + r1*r1));
+    }
+    return f11;
+
+}
+
 
 void render::saveHealPix(){
     double * healmap;
@@ -613,7 +653,35 @@ void render::saveHealPix(){
             theta = PI - theta;
             isupshere = true;
         }
-        double sintpr = sin(theta+detheta);
+        
+        int d = round(windowSize / 2.0);
+        //bilinear interpolation
+        double pr = sin(theta)/(1-cos(theta));
+        double pxc = pr * cos(phi);
+        double pyc = pr * sin(phi);
+        
+        double xc = (pxc) * (double)d;
+        double yc = (pyc) * (double)d;
+        double x1 = floor(xc);
+        double x2 = x1 + 1;
+        double y1 = floor(yc);
+        double y2 = y1 + 1;
+        
+        float f11 = _getpixflux(round(x1), round(y1), isupshere);
+        float f12 = _getpixflux(round(x1), round(y2), isupshere);
+        float f21 = _getpixflux(round(x2), round(y1), isupshere);
+        float f22 = _getpixflux(round(x2), round(y2), isupshere);
+        
+        double flux = 0;
+        double fr1 = (x2 - xc) / (x2 - x1) * f11 + (xc - x1) / (x2 - x1) * f21;
+        double fr2 = (x2 - xc) / (x2 - x1) * f12 + (xc - x1) / (x2 - x1) * f22;
+        flux = (y2 - yc) / (y2 - y1) * fr1 + (yc - y1) / (y2 - y1) * fr2;
+        healmap[i] = flux * params->FLUXFACTOR / (4 * PI / npix) * 
+        4 * PI * (windowSize * windowSize) / npix;// / (4.0 / (1 + pr*pr)/(1 + pr*pr));;
+        if(flux > _rffmax) _rffmax = flux;
+        if(flux < _rffmin) _rffmin = flux;
+        
+        /*double sintpr = sin(theta+detheta);
         double sintmr = sin(theta-detheta);
         double costpr = cos(theta+detheta);
         double costmr = cos(theta-detheta);
@@ -637,7 +705,7 @@ void render::saveHealPix(){
         int n = 0;
         double flux = 0;
         double _flux = 0;
-        /*if(!isupshere){
+        if(!isupshere){
             _flux = fluxmapL[(int)((windowSize - pyc) * windowSize + pxc)];
         }
         else{
@@ -647,7 +715,7 @@ void render::saveHealPix(){
         if(_flux > 0){
             flux += _flux;// * 4.0 / (1 + __r*__r)/(1 + __r*__r);
             n++;
-        }*/
+        }
  
         for(int ix = lx; ix < ux; ix ++){
             for(int  iy = ly; iy < uy; iy ++){
@@ -663,7 +731,7 @@ void render::saveHealPix(){
                         _flux = fluxmapU[(windowSize - iy) * windowSize + ix];
                     }
                     if(_flux > 0){
-                        flux += _flux / (4.0 / (1 + _r*_r)/(1 + _r*_r));
+                        flux += _flux;// / (4.0 / (1 + _r*_r)/(1 + _r*_r));
                         n++;
                     }
                 
@@ -674,7 +742,7 @@ void render::saveHealPix(){
                     double _theta;
                     _theta = (_r == 0.0) ? PI : 2.0 * atan(1.0 / _r);
                     _theta = PI - _theta;
-                    double r1 = sin(_theta)/(1-cos(theta));
+                    double r1 = sin(_theta)/(1-cos(_theta));
                     double _px = r1 * _cosphi;
                     double _py = r1 * _sinphi;
                     int kx = floor((_px + 1.0) * windowSize / 2);
@@ -689,7 +757,7 @@ void render::saveHealPix(){
                     }
                     //printf("%d %f %f", n, flux, _flux);
                     if(_flux > 0){
-                        flux += _flux / ( 4.0 / (1 + r1*r1)/(1 + r1*r1));
+                        flux += _flux;// / ( 4.0 / (1 + r1*r1)/(1 + r1*r1));
                         n++;
                     }
                     //printf(" %f\n", flux / n);
@@ -701,11 +769,12 @@ void render::saveHealPix(){
         if(n>0){
             double r = sin(theta)/(1+abs(cos(theta)));
             flux /=(double)n;
-            healmap[i] = flux * params->FLUXFACTOR;
+            flux = flux / ( 4.0 / (1 + __r*__r)/(1 + __r*__r));
+            healmap[i] = flux * params->FLUXFACTOR / (4 * PI / npix);
             if(flux > _rffmax) _rffmax = flux;
             if(flux < _rffmin) _rffmin = flux;
             //printf("%d %d-> %f\n", i, n, healmap[i]);
-        }
+        }*/
         
     }
     

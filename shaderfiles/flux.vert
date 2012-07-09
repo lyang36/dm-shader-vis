@@ -16,11 +16,14 @@ uniform vec3 geofac;
 varying vec4 particle;    //the radius of the particle circle and the coordianate
         //size, x, y, z
             
-float profile(vec3 r1, vec3 r0, float dtheta){ 
-    //vec3 r0 = vec3(particle.gba);
-    float costheta = dot(r0, r1);
+float profile(vec3 r1, float dtheta){ 
+    vec3 r0 = vec3(particle.gba);
+    float costheta = dot(normalize(r0), normalize(r1));
+    costheta = clamp(costheta, 0.0, 1.0);
     //use tylor seriers
-    float t2 = 2.0 * ( 1.0 - costheta);
+    //float t2 = 2.0 * ( 1.0 - costheta);
+    float t2 = acos(costheta);
+    t2 = t2*t2;
     float d2 = t2 / dtheta / dtheta;
     return exp(- 1.5 * d2);
 }
@@ -31,12 +34,13 @@ vec3 prev(vec2 xy){
     return vec3(2.0 * xy.x/(1.0 + r2), 2.0 * xy.y/(1.0 + r2), (r2 - 1.0)/(r2 + 1.0));
 }
 
-float projprofile(vec2 xy, vec3 r0, float fc, float dtheta){
-    return fc * profile(prev(xy), r0, dtheta);
+float projprofile(vec2 xy, float fc, float dtheta){
+    return fc * profile(prev(xy), dtheta);
 }
 
 
-float calc_norm(vec2 svec, vec3 r0, float dsize, float dtheta){
+float calc_norm(vec2 svec, float dsize, float dtheta){
+    //TODO generate a static norm function f(r, r0) using interpolation
     //use the particle variable
     float wsize = geofac.y;
     vec2 coor = svec * wsize / 2.0;
@@ -57,7 +61,7 @@ float calc_norm(vec2 svec, vec3 r0, float dsize, float dtheta){
             fact = 4.0 / (1.0 + rho2) / (1.0 + rho2);
             //fact = 1.0;
             if( dot(xy, xy) <= 1.0){
-                norm += projprofile(xyr,  r0, fact, dtheta);
+                norm += projprofile(xyr, fact, dtheta);
                 //norm += fact * exp(-dot(xyr - svec, xyr - svec));
             }
         }        
@@ -138,7 +142,7 @@ void main(){
         float prho = (a + b)/2.0;
         xc = prho * cosphi;
         yc = prho * sinphi;
-        float newsize = r *geofac.y;
+        float newsize = r *geofac.y; ///!!!!!!!!!!!!!!!!
 
         
         newpos = vec4(xc * geofac.x, yc * geofac.x, 0.0, 1.0);
@@ -163,7 +167,7 @@ void main(){
         
         float normfac;
         //calculate the flux infomation
-        float c = 1.5;
+        //float c = 1.5;
         float d2 = dtheta * dtheta;
         if(newsize == 1.0){ //only one pixel!
             normfac = 1.0;
@@ -171,7 +175,7 @@ void main(){
         }else{
             //normfac = c * exp(c) / (exp(c) - 1.0) / PI / d2; //(normalize the gaussian profile)
             //normfac = 1.0 / PI / d2;
-            normfac = calc_norm(vec2(xc, yc), vec3(npvec.x, npvec.y, npvec.z), dsize, dtheta);
+            normfac = calc_norm(vec2(xc, yc),dsize, dtheta);
             //normfac = 1.0;// / 1000.0;
         }
         

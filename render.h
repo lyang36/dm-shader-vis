@@ -40,6 +40,7 @@ private:
     
     void saveHealPix();         //save healpix map to the file
     void saveFluxMap();         //save flux map to the file
+    double _getpixflux(int x1, int y1, bool isupshere);
     
 public:
     DataReader * reader;
@@ -48,7 +49,7 @@ public:
             windowSize = 512;
             pointSize = 256;
             initialed = false;
-            orthsize = 10.0;
+            orthsize = 1.0;
     };
     void start(int argc, char **argv);
 };

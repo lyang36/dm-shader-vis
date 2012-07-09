@@ -1,0 +1,29 @@
+nside = 512L
+sky1 = dindgen(nside * nside * 12L) * 0.0d
+sky2 = dindgen(nside * nside * 12L) * 0.0d
+openr,lun1, "first_gpu_run.fits", /get_lun
+openr,lun2, "skyhealpix.data", /get_lun
+readu,lun1,sky1
+readu,lun2,sky2
+close,lun1
+close,lun2
+plot,(sky2 / sky1);
+set_plot,'PS'
+device, filename='diff.ps'
+plot,alog10(sky2 / sky1),title='Log difference between 2 methods (NSIDE = 512)',xtitle='HEALPIX ID', ytitle='LOG[NEW] - LOG[ORIGINAL]';
+device, /close
+set_plot,'X'
+
+
+set_plot,'PS'
+device, filename='original.ps'
+plot,(sky1),xtitle='HEALPIX ID', ytitle='Flux in Gev^2 cm^-6 kpc', title = "HEALPIX FLUX PROFILE (ORIGINAL METHOD NSIDE =512)";
+device, /close
+set_plot,'X'
+
+set_plot,'PS'
+device, filename='new.ps'
+plot,(sky2),xtitle='HEALPIX ID', ytitle='Flux in Gev^2 cm^-6 kpc', title = "HEALPIX FLUX PROFILE (NEW METHOD NSIDE = 512)";
+device, /close
+set_plot,'X'
+
