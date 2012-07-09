@@ -46,10 +46,13 @@ public:
     DataReader * reader;
     Parameter * params;
     render(){
-            windowSize = 512;
-            pointSize = 256;
-            initialed = false;
-            orthsize = 1.0;
+        fluxmapL = NULL;
+        fluxmapU = NULL;
+        
+        windowSize = 512;
+        pointSize = 256;
+        initialed = false;
+        orthsize = 1.0;
     };
     void start(int argc, char **argv);
 };

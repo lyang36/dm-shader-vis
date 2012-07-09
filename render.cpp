@@ -78,6 +78,10 @@ void render::drawFlux(){
     //fbufferL->bindBuf();
     
     //bind texture
+    //printf("Generating normalization buffer...\n");
+    //fbufferL -> setMapRes(windowSize);
+    //fbufferL -> setNormTex();
+    //printf("Norm map generated.\n");
     glBindTexture(GL_TEXTURE_2D, textureIni);
     
     
@@ -551,6 +555,13 @@ void render::start(int argc, char **argv){
     delete fluxmapU;
     picfile = params->PICFILE;
     glutMainLoop();
+    
+    delete fshaderL;
+    delete fshaderU;   
+    delete cshaderL;
+    delete cshaderU;
+    delete cbufferU;
+    delete cbufferL; 
 
 }
 
@@ -608,6 +619,7 @@ void render::saveHealPix(){
     
     double _rffmin = 1.0e36;
     double _rffmax = 0.0;
+     printf("read ok\n");
     /*for(int i = 0; i < npix; i++){
         healmap[i] = 0;
     }
@@ -680,6 +692,7 @@ void render::saveHealPix(){
         4 * PI * (windowSize * windowSize) / npix;// / (4.0 / (1 + pr*pr)/(1 + pr*pr));;
         if(flux > _rffmax) _rffmax = flux;
         if(flux < _rffmin) _rffmin = flux;
+       
         
         /*double sintpr = sin(theta+detheta);
         double sintmr = sin(theta-detheta);
@@ -787,6 +800,7 @@ void render::saveHealPix(){
         cout << "Writing Error!";
     }
     output_file.close();
+    delete healmap;
 }
 
 void render::saveFluxMap(){

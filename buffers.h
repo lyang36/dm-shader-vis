@@ -44,10 +44,47 @@ public:
 };
 
 class fluxBuffer:public buffer{       //buffer for additing flux
-    
+private:
+    GLuint normtex;          //map used to calculate map flux
+    int normMapRes;          //map resolution, in pixels.
+    void loadnorm();         //calculate normalization text or from file
+    string normfile;// = "norm.dat";
+    float * normtextbuf;
 public:
+    //load norm and bind texture
+    void setNormTex(){
+        normtextbuf = new float[normMapRes * normMapRes];
+        loadnorm();
+        glEnable(GL_TEXTURE_2D);
+        glGenTextures(1, &normtex);
+        glBindTexture(GL_TEXTURE_2D, normtex);
+        
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F_ARB, normMapRes, normMapRes, 0, GL_RED, GL_FLOAT, normtextbuf);
+        
+        // set its parameters
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+    };
+    
+    void setMapRes(int m){
+        normMapRes = m;
+    };
+    
     fluxBuffer(unsigned int w, unsigned int h):buffer(w,h){
+        normtex = 100;
+        normfile = "norm.dat";
+        normtextbuf = NULL;
     };//:buffer(w,h);
+    
+    ~fluxBuffer(){
+        if(normtextbuf != NULL){
+            delete normtextbuf;
+            normtextbuf = NULL;
+        }
+    }
     
 };
 
