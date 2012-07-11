@@ -48,13 +48,16 @@ float calc_norm(vec2 svec, float dsize, float dtheta){
     float norm = 0.0;
     float rho2, fact;
     
-    int lx = int(- dsize * wsize / 2.0);
-    int ux = int(+ dsize * wsize / 2.0);
-    int ly = int(- dsize * wsize / 2.0);
-    int uy = int(+ dsize * wsize / 2.0);
     
-    for(i = lx; i < ux; i++){
-        for(j = ly; j < uy; j++){
+    int d = int(dsize * wsize / 2.0);
+    
+    int lx = -d;
+    int ux = d;
+    int ly = -d;
+    int uy = d;
+    
+    for(i = lx; i <= ux; i++){
+        for(j = ly; j <= uy; j++){
             vec2 xy = vec2(float(i) / (wsize/2.0), float(j) / (wsize/2.0));
             vec2 xyr = xy + svec;
             rho2 = dot(xyr, xyr);

@@ -54,7 +54,7 @@ void main(){
 
                 float fact = 4.0 / (1.0 + rho2) / (1.0 + rho2);
                 //actual distribution
-                flux = projprofile(xyr, fluxfac * fact, dtheta);
+                flux = projprofile(xyr, fluxfac * fact, dtheta) * geofac.y * geofac.y;
                 //flat distribution
                 //flux = gl_Color.b;
                 

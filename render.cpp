@@ -272,14 +272,18 @@ void render::findMinMax(float &fluxmin, float &fluxmax){
     //             GL_RED, GL_FLOAT, pic);
     fluxmax = 0;
     fluxmin = 1.0e36;
-    float average;
+    float average = 0.0;
+    float total = 0.0;
+    
     int pixss = windowSize * windowSize;
     for(int i = 0; i < pixss; i++){
         float x = (int)(i/windowSize) - windowSize / 2.0;
         float y = (int)(i%windowSize) - windowSize / 2.0;
         float r = windowSize / 2.0;
         if(x*x + y*y <= r*r){
+            float pr = (x*x + y*y) / (windowSize / 2.0) / (windowSize / 2.0) ;
             average += (fluxmapL[i] + fluxmapU[i])/ (float) pixss;
+            total += (fluxmapL[i] + fluxmapU[i]) * (1 + pr) * (1 + pr) / 4.0;
         }else{
             continue;
         }
@@ -293,7 +297,8 @@ void render::findMinMax(float &fluxmin, float &fluxmax){
     printf("min = %f, max = %f\n", fluxmin, fluxmax);
     fluxmax = (fluxmax + average) / 4;
     fluxmin = (average + fluxmin) / 8;
-    printf("fmin = %f, fmax = %f, average: %f\n", fluxmin, fluxmax, average);
+    //average = average * 2.0 * pixss;
+    printf("fmin = %f, fmax = %f, average: %f total: %f\n", fluxmin, fluxmax, average, total/windowSize/windowSize);
     //fbufferU->unbindBuf();
     
     //delete pic;
@@ -576,7 +581,7 @@ double render::_getpixflux(int x1, int y1, bool isupshere){
         }else{
             f11 = fluxmapL[(d - y1) * windowSize + x1 + d];
         }
-        f11 =  f11 / (4.0 / (1 + _r*_r)/(1 + _r*_r));
+        f11 =  f11;// / (4.0 / (1 + _r*_r)/(1 + _r*_r));
     }else{
         //converted it to theta phi and add it to another sphere
         double _y = (double) y1 / (double)d;
@@ -599,7 +604,7 @@ double render::_getpixflux(int x1, int y1, bool isupshere){
         else{
             _flux = fluxmapL[(windowSize - ky) * windowSize + kx];
         }
-        f11 = _flux / (4.0 / (1 + r1*r1)/(1 + r1*r1));
+        f11 = _flux;// / (4.0 / (1 + r1*r1)/(1 + r1*r1));
     }
     return f11;
 
@@ -671,6 +676,12 @@ void render::saveHealPix(){
         double pr = sin(theta)/(1-cos(theta));
         double pxc = pr * cos(phi);
         double pyc = pr * sin(phi);
+        double sintpr = sin(theta+detheta);
+        double sintmr = sin(theta-detheta);
+        double costpr = cos(theta+detheta);
+        double costmr = cos(theta-detheta);
+        double pxr = (sintmr/(1-costmr)-sintpr/(1-costpr))/2.0;
+
         
         double xc = (pxc) * (double)d;
         double yc = (pyc) * (double)d;
@@ -688,8 +699,9 @@ void render::saveHealPix(){
         double fr1 = (x2 - xc) / (x2 - x1) * f11 + (xc - x1) / (x2 - x1) * f21;
         double fr2 = (x2 - xc) / (x2 - x1) * f12 + (xc - x1) / (x2 - x1) * f22;
         flux = (y2 - yc) / (y2 - y1) * fr1 + (yc - y1) / (y2 - y1) * fr2;
-        healmap[i] = flux * params->FLUXFACTOR / (4 * PI / npix) * 
-        4 * PI * (windowSize * windowSize) / npix;// / (4.0 / (1 + pr*pr)/(1 + pr*pr));;
+        
+        healmap[i] = flux * params->FLUXFACTOR / (4.0 / (1 + pr*pr)/(1 + pr*pr));// * 
+        //4 * PI * (windowSize * windowSize) / npix;// / (4.0 / (1 + pr*pr)/(1 + pr*pr));;
         if(flux > _rffmax) _rffmax = flux;
         if(flux < _rffmin) _rffmin = flux;
        

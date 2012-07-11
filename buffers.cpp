@@ -1,11 +1,20 @@
 #include <stdlib.h>
 #include <cmath>
-#include <glew.h>
-#include <GLUT/glut.h> // darwin uses glut.h rather than GL/glut.h
+
 #include <stdio.h>
 #include <string>
 #include <fstream>
 #include <iostream>
+
+
+#ifdef __APPLE__
+#include <glew.h>
+#include <GLUT/glut.h> // darwin uses glut.h rather than GL/glut.h
+#else
+#include <GL/glew.h>
+#include <GL/glut.h>
+#endif
+
 #include "buffers.h"
 
 using namespace std;
