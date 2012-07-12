@@ -11,12 +11,12 @@ float profile(vec3 r1,float dtheta){
     float costheta = dot(normalize(r0), normalize(r1));
     //use tylor seriers
     
-    //float t2 = 2.0 * ( 1.0 - costheta);// + 1.0/3.0*(costheta - 1.0)*(costheta - 1.0) - 4.0/45.0 * (costheta - 1.0) *(costheta - 1.0)*(costheta - 1.0);
-    costheta = clamp(costheta, 0.0, 1.0);
-    float t2 = acos(costheta);
-    t2 = t2*t2;
+    float t2 = 2.0 * ( 1.0 - costheta);// + 1.0/3.0*(costheta - 1.0)*(costheta - 1.0) - 4.0/45.0 * (costheta - 1.0) *(costheta - 1.0)*(costheta - 1.0);
+    //costheta = clamp(costheta, 0.0, 1.0);
+    //float t2 = acos(costheta);
+    //t2 = t2*t2;
     float d2 = t2 / dtheta / dtheta;
-    return exp(- 1.5 * d2);
+    return costheta;//exp(- 1.5 * d2);
      
     //try flat distribution
     //return 1.0;
@@ -50,14 +50,17 @@ void main(){
             
             float rho2 = dot(xyr,xyr);
             //&& dot(xyr, xyr) <= 1.0  && rho2 <= 1.0
-            if(dot(xy, xy) <= 1.0){
+            if(dot(xy, xy) <= 1.0 && rho2 <= 1.0){
 
                 float fact = 4.0 / (1.0 + rho2) / (1.0 + rho2);
                 //actual distribution
-                flux = projprofile(xyr, fluxfac * fact, dtheta) * geofac.y * geofac.y;
+                flux = projprofile(xyr, fluxfac * fact, dtheta);
+                //flux = fluxfac * fact;
                 //flat distribution
                 //flux = gl_Color.b;
                 
+            }else{
+                flux = 0.0;
             }
         }else{
             flux = fluxfac; 

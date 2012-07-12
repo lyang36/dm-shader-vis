@@ -186,8 +186,6 @@ void render::drawFlux(){
     {
         
         
-        
-        reader->loadBuffer();
         GLfloat * vetexarray = (GLfloat *) reader->getBuf();
         glEnableClientState (GL_VERTEX_ARRAY);
         glEnableClientState (GL_COLOR_ARRAY);
@@ -200,6 +198,7 @@ void render::drawFlux(){
         {
             glDrawArrays(GL_POINTS, 0, reader->getMemparts());
             glFlush();
+            //printf("Particles: %d\n", reader->getMemparts());
         }
         fshaderL->end();
         fbufferL->unbindBuf();
@@ -210,6 +209,8 @@ void render::drawFlux(){
         {
             glDrawArrays(GL_POINTS, 0, reader->getMemparts());
             glFlush();
+            glFlush();
+            //printf("Particles: %d\n", reader->getMemparts());
         }
         fshaderU->end();
         fbufferU->unbindBuf();       
@@ -228,6 +229,7 @@ void render::drawFlux(){
             cout << "*";
             cout.flush();
         }
+        reader->loadBuffer();
     }
     cout << endl;
     cout.flush();
@@ -283,7 +285,7 @@ void render::findMinMax(float &fluxmin, float &fluxmax){
         if(x*x + y*y <= r*r){
             float pr = (x*x + y*y) / (windowSize / 2.0) / (windowSize / 2.0) ;
             average += (fluxmapL[i] + fluxmapU[i])/ (float) pixss;
-            total += (fluxmapL[i] + fluxmapU[i]) * (1 + pr) * (1 + pr) / 4.0;
+            total += (fluxmapL[i] + fluxmapU[i]);// * (1 + pr) * (1 + pr) / 4.0;
         }else{
             continue;
         }
@@ -298,7 +300,7 @@ void render::findMinMax(float &fluxmin, float &fluxmax){
     fluxmax = (fluxmax + average) / 4;
     fluxmin = (average + fluxmin) / 8;
     //average = average * 2.0 * pixss;
-    printf("fmin = %f, fmax = %f, average: %f total: %f\n", fluxmin, fluxmax, average, total/windowSize/windowSize);
+    printf("fmin = %f, fmax = %f, average: %f total: %f\n", fluxmin, fluxmax, average, total*params->FLUXFACTOR);
     //fbufferU->unbindBuf();
     
     //delete pic;
@@ -624,37 +626,8 @@ void render::saveHealPix(){
     
     double _rffmin = 1.0e36;
     double _rffmax = 0.0;
+    double total_f = 0.0;
      printf("read ok\n");
-    /*for(int i = 0; i < npix; i++){
-        healmap[i] = 0;
-    }
-    
-    for(int ix = 0; ix < windowSize; ix ++){
-        for(int iy = 0; iy < windowSize; iy ++){
-            double _x = (ix - windowSize/2.0) / (windowSize/2.0);
-            double _y = (iy - windowSize/2.0) / (windowSize/2.0);
-            double _r = sqrt(_x * _x + _y * _y);
-            if(_r <= 1.0){
-                double _phi = (_r == 0.0)? 0 : asin(_y/_r);
-                if( _x < 0){
-                    _phi = PI - _phi;
-                }else if(_y < 0){
-                    _phi = 2*PI + _phi;
-                }
-                double _theta;
-                _theta = (_r == 0.0) ? PI : 2.0 * atan(1.0 / _r);
-                int ipx1 = 0;
-                int ipx2 = 0;
-                ang2pix_ring(nside, _theta, _phi, &ipx1);
-                healmap[ipx1] +=fluxmapL[(windowSize - iy) * windowSize + ix];
-                ang2pix_ring(nside, PI - _theta, _phi, &ipx2);
-                if(_r < 1.0){
-                    healmap[ipx2] +=fluxmapU[(windowSize - iy) * windowSize + ix];
-                }
-                //printf("%f %f %i %i\n", _theta, _phi, ipx1, ipx2);
-            }
-        }
-    }*/    
     
     for(int i = 0; i < npix; i++){
         double x, y,r, factor;
@@ -700,110 +673,16 @@ void render::saveHealPix(){
         double fr2 = (x2 - xc) / (x2 - x1) * f12 + (xc - x1) / (x2 - x1) * f22;
         flux = (y2 - yc) / (y2 - y1) * fr1 + (yc - y1) / (y2 - y1) * fr2;
         
-        healmap[i] = flux * params->FLUXFACTOR / (4.0 / (1 + pr*pr)/(1 + pr*pr));// * 
+        healmap[i] = flux * params->FLUXFACTOR / (4.0 / (1 + pr*pr)/(1 + pr*pr)) * windowSize * windowSize * domega;
+        total_f += healmap[i];
+        // * 
         //4 * PI * (windowSize * windowSize) / npix;// / (4.0 / (1 + pr*pr)/(1 + pr*pr));;
         if(flux > _rffmax) _rffmax = flux;
         if(flux < _rffmin) _rffmin = flux;
-       
-        
-        /*double sintpr = sin(theta+detheta);
-        double sintmr = sin(theta-detheta);
-        double costpr = cos(theta+detheta);
-        double costmr = cos(theta-detheta);
-        double pr = (sintmr/(1-costmr)-sintpr/(1-costpr))/2.0;
-        double pxc = (sintmr/(1-costmr)+sintpr/(1-costpr))/2.0 * cos(phi);
-        double pyc = (sintmr/(1-costmr)+sintpr/(1-costpr))/2.0 * sin(phi);
-        //printf("%f, %f, %f \n", pxc, pyc, pr);
-        double __r = pr;
-        
-        pr = pr * windowSize/2;
-        pxc = (pxc + 1)*windowSize/2;
-        pyc = (pyc + 1)*windowSize/2;
-        
-        //printf("%f, %f, %f \n", pxc, pyc, pr);
-        
-        int lx = floor(pxc - pr);
-        int ly = floor(pyc - pr);
-        int ux = ceil(pxc + pr);
-        int uy = ceil(pyc + pr);
-        
-        int n = 0;
-        double flux = 0;
-        double _flux = 0;
-        if(!isupshere){
-            _flux = fluxmapL[(int)((windowSize - pyc) * windowSize + pxc)];
-        }
-        else{
-            _flux = fluxmapU[(int)((windowSize - pyc) * windowSize + pxc)];
-        }
-        
-        if(_flux > 0){
-            flux += _flux;// * 4.0 / (1 + __r*__r)/(1 + __r*__r);
-            n++;
-        }
- 
-        for(int ix = lx; ix < ux; ix ++){
-            for(int  iy = ly; iy < uy; iy ++){
-                double _x = (ix - windowSize/2.0) / (windowSize/2.0);
-                double _y = (iy - windowSize/2.0) / (windowSize/2.0);
-                double _r = sqrt(_x * _x + _y * _y);
-                if( _r < 1 ){
-                    double _flux = 0;
-                    if(!isupshere){
-                        _flux = fluxmapL[(windowSize - iy) * windowSize + ix];
-                    }
-                    else{
-                        _flux = fluxmapU[(windowSize - iy) * windowSize + ix];
-                    }
-                    if(_flux > 0){
-                        flux += _flux;// / (4.0 / (1 + _r*_r)/(1 + _r*_r));
-                        n++;
-                    }
-                
-                }else{
-                    //converted it to theta phi and add it to another sphere
-                    double _sinphi = _y / _r;
-                    double _cosphi = _x / _r;
-                    double _theta;
-                    _theta = (_r == 0.0) ? PI : 2.0 * atan(1.0 / _r);
-                    _theta = PI - _theta;
-                    double r1 = sin(_theta)/(1-cos(_theta));
-                    double _px = r1 * _cosphi;
-                    double _py = r1 * _sinphi;
-                    int kx = floor((_px + 1.0) * windowSize / 2);
-                    int ky = floor((_py + 1.0) * windowSize / 2);
-                    
-                    double _flux = 0;
-                    if(!isupshere){
-                        _flux = fluxmapU[(windowSize - ky) * windowSize + kx];
-                    }
-                    else{
-                        _flux = fluxmapL[(windowSize - ky) * windowSize + kx];
-                    }
-                    //printf("%d %f %f", n, flux, _flux);
-                    if(_flux > 0){
-                        flux += _flux;// / ( 4.0 / (1 + r1*r1)/(1 + r1*r1));
-                        n++;
-                    }
-                    //printf(" %f\n", flux / n);
-                    
-                }
-            }
-        }
-        
-        if(n>0){
-            double r = sin(theta)/(1+abs(cos(theta)));
-            flux /=(double)n;
-            flux = flux / ( 4.0 / (1 + __r*__r)/(1 + __r*__r));
-            healmap[i] = flux * params->FLUXFACTOR / (4 * PI / npix);
-            if(flux > _rffmax) _rffmax = flux;
-            if(flux < _rffmin) _rffmin = flux;
-            //printf("%d %d-> %f\n", i, n, healmap[i]);
-        }*/
         
     }
     
-    printf("%f %f \n", _rffmax, _rffmin);
+    printf("%f %f total: %f\n", _rffmax, _rffmin, total_f);
         
     ofstream output_file ((params->HEALPIXFILE).c_str(), ios::out | ios::binary);
     if(output_file.good()){

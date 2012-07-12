@@ -19,13 +19,13 @@ varying vec4 particle;    //the radius of the particle circle and the coordianat
 float profile(vec3 r1, float dtheta){ 
     vec3 r0 = vec3(particle.gba);
     float costheta = dot(normalize(r0), normalize(r1));
-    costheta = clamp(costheta, 0.0, 1.0);
     //use tylor seriers
-    //float t2 = 2.0 * ( 1.0 - costheta);
-    float t2 = acos(costheta);
-    t2 = t2*t2;
+    float t2 = 2.0 * ( 1.0 - costheta);// + 1.0/3.0*(costheta - 1.0)*(costheta - 1.0) - 4.0/45.0 * (costheta - 1.0) *(costheta - 1.0)*(costheta - 1.0);
+    //costheta = clamp(costheta, 0.0, 1.0);
+    //float t2 = acos(costheta);
+    //t2 = t2*t2;
     float d2 = t2 / dtheta / dtheta;
-    return exp(- 1.5 * d2);
+    return costheta;//exp(- 1.5 * d2);
 }
 
 //reverse stereoprojection
@@ -34,48 +34,42 @@ vec3 prev(vec2 xy){
     return vec3(2.0 * xy.x/(1.0 + r2), 2.0 * xy.y/(1.0 + r2), (r2 - 1.0)/(r2 + 1.0));
 }
 
-float projprofile(vec2 xy, float fc, float dtheta){
-    return fc * profile(prev(xy), dtheta);
-}
 
-
-float calc_norm(vec2 svec, float dsize, float dtheta){
-    //TODO generate a static norm function f(r, r0) using interpolation
-    //use the particle variable
-    float wsize = geofac.y;
-    vec2 coor = svec * wsize / 2.0;
-    int i, j;
+float calc_norm(vec2 svec, float newsize, float dtheta){
+    //float norm = 4.0 * PI * (newsize / 2.0) * (newsize / 2.0) / (1.0 + (newsize / 2.0) * (newsize / 2.0));
     float norm = 0.0;
-    float rho2, fact;
+    vec2 coor = svec * geofac.y;
     
+    float lx = floor(coor.x - newsize/2.0);
+    float ly = floor(coor.y - newsize/2.0);
+    float ux = ceil(coor.x + newsize/2.0);
+    float uy = ceil(coor.y + newsize/2.0);
     
-    int d = int(dsize * wsize / 2.0);
-    
-    int lx = -d;
-    int ux = d;
-    int ly = -d;
-    int uy = d;
-    
-    for(i = lx; i <= ux; i++){
-        for(j = ly; j <= uy; j++){
-            vec2 xy = vec2(float(i) / (wsize/2.0), float(j) / (wsize/2.0));
-            vec2 xyr = xy + svec;
-            rho2 = dot(xyr, xyr);
-            fact = 4.0 / (1.0 + rho2) / (1.0 + rho2);
-            //fact = 1.0;
-            if( dot(xy, xy) <= 1.0){
-                norm += projprofile(xyr, fact, dtheta);
-                //norm += fact * exp(-dot(xyr - svec, xyr - svec));
+    float i=0.0;
+    float j=0.0;
+    vec2 xy;
+    float pr2 = dot(svec, svec);
+    float r = newsize / 2.0;
+    //if(r < 10.0){
+    for(i=lx; i < ux; i++){
+        for(j=ly; j < uy; j++){
+            xy = (vec2(i, j) - coor)/(newsize/2.0);
+            vec2 xy1 = vec2(i, j) / geofac.y;
+            float r2 = dot(xy, xy);
+            float pr2 = dot(vec2(i, j)/geofac.y, vec2(i, j)/geofac.y);
+            if(r2 <= 1.0){
+                norm += 4.0/(1.0+pr2)/(1.0+pr2) * profile(prev(xy1), dtheta);
             }
-        }        
-    }
-    //norm = projprofile(svec, r0, fact, dtheta);
-    if(norm > 0.0){
-        return  1.0/norm;
-    }else{
-        return 1.0;
+        }
     }
     
+    if(norm == 0.0){
+        norm = 4.0;//4.0/(1.0+pr2)/(1.0+pr2) * profile(prev(svec), dtheta);
+    }
+    //}else{
+    //    norm = 4.0 * r *r * PI / (1.0 + r * r) * geofac.y * geofac.y; 
+    //}
+    return 1.0/norm;
 }
 
 
@@ -178,12 +172,18 @@ void main(){
         }else{
             //normfac = c * exp(c) / (exp(c) - 1.0) / PI / d2; //(normalize the gaussian profile)
             //normfac = 1.0 / PI / d2;
-            normfac = calc_norm(vec2(xc, yc),dsize, dtheta);
-            //normfac = 1.0;// / 1000.0;
-        }
+            
+            normfac = calc_norm(vec2(xc, yc), newsize, dtheta);
+            
+            //~%4 error
+            //normfac = 1.0 / (PI * ((newsize / 2.0 )) * ((newsize / 2.0)));// / 1000.0;
+            
+        };
         
         //Must add another vector (xc, yc)
         gl_FrontColor = vec4(xc, yc, flux * normfac , dtheta);
+        //gl_FrontColor = vec4(xc, yc, normfac , dtheta);
+
     
         //gl_FrontColor = vec4(xc, yc, normfac , dtheta);
         //texture

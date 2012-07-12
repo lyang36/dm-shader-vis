@@ -56,6 +56,7 @@ bool DataReader::open(){
 
 void DataReader::loadBuffer(){
     int resParts = partNumbers - (readCursor - memCursor + memParts);
+    //cout << "resparts: " << resParts << endl;
     if(resParts > memBuffer){
         //setup new readCursor
         readCursor = readCursor - memCursor + memParts;
