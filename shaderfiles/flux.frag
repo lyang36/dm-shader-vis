@@ -35,39 +35,27 @@ float projprofile(vec2 xy, float fc, float dtheta){
 
 
 void main(){
-    float dsize = particle.r;
+    //float dsize = particle.r;
+    float newsize = particle.r;
     vec2 xyc = gl_Color.rg;
+    vec2 coor = xyc *geofac.y / 2.0;
     float flux = 0.0;
     float fluxfac = gl_Color.b;
     if(fluxfac != 0.0){
         float dtheta = gl_Color.a;
-        if(dtheta > 0.0){   //pixel == 1
-            vec2 xy = (gl_TexCoord[0].st - vec2(0.5, 0.5)) * 2.0;
-            vec2 xyr = xy  * dsize;
-            xyr = xyr + xyc;           //be careful to the orientation
-            
-            xyr = floor(xyr * geofac.y/2.0)/geofac.y*2.0;
-            
-            float rho2 = dot(xyr,xyr);
-            //&& dot(xyr, xyr) <= 1.0  && rho2 <= 1.0
-            if(dot(xy, xy) <= 1.0 && rho2 <= 1.0){
-
-                float fact = 4.0 / (1.0 + rho2) / (1.0 + rho2);
-                //actual distribution
-                flux = projprofile(xyr, fluxfac * fact, dtheta);
-                //flux = fluxfac * fact;
-                //flat distribution
-                //flux = gl_Color.b;
-                
-            }else{
-                flux = 0.0;
-            }
-        }else{
-            flux = fluxfac; 
-        }
+        vec2 p = floor(newsize * vec2(gl_TexCoord[0].s,gl_TexCoord[0].t));
+        
+        p = (p+0.5) / newsize;
+        p = 2.0*(p-0.5);
+        float u = dot(p, p);
+        if (u > 1.0) discard;
+        
+        vec2 xyp = p * (newsize / 2.0) + coor;
+        vec2 xyr = xyp / (geofac.y / 2.0);
+        float pr2 = dot(xyr, xyr);
+        flux = fluxfac * 4.0/(1.0+pr2)/(1.0+pr2) * profile(prev(xyr), dtheta);
         gl_FragColor = vec4(flux, 0, 0, 1.0);
     }else{
         gl_FragColor = vec4(0, 0, 0, 0);
     }
-    //gl_FragColor = gl_Color;
 }

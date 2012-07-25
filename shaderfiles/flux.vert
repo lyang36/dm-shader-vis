@@ -36,40 +36,33 @@ vec3 prev(vec2 xy){
 
 
 float calc_norm(vec2 svec, float newsize, float dtheta){
-    //float norm = 4.0 * PI * (newsize / 2.0) * (newsize / 2.0) / (1.0 + (newsize / 2.0) * (newsize / 2.0));
     float norm = 0.0;
-    vec2 coor = svec * geofac.y;
     
-    float lx = floor(coor.x - newsize/2.0);
-    float ly = floor(coor.y - newsize/2.0);
-    float ux = ceil(coor.x + newsize/2.0);
-    float uy = ceil(coor.y + newsize/2.0);
+    vec2 coor = svec * geofac.y / 2.0;
     
-    float i=0.0;
-    float j=0.0;
-    vec2 xy;
-    float pr2 = dot(svec, svec);
-    float r = newsize / 2.0;
-    //if(r < 10.0){
-    for(i=lx; i < ux; i++){
-        for(j=ly; j < uy; j++){
-            xy = (vec2(i, j) - coor)/(newsize/2.0);
-            vec2 xy1 = vec2(i, j) / geofac.y;
-            float r2 = dot(xy, xy);
-            float pr2 = dot(vec2(i, j)/geofac.y, vec2(i, j)/geofac.y);
-            if(r2 <= 1.0){
-                norm += 4.0/(1.0+pr2)/(1.0+pr2) * profile(prev(xy1), dtheta);
-            }
+    
+    float x=0.0;
+    float y=0.0;
+    for(x = 0.0; x < newsize; x++){
+        for(y = 0.0; y < newsize; y++){
+            float px = (x+0.5)/newsize;
+            float py = (y+0.5)/newsize;
+            px = 2.0*(px-0.5); // -1...1
+            py = 2.0*(py-0.5);
+            vec2 xy = vec2(px, py);
+            float u = dot(xy, xy);
+            if (u > 1.0)
+                continue;
+            
+            vec2 xyp = xy * (newsize / 2.0) + coor;
+            vec2 xyr = xyp / (geofac.y / 2.0);
+            float pr2 = dot(xyr, xyr);
+            norm += 4.0/(1.0+pr2)/(1.0+pr2) * profile(prev(xyr), dtheta);
+            
         }
     }
-    
-    if(norm == 0.0){
-        norm = 4.0;//4.0/(1.0+pr2)/(1.0+pr2) * profile(prev(svec), dtheta);
-    }
-    //}else{
-    //    norm = 4.0 * r *r * PI / (1.0 + r * r) * geofac.y * geofac.y; 
-    //}
     return 1.0/norm;
+    //return 1.0 / (newsize * newsize);
 }
 
 
@@ -107,7 +100,8 @@ void main(){
     
     //vec3 newpvec = vec3(dot(npvec, nxaxis), dot(npvec, nyaxis),costheta);
     
-    if((theta > PI / 2.0 || theta + dtheta >= PI / 2.0) && dtheta < PI / 2.0){
+    if((theta > PI / 2.0 || theta + dtheta >= PI / 2.0) && dtheta < PI / 2.0)
+    {
         float sintheta = sin(theta);
         float sinphi;
         float cosphi;
@@ -139,7 +133,7 @@ void main(){
         float prho = (a + b)/2.0;
         xc = prho * cosphi;
         yc = prho * sinphi;
-        float newsize = r *geofac.y; ///!!!!!!!!!!!!!!!!
+        float newsize = floor(r *geofac.y); ///!!!!!!!!!!!!!!!!
 
         
         newpos = vec4(xc * geofac.x, yc * geofac.x, 0.0, 1.0);
@@ -159,17 +153,19 @@ void main(){
 
         //calculate normfac
         //particle must be written before fhe nomal fac
-        particle = vec4(dsize, npvec.x, npvec.y, npvec.z);
-        
+        //particle = vec4(dsize, npvec.x, npvec.y, npvec.z);
+        particle = vec4(newsize, npvec.x, npvec.y, npvec.z);
         
         float normfac;
+        
         //calculate the flux infomation
         //float c = 1.5;
         float d2 = dtheta * dtheta;
-        if(newsize == 1.0){ //only one pixel!
+        /*if(newsize == 1.0){ //only one pixel!
             normfac = 1.0;
             dtheta = 0.0;
-        }else{
+        }else*/
+        {
             //normfac = c * exp(c) / (exp(c) - 1.0) / PI / d2; //(normalize the gaussian profile)
             //normfac = 1.0 / PI / d2;
             
@@ -178,7 +174,7 @@ void main(){
             //~%4 error
             //normfac = 1.0 / (PI * ((newsize / 2.0 )) * ((newsize / 2.0)));// / 1000.0;
             
-        };
+        }
         
         //Must add another vector (xc, yc)
         gl_FrontColor = vec4(xc, yc, flux * normfac , dtheta);

@@ -253,16 +253,7 @@ void render::readFluxMap(){
     fbufferU -> bindTex();
     glGetTexImage(GL_TEXTURE_2D,0,GL_RED,GL_FLOAT,fluxmapU);
     fbufferU->unbindTex();
-     
-    if(params->OUTFILE != ""){
-        printf("Save to file \"%s\"...\n", (params->OUTFILE).c_str());
-        saveFluxMap();
-    }
-    
-    if(params->HEALPIXFILE != ""){
-        printf("Convert and save to healpix file \"%s\"...\n", (params->HEALPIXFILE).c_str());
-        saveHealPix();
-    }
+
     
 }
 
@@ -299,8 +290,9 @@ void render::findMinMax(float &fluxmin, float &fluxmax){
     printf("min = %f, max = %f\n", fluxmin, fluxmax);
     fluxmax = (fluxmax + average) / 4;
     fluxmin = (average + fluxmin) / 8;
-    //average = average * 2.0 * pixss;
-    printf("fmin = %f, fmax = %f, average: %f total: %f\n", fluxmin, fluxmax, average, total*params->FLUXFACTOR);
+    //average = average * 2.0 * pixss *params->FLUXFACTOR/(4*PI/12.0/512.0/512.0);
+    this->totalFlux = total;
+    printf("fmin = %f, fmax = %f, average: %f total: %f\n", fluxmin, fluxmax, average, total);
     //fbufferU->unbindBuf();
     
     //delete pic;
@@ -312,6 +304,17 @@ void render::drawImage(){
     
     readFluxMap();
     findMinMax(fluxmin, fluxmax);
+    
+    
+    if(params->OUTFILE != ""){
+        printf("Save to file \"%s\"...\n", (params->OUTFILE).c_str());
+        saveFluxMap();
+    }
+    
+    if(params->HEALPIXFILE != ""){
+        printf("Convert and save to healpix file \"%s\"...\n", (params->HEALPIXFILE).c_str());
+        saveHealPix();
+    }
     
     fbufferL->bindTex();
     cshaderL -> begin();
@@ -578,6 +581,10 @@ double render::_getpixflux(int x1, int y1, bool isupshere){
     int d = round(windowSize / 2.0);
     double _r = sqrt((double)(x1 * x1 + y1 * y1)/(double)(d * d));
     if(x1 * x1 + y1 * y1 <= d * d){
+        if(x1 < -(d)) x1 = -(d);
+        if(x1 > d-1) x1 = d-1;
+        if(y1 < -(d-1)) y1 = -(d-1);
+        if(y1 > d) y1 = d;
         if(isupshere){
             f11 = fluxmapU[(d - y1) * windowSize + x1 + d];
         }else{
@@ -600,6 +607,10 @@ double render::_getpixflux(int x1, int y1, bool isupshere){
         int ky = floor((_py + 1.0) * windowSize / 2);
         
         double _flux = 0;
+        if(ky < 1) kx = 1;
+        if(ky > windowSize) ky = windowSize;
+        if(kx < 0) kx = 0;
+        if(kx > windowSize - 1) kx = windowSize - 1;
         if(!isupshere){
             _flux = fluxmapU[(windowSize - ky) * windowSize + kx];
         }
@@ -627,7 +638,7 @@ void render::saveHealPix(){
     double _rffmin = 1.0e36;
     double _rffmax = 0.0;
     double total_f = 0.0;
-     printf("read ok\n");
+
     
     for(int i = 0; i < npix; i++){
         double x, y,r, factor;
@@ -662,6 +673,7 @@ void render::saveHealPix(){
         double x2 = x1 + 1;
         double y1 = floor(yc);
         double y2 = y1 + 1;
+        //printf("reading %d\n", i);
         
         float f11 = _getpixflux(round(x1), round(y1), isupshere);
         float f12 = _getpixflux(round(x1), round(y2), isupshere);
@@ -673,16 +685,23 @@ void render::saveHealPix(){
         double fr2 = (x2 - xc) / (x2 - x1) * f12 + (xc - x1) / (x2 - x1) * f22;
         flux = (y2 - yc) / (y2 - y1) * fr1 + (yc - y1) / (y2 - y1) * fr2;
         
-        healmap[i] = flux * params->FLUXFACTOR / (4.0 / (1 + pr*pr)/(1 + pr*pr)) * windowSize * windowSize * domega;
+        healmap[i] = flux / (4.0 / (1 + pr*pr)/(1 + pr*pr)) * windowSize * windowSize;
+        //printf("read ok %d\n", i);
         total_f += healmap[i];
         // * 
         //4 * PI * (windowSize * windowSize) / npix;// / (4.0 / (1 + pr*pr)/(1 + pr*pr));;
+        // * params->FLUXFACTOR / 
         if(flux > _rffmax) _rffmax = flux;
         if(flux < _rffmin) _rffmin = flux;
         
     }
+    float _ft = 0;
+    for(int i = 0; i < npix; i++){
+        healmap[i] = healmap[i] / total_f * totalFlux * params->FLUXFACTOR /domega; 
+        _ft += healmap[i];
+    }
     
-    printf("%f %f total: %f\n", _rffmax, _rffmin, total_f);
+    printf("%f %f total: %f %f times %f %d\n", _rffmax, _rffmin, total_f, _ft, total_f / totalFlux, npix/(2*windowSize*windowSize));
         
     ofstream output_file ((params->HEALPIXFILE).c_str(), ios::out | ios::binary);
     if(output_file.good()){
