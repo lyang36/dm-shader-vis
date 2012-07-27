@@ -7,6 +7,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
+
 void ang2pix_ring( const int nside, double theta, double phi, int *ipix) {
   /*
     c=======================================================================
@@ -53,9 +57,9 @@ void ang2pix_ring( const int nside, double theta, double phi, int *ipix) {
     
     ir = nside + 1 + jp - jm;// ! in {1,2n+1} (ring number counted from z=2/3)
     kshift = 0;
-    if (fmod(ir,2)==0.) kshift = 1;// ! kshift=1 if ir even, 0 otherwise
+    if (fmod((double)ir,(double)2)==0.) kshift = 1;// ! kshift=1 if ir even, 0 otherwise
     
-    ip = (int)floor( ( jp+jm - nside + kshift + 1 ) / 2 ) + 1;// ! in {1,4n}
+    ip = (int)floor( (double)( jp+jm - nside + kshift + 1 ) / 2 ) + 1;// ! in {1,4n}
     if( ip>nl4 ) ip = ip - nl4;
     
     ipix1 = ncap + nl4*(ir-1) + ip ;

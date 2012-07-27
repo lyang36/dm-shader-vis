@@ -3,6 +3,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
+
 void pix2ang_ring( long nside, long ipix, double *theta, double *phi) {
   /*
     c=======================================================================
@@ -49,8 +53,8 @@ void pix2ang_ring( long nside, long ipix, double *theta, double *phi) {
   else if( ipix1 <= nl2*(5*nside+1) ) {//then ! Equatorial region ------
     
     ip    = ipix1 - ncap - 1;
-    iring = (int)floor( ip / nl4 ) + nside;// ! counted from North pole
-    iphi  = (int)fmod(ip,nl4) + 1;
+    iring = (int)floor( (double)ip / nl4 ) + nside;// ! counted from North pole
+    iphi  = (int)fmod((double)ip,(double)nl4) + 1;
     
     fodd  = 0.5 * (1 + fmod((double)(iring+nside),2));//  ! 1 if iring+nside is odd, 1/2 otherwise
     *theta = acos( (nl2 - iring) / fact1 );
