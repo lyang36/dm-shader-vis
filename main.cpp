@@ -28,9 +28,10 @@ int main(int argc, char** argv){
     reader.setPath(params.DATAFILE);
     reader.setBuf(params.CPU_MEM);
     
-			   
+#ifdef _WIN32 || _WIN64		   
     glewInit();
     glewExperimental = GL_TRUE; 
+#endif
 
     render Render;
     Render.reader = &reader;
