@@ -67,8 +67,14 @@ public:
                                             //alignvec has 3 vars
     
     fluxShader(){
+        
+#ifdef _WIN32 || _WIN64
+        vfile = "shaderfiles\\flux.vert";
+        ffile = "shaderfiles\\flux.frag";
+#else
         vfile = "./shaderfiles/flux.vert";
         ffile = "./shaderfiles/flux.frag";
+#endif
         shaderManager SM;
         shader = SM.loadShaderFile(vfile.c_str(), ffile.c_str());
         if(shader == 0){
@@ -99,9 +105,15 @@ private:
     
 public:
     minMaxShader(){
+#ifdef _WIN32 || _WIN64
+        vfile = "shaderfiles\\coor.vert";
+        ffile = "shaderfiles\\minmax.frag";
+        fillfile = "shaderfiles\\fill.frag";
+#else
         vfile = "./shaderfiles/coor.vert";
         ffile = "./shaderfiles/minmax.frag";
         fillfile = "./shaderfiles/fill.frag";
+#endif
         shaderManager SM, SM1;
         shader = SM.loadShaderFile(vfile.c_str(), ffile.c_str());
         fillshader = SM1.loadShaderFile(vfile.c_str(), fillfile.c_str());
@@ -136,8 +148,13 @@ public:
 class colorShader:public Shader{
 public:
     colorShader(){
+#ifdef _WIN32 || _WIN64
+        vfile = "shaderfiles\\color.vert";
+        ffile = "shaderfiles\\color.frag";
+#else
         vfile = "./shaderfiles/color.vert";
         ffile = "./shaderfiles/color.frag";
+#endif
         shaderManager SM;
         shader = SM.loadShaderFile(vfile.c_str(), ffile.c_str());
         if(shader == 0){

@@ -28,7 +28,11 @@ Parameter::Parameter(){
 bool Parameter::readParameter(){
     ifstream conf;
     string line;
-    conf.open ("configure.ini");
+#ifdef _WIN32 || _WIN64
+    conf.open ("config_win.ini");
+#else
+    conf.open ("config_mac.ini");
+#endif
     while(conf.good()){
         stringstream line_buf;
         string word;

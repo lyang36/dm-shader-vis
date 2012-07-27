@@ -16,4 +16,4 @@ obj:
 
 clean:
 	rm -f *.o
-	rm -f bin/dmvis
+	rm -f dmvis
