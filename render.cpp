@@ -1,3 +1,23 @@
+#include <iostream>
+#ifdef _WIN32 || _WIN64
+#include <time.h>
+#include <windows.h>
+#include "gettime.h"
+#define round(x) floor(x)
+#else
+#include <sys/time.h>
+#endif
+
+#include <cmath>
+#include <fstream>
+
+#include "buffers.h"
+#include "shaders.h"
+#include "render.h"
+
+#include "healpix.h"
+#include "types.h"
+
 #ifdef __APPLE__
 #include <glew.h>
 #include <GLUT/glut.h> // darwin uses glut.h rather than GL/glut.h
@@ -5,22 +25,10 @@
 #include <GL/glew.h>
 #include <GL/glut.h>
 #endif
-
-
-#include "buffers.h"
-#include "shaders.h"
-#include "render.h"
-#include <iostream>
-#include <sys/time.h>
-#include <cmath>
-#include <fstream>
-#include "healpix.h"
-#include "types.h"
-
 using namespace std;
 
 colorBuffer * CB, *CBL, *CBU;       //for final rendering
-static unsigned int WSIZE, PSIZE;
+static unsigned int WSIZE, POINTSIZE;
 string picfile;
 
 void render::init(){
@@ -460,7 +468,7 @@ void KeyboardFunc(unsigned char key, int x, int y)
       if (!fScreenshot.good()) {
           printf("Open pic file error.\n");
       }else{
-          GLubyte pixels[WSIZE*2*WSIZE*3];
+          GLubyte *pixels = new GLubyte[WSIZE*2*WSIZE*3];
           glReadPixels(0, 0, WSIZE*2, WSIZE, GL_RGB, 
                        GL_UNSIGNED_BYTE, pixels);
           unsigned char TGAheader[12]={0,0,2,0,0,0,0,0,0,0,0,0};
@@ -481,6 +489,7 @@ void KeyboardFunc(unsigned char key, int x, int y)
           fScreenshot.write((char *)pixels, WSIZE*2*WSIZE*3);
           fScreenshot.close();
           printf("Saving ok.\n");
+          delete pixels;
       }
 
   }
@@ -519,7 +528,7 @@ void render::start(int argc, char **argv){
 
     //set the global pointers
     WSIZE = windowSize;
-    PSIZE = pointSize;
+    POINTSIZE = pointSize;
     CBL = cbufferL;
     CBU = cbufferU;
     CB = CBL;

@@ -1,9 +1,13 @@
 #ifndef __LY_PARTICLESHADER__
 #define __LY_PARTICLESHADER__
+#include <string>
 #include <cstdio>
+#include <stdlib.h>
+#ifdef _WIN32 || _WIN64
+#include <windows.h>
+#endif
 #include "types.h"
 #include "shaderManager.h"
-#include <string>
 
 using namespace std;
 

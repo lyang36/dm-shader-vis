@@ -3,19 +3,19 @@
 #include <fcntl.h>
 #include <string.h>
 #include <sys/types.h>
-#include <unistd.h> 
+
 #include <sys/types.h>
 #include <stdlib.h>
 #ifdef __APPLE__
 #include <glew.h>
 #include <GLUT/glut.h> // darwin uses glut.h rather than GL/glut.h
+#include <unistd.h>
 #else
 #include <GL/glew.h>
 #include <GL/glut.h>
+#include <io.h>
 #endif
 #include "shaderManager.h"
-
-
 
 void shaderObj::begin(){
     
@@ -76,7 +76,7 @@ void shaderManager::printLog(GLhandleARB obj){
     
     glGetObjectParameterivARB(obj, GL_OBJECT_INFO_LOG_LENGTH_ARB,
                               &infologLength);
-    if (infologLength > 0)
+    if (infologLength > 1)
     {
         infoLog = (char *)malloc(infologLength);
         glGetInfoLogARB(obj, infologLength, &charsWritten, infoLog);
