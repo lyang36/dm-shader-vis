@@ -28,6 +28,10 @@ int main(int argc, char** argv){
     reader.setPath(params.DATAFILE);
     reader.setBuf(params.CPU_MEM);
     
+			   
+    glewInit();
+    glewExperimental = GL_TRUE; 
+
     render Render;
     Render.reader = &reader;
     Render.params = &params;

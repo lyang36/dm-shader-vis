@@ -14,7 +14,7 @@ using namespace std;
 class Shader{
 protected:
     shaderObj * shader;
-    string vfile, ffile;
+	string vfile, ffile;
     bool good;
     
 public:

@@ -1,0 +1,66 @@
+﻿Build started 7/27/2012 4:16:26 PM.
+     1>Project "E:\Projects\dm-shader-vis\dm-shader-vis.vcxproj" on node 2 (build target(s)).
+     1>InitializeBuildStatus:
+         Creating "Debug\dm-shader-vis.unsuccessfulbuild" because "AlwaysCreate" was specified.
+       ClCompile:
+         c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /Od /Oy- /D _MBCS /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc100.pdb" /Gd /TP /analyze- /errorReport:prompt Parameter.cpp buffers.cpp main.cpp render.cpp shaders.cpp
+         Parameter.cpp
+     1>e:\projects\dm-shader-vis\parameter.cpp(31): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+         Generating Code...
+         Compiling...
+         buffers.cpp
+     1>e:\projects\dm-shader-vis\shaders.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+     1>e:\projects\dm-shader-vis\shaders.h(71): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+     1>e:\projects\dm-shader-vis\shaders.h(108): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+     1>e:\projects\dm-shader-vis\shaders.h(151): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+     1>e:\projects\dm-shader-vis\buffers.cpp(207): warning C4101: 'xy' : unreferenced local variable
+         Generating Code...
+         Compiling...
+         shaders.cpp
+     1>e:\projects\dm-shader-vis\shaders.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+     1>e:\projects\dm-shader-vis\shaders.h(71): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+     1>e:\projects\dm-shader-vis\shaders.h(108): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+     1>e:\projects\dm-shader-vis\shaders.h(151): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+         render.cpp
+     1>e:\projects\dm-shader-vis\render.cpp(3): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+     1>e:\projects\dm-shader-vis\shaders.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+     1>e:\projects\dm-shader-vis\shaders.h(71): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+     1>e:\projects\dm-shader-vis\shaders.h(108): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+     1>e:\projects\dm-shader-vis\shaders.h(151): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+     1>e:\projects\dm-shader-vis\render.cpp(81): warning C4101: 'part' : unreferenced local variable
+     1>e:\projects\dm-shader-vis\render.cpp(627): warning C4018: '>' : signed/unsigned mismatch
+     1>e:\projects\dm-shader-vis\render.cpp(629): warning C4018: '>' : signed/unsigned mismatch
+     1>e:\projects\dm-shader-vis\render.cpp(664): warning C4101: 'y' : unreferenced local variable
+     1>e:\projects\dm-shader-vis\render.cpp(664): warning C4101: 'x' : unreferenced local variable
+     1>e:\projects\dm-shader-vis\render.cpp(664): warning C4101: 'factor' : unreferenced local variable
+     1>e:\projects\dm-shader-vis\render.cpp(664): warning C4101: 'r' : unreferenced local variable
+     1>e:\projects\dm-shader-vis\render.cpp(665): warning C4101: 'j' : unreferenced local variable
+         main.cpp
+     1>e:\projects\dm-shader-vis\shaders.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+     1>e:\projects\dm-shader-vis\shaders.h(71): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+     1>e:\projects\dm-shader-vis\shaders.h(108): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+     1>e:\projects\dm-shader-vis\shaders.h(151): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+         Generating Code...
+       Link:
+         c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"E:\Projects\dm-shader-vis\Debug\dm-shader-vis.exe" /NOLOGO glew32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /ManifestFile:"Debug\dm-shader-vis.exe.intermediate.manifest" /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /DEBUG /PDB:"E:\Projects\dm-shader-vis\Debug\dm-shader-vis.pdb" /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"E:\Projects\dm-shader-vis\Debug\dm-shader-vis.lib" /MACHINE:X86 Debug\ang2pix_ring.obj
+         Debug\buffers.obj
+         Debug\datareader.obj
+         Debug\gettime.obj
+         Debug\main.obj
+         Debug\Parameter.obj
+         Debug\pix2ang_ring.obj
+         Debug\render.obj
+         Debug\shaderManager.obj
+         Debug\shaders.obj
+         LINK : E:\Projects\dm-shader-vis\Debug\dm-shader-vis.exe not found or not built by the last incremental link; performing full link
+         dm-shader-vis.vcxproj -> E:\Projects\dm-shader-vis\Debug\dm-shader-vis.exe
+       Manifest:
+         C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\bin\mt.exe /nologo /verbose /outputresource:"E:\Projects\dm-shader-vis\Debug\dm-shader-vis.exe;#1" /manifest "Debug\dm-shader-vis.exe.intermediate.manifest"
+       FinalizeBuildStatus:
+         Deleting file "Debug\dm-shader-vis.unsuccessfulbuild".
+         Touching "Debug\dm-shader-vis.lastbuildstate".
+     1>Done Building Project "E:\Projects\dm-shader-vis\dm-shader-vis.vcxproj" (build target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:05.67

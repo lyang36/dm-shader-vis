@@ -1,5 +1,7 @@
 #include <iostream>
+
 #ifdef _WIN32 || _WIN64
+
 #include <time.h>
 #include <windows.h>
 #include "gettime.h"
@@ -476,7 +478,7 @@ void KeyboardFunc(unsigned char key, int x, int y)
               WSIZE%256,WSIZE/256,24,0};
           //convert to BGR format    
           unsigned char temp;
-          int i = 0;
+          unsigned int i = 0;
           while (i < WSIZE*2*WSIZE*3)
           {
               temp = pixels[i];       //grab blue
@@ -501,13 +503,16 @@ void render::start(int argc, char **argv){
     pointSize = params->PSIZE;
 
     //initialize glut and glew
+
+
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
     glutInitWindowSize(2 * windowSize, windowSize);
     glutCreateWindow("Dark Matter rendering!");
-   
+       
+		   
     glewInit();
-    glewExperimental = GL_TRUE;        
+    glewExperimental = GL_TRUE; 
 
     //set up shaders and buffers
     if(!initialed){
