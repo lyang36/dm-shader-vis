@@ -143,9 +143,20 @@ void buffer::saveImg(string filename){
 float profile(float * r, float * r0, float dtheta){ 
     
     float costheta = r[0] * r0[0] + r[1] * r0[1] + r[2] * r0[2];
+    if(costheta > 1.0){
+        costheta = 1.0;
+        //printf("bbb\n");
+    }
+    if(costheta < -1.0){
+        costheta = -1.0;
+    }
+
     float t2 = acos(costheta);
     t2 = t2*t2;
     float d2 = t2 / dtheta / dtheta;
+    /*if(exp(- 1.5 * d2) == 0.0){
+        printf("d2 %f, dtheta %f\n", d2, dtheta);
+    }*/
     return exp(- 1.5 * d2);
 }
 
@@ -160,6 +171,9 @@ void prev(float * xy, float * r){
 float projprofile(float * xy, float * r0, float fc, float dtheta){
     float r[3];
     prev(xy, r);
+    /*if(profile(r, r0, dtheta) == 0.0){
+        printf("r %f %f %f, r0 %f %f %f\n", r[0], r[1], r[2], r0[0], r0[1], r0[2]);
+    }*/
     return fc * profile(r, r0, dtheta);
 }
 
@@ -194,16 +208,22 @@ void fluxBuffer::loadnorm(){
         float dtheta, theta, phi;
         float norm = 0;
         int _ck = 0;
+
         for(int i = 0; i < normMapRes; i ++){
             for(int j = 0; j < normMapRes; j ++){
-                if(_ck % (normMapRes*normMapRes / 20) == 0 ){
-                    printf("%d%% ", _ck * 100/(normMapRes*normMapRes));
+                 normtextbuf[i * normMapRes + j] = 1.0;
+            }
+        }
+        for(int i = 1; i < normPointSize; i ++){
+            for(int j = 0; j < normMapRes / 2.0; j ++){
+
+                if(_ck % (normPointSize*normMapRes / 2 / 20) == 0 ){
+                    printf("%d%% ", _ck * 100/(normPointSize*normMapRes / 2));
                     cout.flush();
                 }
                 _ck++;
-                
-                r0 = ((float) i) / ((float) (normMapRes - 1));
-                r1 = ((float) j) / ((float) (normMapRes - 1));
+                r0 = ((float) j / ((float) (normMapRes/2.0)));
+                r1 = ((float) i / ((float) (normMapRes)));
 
                 float theta1 = acos((-1.0 + (r1+r0)*(r1+r0))/(1.0 + (r1+r0)*(r1+r0)));
                 float theta2 = acos((-1.0 + (r0-r1)*(r0-r1))/(1.0 + (r0-r1)*(r0-r1)));
@@ -213,35 +233,54 @@ void fluxBuffer::loadnorm(){
                 if(((r1+r0)) * ((r0-r1)) < 0.0){
                     dtheta =abs(2*PI - theta1 - theta2) / 2.0;
                     theta = abs(2*PI - theta2 + theta1) / 2.0;
-                }
+                    }
             
                 phi = 0;
-            
                 vr0[0] = sin(theta);
                 vr0[1] = 0.0;
                 vr0[2] = cos(theta);
+
+
+                float coorx = j;
+                float coory = 0;
+                float x = 0;
+                float y = 0;
+                float newsize = i;
                 norm = 0;
-                //printf(" %f, %f, %f  %f \n", r0, r1, theta, dtheta);
-                if(dtheta > 0.0){
-                    for(float xx = - floor((normMapRes - 1) * r1); xx <= floor((normMapRes - 1) * r1); xx ++){
-                        for(float yy = - floor((normMapRes - 1) * r1); yy <= floor((normMapRes - 1) * r1); yy ++){
-                            float _x = xx / (floor((normMapRes - 1) * r1));
-                            float _y = yy / (floor((normMapRes - 1) * r1));
-                            float _r2 = _x*_x + _y*_y;
-                            if(_r2 <= r1 * r1){
-                                xy[0] = _x + r0;
-                                xy[1] = _y;
-                                float rp2 = xy[0] * xy[0] + xy[1]*xy[1];
-                                norm += projprofile(xy, vr0, 1.0, dtheta) * 4.0 / (1+rp2)/(1+rp2);
-                                // / (float)(normMapRes * normMapRes)
-                            }
-                        }
+                int n = 0;
+                for(x = 0.0; x < newsize; x++){
+                    for(y = 0.0; y < newsize; y++){
+                        float px = (x+0.5)/newsize;
+                        float py = (y+0.5)/newsize;
+                        px = 2.0*(px-0.5); // -1...1
+                        py = 2.0*(py-0.5);
+                        float u = px * px + py * py;
+                        if (u > 1.0)
+                            continue;
+                        float xyr[2];
+                        xyr[0] = (px * (newsize / 2.0) + coorx) / (normMapRes / 2.0);
+                        xyr[1] = (py * (newsize / 2.0) + coory) / (normMapRes / 2.0);
+                        //xyr[0] = (coorx) / (normMapRes / 2.0);
+                        //xyr[1] = (coory) / (normMapRes / 2.0);
+
+                        float pr2 = xyr[0] * xyr[0] + xyr[1] * xyr[1];
+                        norm += 4.0/(1.0+pr2)/(1.0+pr2) * projprofile(xyr, vr0, 1.0, dtheta);
+                        n++;
+                        float t =  4.0/(1.0+pr2)/(1.0+pr2) * projprofile(xyr, vr0, 1.0, dtheta);
+                        /*if(t == 0.0) {
+                            printf("%f %f %f %f %f %f\n", xyr[0], xyr[1], vr0[0], vr0[1], vr0[2], dtheta);
+                        }*/
                     }
                 }
-                normtextbuf[j * normMapRes + j] = norm;
-                //printf("%f\n", norm);
+                normtextbuf[i * normMapRes + j] = norm;
+                //printf("%f   ", norm);
+                //if(dtheta == 0.0){
+                //    printf("%d, %d, %f, %f, %d \n", i, j, normtextbuf[i * normMapRes + j], dtheta, n);
+                //}
+
             }
         }
+                
         printf("Saving to file %s ... \n", normfile.c_str());
         ofstream oufile;
         //printf("ok\n");

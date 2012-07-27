@@ -5,7 +5,7 @@ IFLAG= -I /usr/include/GL/
 GLEWO=/usr/lib/libGLEW.a 
 
 all: obj
-	$(CC) *.o $(GLEWO) -o dmvis $(LFLAGS)
+	$(CC) *.o $(GLEWO) -o bin/dmvis $(LFLAGS)
 	@echo success
 
 obj:
@@ -13,4 +13,4 @@ obj:
 
 clean:
 	rm -f *.o
-	rm -f dmvis
+	rm -f bin/dmvis

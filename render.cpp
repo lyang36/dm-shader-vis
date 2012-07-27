@@ -79,7 +79,7 @@ void render::drawFlux(){
     
     //bind texture
     //printf("Generating normalization buffer...\n");
-    //fbufferL -> setMapRes(windowSize);
+    //fbufferL -> setMapRes(windowSize, params->PSIZE);
     //fbufferL -> setNormTex();
     //printf("Norm map generated.\n");
     glBindTexture(GL_TEXTURE_2D, textureIni);
@@ -185,7 +185,9 @@ void render::drawFlux(){
     while(reader->hasNext())
     {
         
-        
+        timeval tim;
+        gettimeofday(&tim, NULL);
+        double t1=tim.tv_sec+(tim.tv_usec/1000000.0);
         GLfloat * vetexarray = (GLfloat *) reader->getBuf();
         glEnableClientState (GL_VERTEX_ARRAY);
         glEnableClientState (GL_COLOR_ARRAY);
@@ -209,12 +211,14 @@ void render::drawFlux(){
         {
             glDrawArrays(GL_POINTS, 0, reader->getMemparts());
             glFlush();
-            glFlush();
             //printf("Particles: %d\n", reader->getMemparts());
         }
         fshaderU->end();
         fbufferU->unbindBuf();       
         
+        gettimeofday(&tim, NULL);
+        double t2=tim.tv_sec+(tim.tv_usec/1000000.0);
+        rendertime += t2 - t1;
         reader -> move2bufEnd();
         
         glDisableClientState (GL_VERTEX_ARRAY);
@@ -265,8 +269,8 @@ void render::findMinMax(float &fluxmin, float &fluxmax){
     //             GL_RED, GL_FLOAT, pic);
     fluxmax = 0;
     fluxmin = 1.0e36;
-    float average = 0.0;
-    float total = 0.0;
+    double average = 0.0;
+    double total = 0.0;
     
     int pixss = windowSize * windowSize;
     for(int i = 0; i < pixss; i++){
@@ -559,7 +563,8 @@ void render::start(int argc, char **argv){
     delete fbufferU;
     gettimeofday(&tim, NULL);
     double t2=tim.tv_sec+(tim.tv_usec/1000000.0);
-    printf("End rendering. %.6lf seconds elapsed\n", t2-t1);
+    printf("End rendering. %.6lf seconds elapsed. Rendertime: %.6lf. Reading time: %.6lf\n",
+            t2-t1, rendertime, t2-t1-rendertime);
     cout << "--------------------------------------------------"<<endl;
     delete fluxmapL;
     delete fluxmapU;
@@ -630,6 +635,10 @@ void render::saveHealPix(){
     int pixss = windowSize * windowSize;
     int npix = nside * nside * 12;
     healmap = (double *) calloc(npix, sizeof(double));
+    if(healmap == NULL){
+        printf("Not enough memory, cannot convert to healpix map!\n");
+        return;
+    }
     double domega = 4.0 * PI / (double) npix;
     double detheta = sqrt(domega);
     double theta;
@@ -675,17 +684,17 @@ void render::saveHealPix(){
         double y2 = y1 + 1;
         //printf("reading %d\n", i);
         
-        float f11 = _getpixflux(round(x1), round(y1), isupshere);
-        float f12 = _getpixflux(round(x1), round(y2), isupshere);
-        float f21 = _getpixflux(round(x2), round(y1), isupshere);
-        float f22 = _getpixflux(round(x2), round(y2), isupshere);
+        double f11 = _getpixflux(round(x1), round(y1), isupshere);
+        double f12 = _getpixflux(round(x1), round(y2), isupshere);
+        double f21 = _getpixflux(round(x2), round(y1), isupshere);
+        double f22 = _getpixflux(round(x2), round(y2), isupshere);
         
         double flux = 0;
         double fr1 = (x2 - xc) / (x2 - x1) * f11 + (xc - x1) / (x2 - x1) * f21;
         double fr2 = (x2 - xc) / (x2 - x1) * f12 + (xc - x1) / (x2 - x1) * f22;
         flux = (y2 - yc) / (y2 - y1) * fr1 + (yc - y1) / (y2 - y1) * fr2;
         
-        healmap[i] = flux / (4.0 / (1 + pr*pr)/(1 + pr*pr)) * windowSize * windowSize;
+        healmap[i] = flux / (4.0 / (1 + pr*pr)/(1 + pr*pr)) * windowSize * windowSize / 4.0;
         //printf("read ok %d\n", i);
         total_f += healmap[i];
         // * 
@@ -697,11 +706,12 @@ void render::saveHealPix(){
     }
     float _ft = 0;
     for(int i = 0; i < npix; i++){
-        healmap[i] = healmap[i] / total_f * totalFlux * params->FLUXFACTOR /domega; 
-        _ft += healmap[i];
+        healmap[i] = healmap[i] * params->FLUXFACTOR;// / total_f * totalFlux * params->FLUXFACTOR /domega;
+        _ft += healmap[i];// / total_f * totalFlux * params->FLUXFACTOR /domega;;
     }
     
-    printf("%f %f total: %f %f times %f %d\n", _rffmax, _rffmin, total_f, _ft, total_f / totalFlux, npix/(2*windowSize*windowSize));
+    printf("%f %f total: %f %f times %f %d\n", _rffmax, _rffmin, total_f * (4*PI/npix), _ft, total_f * (4*PI/npix) / totalFlux, npix/(2*windowSize*windowSize));
+    cout.flush();
         
     ofstream output_file ((params->HEALPIXFILE).c_str(), ios::out | ios::binary);
     if(output_file.good()){
@@ -710,7 +720,7 @@ void render::saveHealPix(){
         cout << "Writing Error!";
     }
     output_file.close();
-    delete healmap;
+    free(healmap);
 }
 
 void render::saveFluxMap(){

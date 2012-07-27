@@ -47,6 +47,7 @@ class fluxBuffer:public buffer{       //buffer for additing flux
 private:
     GLuint normtex;          //map used to calculate map flux
     int normMapRes;          //map resolution, in pixels.
+    int normPointSize;       //max point size of the point sprite, in pixels
     void loadnorm();         //calculate normalization text or from file
     string normfile;// = "norm.dat";
     float * normtextbuf;
@@ -60,7 +61,9 @@ public:
         glBindTexture(GL_TEXTURE_2D, normtex);
         
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F_ARB, normMapRes, normMapRes, 0, GL_RED, GL_FLOAT, normtextbuf);
-        
+        /*for(int i = 0; i < normMapRes*normMapRes; i++){
+            printf("%f  ", normtextbuf[i]);
+        }*/
         // set its parameters
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -69,12 +72,15 @@ public:
         glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
     };
     
-    void setMapRes(int m){
+    void setMapRes(int m, int n){
         normMapRes = m;
+        normPointSize = n;
     };
     
     fluxBuffer(unsigned int w, unsigned int h):buffer(w,h){
         normtex = 100;
+        normMapRes = 1024;
+        normPointSize = 256;
         normfile = "norm.dat";
         normtextbuf = NULL;
     };//:buffer(w,h);

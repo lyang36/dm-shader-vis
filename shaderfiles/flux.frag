@@ -5,16 +5,17 @@ uniform vec3 geofac;
             //orthsize, windowsize, pointsize
 
 varying vec4 particle;
+uniform sampler2D normmap;
 
 float profile(vec3 r1,float dtheta){ 
     vec3 r0 = vec3(particle.gba);
     float costheta = dot(normalize(r0), normalize(r1));
     //use tylor seriers
     
-    float t2 = 2.0 * ( 1.0 - costheta);// + 1.0/3.0*(costheta - 1.0)*(costheta - 1.0) - 4.0/45.0 * (costheta - 1.0) *(costheta - 1.0)*(costheta - 1.0);
-    //costheta = clamp(costheta, 0.0, 1.0);
-    //float t2 = acos(costheta);
-    //t2 = t2*t2;
+    //float t2 = 2.0 * ( 1.0 - costheta);// + 1.0/3.0*(costheta - 1.0)*(costheta - 1.0) - 4.0/45.0 * (costheta - 1.0) *(costheta - 1.0)*(costheta - 1.0);
+    costheta = clamp(costheta, -1.0, 1.0);
+    float t2 = acos(costheta);
+    t2 = t2*t2;
     float d2 = t2 / dtheta / dtheta;
     return costheta;//exp(- 1.5 * d2);
      
@@ -54,6 +55,14 @@ void main(){
         vec2 xyr = xyp / (geofac.y / 2.0);
         float pr2 = dot(xyr, xyr);
         flux = fluxfac * 4.0/(1.0+pr2)/(1.0+pr2) * profile(prev(xyr), dtheta);
+        //flux = fluxfac;
+        
+        float r0 = sqrt(pr2);
+        float r = newsize / geofac.y;
+        float norm = (texture2D(normmap, vec2(r, r0))).r;
+        //flux /= norm;
+        
+
         gl_FragColor = vec4(flux, 0, 0, 1.0);
     }else{
         gl_FragColor = vec4(0, 0, 0, 0);

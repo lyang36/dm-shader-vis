@@ -20,10 +20,10 @@ float profile(vec3 r1, float dtheta){
     vec3 r0 = vec3(particle.gba);
     float costheta = dot(normalize(r0), normalize(r1));
     //use tylor seriers
-    float t2 = 2.0 * ( 1.0 - costheta);// + 1.0/3.0*(costheta - 1.0)*(costheta - 1.0) - 4.0/45.0 * (costheta - 1.0) *(costheta - 1.0)*(costheta - 1.0);
-    //costheta = clamp(costheta, 0.0, 1.0);
-    //float t2 = acos(costheta);
-    //t2 = t2*t2;
+    //float t2 = 2.0 * ( 1.0 - costheta);// + 1.0/3.0*(costheta - 1.0)*(costheta - 1.0) - 4.0/45.0 * (costheta - 1.0) *(costheta - 1.0)*(costheta - 1.0);
+    costheta = clamp(costheta, -1.0, 1.0);
+    float t2 = acos(costheta);
+    t2 = t2*t2;
     float d2 = t2 / dtheta / dtheta;
     return costheta;//exp(- 1.5 * d2);
 }
@@ -58,6 +58,7 @@ float calc_norm(vec2 svec, float newsize, float dtheta){
             vec2 xyr = xyp / (geofac.y / 2.0);
             float pr2 = dot(xyr, xyr);
             norm += 4.0/(1.0+pr2)/(1.0+pr2) * profile(prev(xyr), dtheta);
+            //norm += 1.0;
             
         }
     }
@@ -157,32 +158,17 @@ void main(){
         particle = vec4(newsize, npvec.x, npvec.y, npvec.z);
         
         float normfac;
-        
-        //calculate the flux infomation
-        //float c = 1.5;
         float d2 = dtheta * dtheta;
-        /*if(newsize == 1.0){ //only one pixel!
-            normfac = 1.0;
-            dtheta = 0.0;
-        }else*/
         {
-            //normfac = c * exp(c) / (exp(c) - 1.0) / PI / d2; //(normalize the gaussian profile)
-            //normfac = 1.0 / PI / d2;
-            
             normfac = calc_norm(vec2(xc, yc), newsize, dtheta);
-            
-            //~%4 error
-            //normfac = 1.0 / (PI * ((newsize / 2.0 )) * ((newsize / 2.0)));// / 1000.0;
+            //normfac = 1.0;
             
         }
         
         //Must add another vector (xc, yc)
+        //flux = 1.0;
         gl_FrontColor = vec4(xc, yc, flux * normfac , dtheta);
-        //gl_FrontColor = vec4(xc, yc, normfac , dtheta);
 
-    
-        //gl_FrontColor = vec4(xc, yc, normfac , dtheta);
-        //texture
         gl_TexCoord[0] = gl_MultiTexCoord0;
     }else{
         gl_PointSize = 1.0;  //point size

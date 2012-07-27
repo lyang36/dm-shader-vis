@@ -42,6 +42,7 @@ private:
     void saveFluxMap();         //save flux map to the file
     double _getpixflux(int x1, int y1, bool isupshere);
     double totalFlux;
+    double rendertime;
     
 public:
     DataReader * reader;
@@ -55,6 +56,7 @@ public:
         initialed = false;
         orthsize = 1.0;
         totalFlux = 0.0;
+        rendertime = 0.0;
     };
     void start(int argc, char **argv);
 };
