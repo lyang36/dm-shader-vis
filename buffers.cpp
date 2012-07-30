@@ -207,13 +207,14 @@ void fluxBuffer::loadnorm(){
         float xy[2];
         float dtheta, theta, phi;
         float norm = 0;
+        float * tempnorm = new float[normPointSize * normMapRes/2];
         int _ck = 0;
 
-        for(int i = 0; i < normMapRes; i ++){
-            for(int j = 0; j < normMapRes; j ++){
-                 normtextbuf[i * normMapRes + j] = 1.0;
-            }
-        }
+        //for(int i = 0; i < normMapRes; i ++){
+        //    for(int j = 0; j < normMapRes; j ++){
+        //         normtextbuf[i * normMapRes + j] = 1.0;
+        //    }
+        //}
         for(int i = 1; i < normPointSize; i ++){
             for(int j = 0; j < normMapRes / 2.0; j ++){
 
@@ -272,12 +273,22 @@ void fluxBuffer::loadnorm(){
                         }*/
                     }
                 }
-                normtextbuf[i * normMapRes + j] = norm;
+                //normtextbuf[i * normMapRes + j] = norm;
+                tempnorm[i * normPointSize + j]=norm;
                 //printf("%f   ", norm);
                 //if(dtheta == 0.0){
                 //    printf("%d, %d, %f, %f, %d \n", i, j, normtextbuf[i * normMapRes + j], dtheta, n);
                 //}
 
+            }
+        }
+        
+        
+        for(int i = 0; i < normMapRes; i ++){
+            for(int j = 0; j < normMapRes; j ++){
+                int row = i * normPointSize / normMapRes;
+                int col = j / 2;
+                normtextbuf[i * normMapRes + j] = tempnorm[row * normPointSize + col];
             }
         }
                 

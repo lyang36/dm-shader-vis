@@ -58,7 +58,7 @@ void main(){
         //flux = fluxfac;
         
         float r0 = sqrt(pr2);
-        float r = newsize / geofac.y;
+        float r = newsize / geofac.z;
         float norm = (texture2D(normmap, vec2(r, r0))).r;
         //flux /= norm;
         

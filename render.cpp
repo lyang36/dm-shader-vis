@@ -88,11 +88,11 @@ void render::drawFlux(){
     //fbufferL->bindBuf();
     
     //bind texture
-    //printf("Generating normalization buffer...\n");
-    //fbufferL -> setMapRes(windowSize, params->PSIZE);
-    //fbufferL -> setNormTex();
-    //printf("Norm map generated.\n");
-    glBindTexture(GL_TEXTURE_2D, textureIni);
+    printf("Generating normalization buffer...\n");
+    fbufferL -> setMapRes(windowSize, params->PSIZE);
+    fbufferL -> setNormTex();
+    printf("Norm map generated.\n");
+    //glBindTexture(GL_TEXTURE_2D, textureIni);
     
     
     {//setup shaders L and U

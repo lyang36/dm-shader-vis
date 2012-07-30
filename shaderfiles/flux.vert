@@ -160,8 +160,8 @@ void main(){
         float normfac;
         float d2 = dtheta * dtheta;
         {
-            normfac = calc_norm(vec2(xc, yc), newsize, dtheta);
-            //normfac = 1.0;
+            //normfac = calc_norm(vec2(xc, yc), newsize, dtheta);
+            normfac = 1.0;
             
         }
         
