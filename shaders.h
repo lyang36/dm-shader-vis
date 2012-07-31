@@ -78,8 +78,11 @@ public:
         vfile = "./shaderfiles/flux.vert";
         ffile = "./shaderfiles/flux.frag";
 #endif
+		printf("ok5.0.1\n");
         shaderManager SM;
+		printf("ok5.0.2\n");
         shader = SM.loadShaderFile(vfile.c_str(), ffile.c_str());
+		printf("ok5.0.3\n");
         if(shader == 0){
             printf("Shader error!\n");
             exit(0);

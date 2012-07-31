@@ -510,23 +510,40 @@ void render::start(int argc, char **argv){
 
     //initialize glut and glew
 
-
+	printf("ok3\n"); 
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
     glutInitWindowSize(2 * windowSize, windowSize);
     glutCreateWindow("Dark Matter rendering!");
        
-		   
+	printf("ok4\n"); 	   
     glewInit();
     glewExperimental = GL_TRUE; 
 
+	    //check shaders
+    if (GLEW_ARB_vertex_shader && GLEW_ARB_fragment_shader)
+		printf("Ready for GLSL\n");
+    else {
+		printf("No GLSL support\n");
+		exit(1);
+    }
+    
+
+
+	printf("ok5\n"); 
     //set up shaders and buffers
     if(!initialed){
+		printf("ok5.0\n"); 
         fshaderL = new fluxShader();
+		printf("ok5.1\n"); 
         cshaderL = new colorShader();
+		printf("ok5.2\n"); 
         fbufferL = new fluxBuffer(windowSize, windowSize);
+		printf("ok5.3\n"); 
         cbufferL = new colorBuffer(windowSize, windowSize);
+		printf("ok5.4\n"); 
         fbufferL->setBuffer();
+		printf("ok5.5\n"); 
         
         fshaderU = new fluxShader();
         cshaderU = new colorShader();
@@ -537,6 +554,7 @@ void render::start(int argc, char **argv){
         initialed = true;
     }
 
+	printf("ok5\n"); 
     //set the global pointers
     WSIZE = windowSize;
     POINTSIZE = pointSize;
@@ -544,9 +562,10 @@ void render::start(int argc, char **argv){
     CBU = cbufferU;
     CB = CBL;
 
+	printf("ok6\n"); 
     //initialize enviroment    
     init();
-    
+    printf("ok7\n"); 
     //setup blending   
     glEnable (GL_BLEND);
     glBlendFunc (GL_ONE,GL_ONE);    //blending
@@ -555,15 +574,8 @@ void render::start(int argc, char **argv){
     glutDisplayFunc(&rendsenc);
     glutReshapeFunc(&ReshapeFunc);
     glutKeyboardFunc(&KeyboardFunc);
+	printf("ok8\n"); 
 
-    //check shaders
-    if (GLEW_ARB_vertex_shader && GLEW_ARB_fragment_shader)
-		printf("Ready for GLSL\n");
-    else {
-		printf("No GLSL support\n");
-		exit(1);
-    }
-    
     //starting drawing
     cout << "Start rendering..." << endl;
     timeval tim;
@@ -577,7 +589,7 @@ void render::start(int argc, char **argv){
 
     cbufferL->setBuffer();
     cbufferU->setBuffer();
-    
+    printf("ok9\n"); 
     drawImage();
     delete fbufferL;
     delete fbufferU;
@@ -589,6 +601,7 @@ void render::start(int argc, char **argv){
     delete fluxmapL;
     delete fluxmapU;
     picfile = params->PICFILE;
+	printf("ok10\n"); 
     glutMainLoop();
     
     delete fshaderL;

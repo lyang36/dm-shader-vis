@@ -97,11 +97,15 @@ void shaderManager::printLog(GLhandleARB obj){
 
 shaderObj * shaderManager::loadShaderFile(const char * vfile, const char * ffile){
     char *vs,*fs;
+	printf("ok5.0.2.0\n"); 
     vs = textFileRead(vfile);
+	printf("ok5.0.2.1\n"); 
 	fs = textFileRead(ffile);
+	printf("ok5.0.2.2\n"); 
     //const char* vvs = vs;
     //const char* ffs = fs;
     shaderObj * temp = loadShader(vs, fs);
+	printf("ok5.0.2.3\n"); 
     free(vs);free(fs);
     return temp;
 }
@@ -109,9 +113,13 @@ shaderObj * shaderManager::loadShaderFile(const char * vfile, const char * ffile
 shaderObj * shaderManager::loadShader(const char *vf, const char * ff){
     
     GLhandleARB v,f,p; 
+	printf("ok5.0.2.2.0\n");
     shaderObj * sobj = new shaderObj();
+	printf("ok5.0.2.2.1\n");
     v = glCreateShaderObjectARB(GL_VERTEX_SHADER_ARB);
+	printf("ok5.0.2.2.2\n");
 	f = glCreateShaderObjectARB(GL_FRAGMENT_SHADER_ARB);
+	printf("ok5.0.2.2.3\n");
     
     glShaderSourceARB(v, 1, &vf, NULL);
 	glShaderSourceARB(f, 1, &ff, NULL);
