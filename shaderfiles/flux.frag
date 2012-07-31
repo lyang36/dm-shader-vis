@@ -8,20 +8,22 @@ varying vec4 particle;
 uniform sampler2D normmap;
 uniform int usenormmap;    //whether use the norm map? true: 1 else:0
 
+
+//This is very important, must be checked 
 float profile(vec3 r1,float dtheta){ 
     vec3 r0 = vec3(particle.gba);
-    float costheta = dot(normalize(r0), normalize(r1));
+    float costheta = dot(r0, r1)/(length(r0)*length(r1));
     //use tylor seriers
-    
-    //float t2 = 2.0 * ( 1.0 - costheta);// + 1.0/3.0*(costheta - 1.0)*(costheta - 1.0) - 4.0/45.0 * (costheta - 1.0) *(costheta - 1.0)*(costheta - 1.0);
+    //acos has too much error
     costheta = clamp(costheta, -1.0, 1.0);
-    float t2 = acos(costheta);
-    t2 = t2*t2;
+    float t2 = 2.0 * ( 1.0 - costheta) + 1.0/3.0*(costheta - 1.0)*(costheta - 1.0) - 4.0/45.0 * (costheta - 1.0) *(costheta - 1.0)*(costheta - 1.0);
+    //costheta = clamp(costheta, -1.0, 1.0);
+    //float t2 = acos(costheta);
+    //t2 = t2*t2;
     float d2 = t2 / dtheta / dtheta;
-    return exp(- 1.5 * d2);
-     
-    //try flat distribution
-    //return 1.0;
+    return exp(- 1.5 * d2);         //here comes the problems
+    //return 1.0 - 1.5 * d2;
+    
 }
 
 //reverse stereoprojection
@@ -62,7 +64,7 @@ void main(){
             float r = newsize / geofac.z;
             float norm = (texture2D(normmap, vec2(r0, r))).r;
             //if(norm < 0.0) norm = 1.0;
-            flux = flux / norm / geofac.z / geofac.z;
+            flux = flux / norm;
         }
         
 
