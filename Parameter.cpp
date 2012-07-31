@@ -30,9 +30,9 @@ bool Parameter::readParameter(){
     ifstream conf;
     string line;
 #ifdef _WIN32 || _WIN64
-	conf.open ("config_win.ini");
+    conf.open ("config_win.ini");
 #else
-    conf.open ("config_mac.ini");
+    conf.open ("config_uni.ini");
 #endif
     while(conf.good()){
         stringstream line_buf;

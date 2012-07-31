@@ -10,10 +10,18 @@
 #include <glew.h>
 #include <GLUT/glut.h> // darwin uses glut.h rather than GL/glut.h
 #include <unistd.h>
-#else
+#endif
+
+#ifdef _WIN32 || _WIN64
 #include <GL/glew.h>
 #include <GL/glut.h>
 #include <io.h>
+#endif
+
+#ifdef __linux__
+#include <GL/glew.h>
+#include <GL/glut.h>
+#include <unistd.h>
 #endif
 #include "shaderManager.h"
 
