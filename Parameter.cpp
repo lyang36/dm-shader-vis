@@ -29,7 +29,8 @@ Parameter::Parameter(){
 bool Parameter::readParameter(){
     ifstream conf;
     string line;
-#ifdef _WIN32 || _WIN64
+//#ifdef _WIN32 || _WIN64
+#if defined(_WIN32) || defined(_WIN64)
     conf.open ("config_win.ini");
 #else
     conf.open ("config_uni.ini");

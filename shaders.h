@@ -3,7 +3,7 @@
 #include <string>
 #include <cstdio>
 #include <stdlib.h>
-#ifdef _WIN32 || _WIN64
+#if defined(_WIN32) || defined(_WIN64)
 #include <windows.h>
 #endif
 #include "types.h"
@@ -70,7 +70,8 @@ public:
     
     fluxShader(){
         
-#ifdef _WIN32 || _WIN64
+//#ifdef _WIN32 || _WIN64
+#if defined(_WIN32) || defined(_WIN64)
         vfile = "shaderfiles\\flux.vert";
         ffile = "shaderfiles\\flux.frag";
 #else
@@ -107,7 +108,8 @@ private:
     
 public:
     minMaxShader(){
-#ifdef _WIN32 || _WIN64
+//#ifdef _WIN32 || _WIN64
+#if defined(_WIN32) || defined(_WIN64)
         vfile = "shaderfiles\\coor.vert";
         ffile = "shaderfiles\\minmax.frag";
         fillfile = "shaderfiles\\fill.frag";
@@ -150,7 +152,8 @@ public:
 class colorShader:public Shader{
 public:
     colorShader(){
-#ifdef _WIN32 || _WIN64
+//#ifdef _WIN32 || _WIN64
+#if defined(_WIN32) || defined(_WIN64)
         vfile = "shaderfiles\\color.vert";
         ffile = "shaderfiles\\color.frag";
 #else

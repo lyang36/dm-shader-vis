@@ -1,6 +1,7 @@
 #include <iostream>
 
-#ifdef _WIN32 || _WIN64
+//#ifdef _WIN32 || _WIN64
+#if defined(_WIN32) || defined(_WIN64)
 #include <time.h>
 #include <windows.h>
 #include "gettime.h"
