@@ -88,11 +88,14 @@ void render::drawFlux(){
     //fbufferL->bindBuf();
     
     //bind texture
-    printf("Generating normalization buffer...\n");
-    fbufferL -> setMapRes(windowSize, params->PSIZE);
-    fbufferL -> setNormTex();
-    printf("Norm map generated.\n");
-    //glBindTexture(GL_TEXTURE_2D, textureIni);
+    if(params->isUseNormMap){
+        printf("Generating normalization buffer...\n");
+        fbufferL -> setMapRes(windowSize, params->PSIZE);
+        fbufferL -> setNormTex();
+        printf("Norm map generated.\n");
+    }else{
+        glBindTexture(GL_TEXTURE_2D, textureIni);
+    }
     
     
     {//setup shaders L and U
@@ -127,6 +130,8 @@ void render::drawFlux(){
         //fshaderL->setxaxis3f(cosphi*costheta, sinphi*costheta, -sintheta);
         fshaderL->setopos3f(params->oposx, params->oposy, params->oposz);
         fshaderL->setrotmatrix(params->vvec, params->opos, params->cpos, false);
+        fshaderL->setusenormmap(params->isUseNormMap);
+        
         fshaderL->end();    
     
         //begin shader
@@ -139,6 +144,7 @@ void render::drawFlux(){
         fshaderU->setopos3f(params->oposx, params->oposy, params->oposz);
         //reflect the view vector
         fshaderU->setrotmatrix(params->vvec, params->opos, params->cpos, true);
+        fshaderU->setusenormmap(params->isUseNormMap);
         fshaderU->end();     
     
     }

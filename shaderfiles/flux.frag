@@ -6,6 +6,7 @@ uniform vec3 geofac;
 
 varying vec4 particle;
 uniform sampler2D normmap;
+uniform int usenormmap;    //whether use the norm map? true: 1 else:0
 
 float profile(vec3 r1,float dtheta){ 
     vec3 r0 = vec3(particle.gba);
@@ -56,11 +57,12 @@ void main(){
         float pr2 = dot(xyr, xyr);
         flux = fluxfac * 4.0/(1.0+pr2)/(1.0+pr2) * profile(prev(xyr), dtheta);
         //flux = fluxfac;
-        
-        float r0 = sqrt(pr2);
-        float r = newsize / geofac.z;
-        float norm = (texture2D(normmap, vec2(r, r0))).r;
-        //flux /= norm;
+        if(usenormmap == 1){
+            float r0 = sqrt(pr2);
+            float r = newsize / geofac.z;
+            float norm = (texture2D(normmap, vec2(clamp(r0, 0.0, 1.0), clamp(r, 0.0, 1.0)))).r;
+            flux /= norm;
+        }
         
 
         gl_FragColor = vec4(flux, 0, 0, 1.0);

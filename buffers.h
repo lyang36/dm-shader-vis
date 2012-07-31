@@ -51,6 +51,7 @@ private:
     void loadnorm();         //calculate normalization text or from file
     string normfile;// = "norm.dat";
     float * normtextbuf;
+    //bool isUseMap;
 public:
     //load norm and bind texture
     void setNormTex(){
@@ -61,9 +62,9 @@ public:
         glBindTexture(GL_TEXTURE_2D, normtex);
         
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F_ARB, normMapRes, normMapRes, 0, GL_RED, GL_FLOAT, normtextbuf);
-        /*for(int i = 0; i < normMapRes*normMapRes; i++){
+        for(int i = 0; i < normMapRes*normMapRes; i++){
             printf("%f  ", normtextbuf[i]);
-        }*/
+        }
         // set its parameters
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -83,7 +84,12 @@ public:
         normPointSize = 256;
         normfile = "norm.dat";
         normtextbuf = NULL;
+        //isUseMap = false;
     };//:buffer(w,h);
+    
+    //bool isBufferLoaded(){
+    //    return isUseMap;
+    //}
     
     ~fluxBuffer(){
         if(normtextbuf != NULL){

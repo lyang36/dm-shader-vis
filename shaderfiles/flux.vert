@@ -15,6 +15,8 @@ uniform vec3 geofac;
 
 varying vec4 particle;    //the radius of the particle circle and the coordianate
         //size, x, y, z
+
+uniform int usenormmap;    //whether use the norm map? true: 1 else:0
             
 float profile(vec3 r1, float dtheta){ 
     vec3 r0 = vec3(particle.gba);
@@ -160,9 +162,11 @@ void main(){
         float normfac;
         float d2 = dtheta * dtheta;
         {
-            //normfac = calc_norm(vec2(xc, yc), newsize, dtheta);
-            normfac = 1.0;
-            
+            if(usenormmap == 0){
+                normfac = calc_norm(vec2(xc, yc), newsize, dtheta);
+            }else{
+                normfac = 1.0;
+            }
         }
         
         //Must add another vector (xc, yc)

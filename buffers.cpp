@@ -181,6 +181,7 @@ float projprofile(float * xy, float * r0, float fc, float dtheta){
 void fluxBuffer::loadnorm(){
     //check whether the file is exsisted
     //if so, read from file
+    
     ifstream infile;
     infile.open(normfile.c_str(), ios::in | ios::binary);
     if(infile.good())
@@ -199,6 +200,7 @@ void fluxBuffer::loadnorm(){
         infile.close();
         return;
     }else{
+        float * tempnorm = new float[normPointSize * normMapRes/2];
         infile.close();
         printf("Normalization file not found, generating ...\n");
         //otherwise, create the file
@@ -207,24 +209,22 @@ void fluxBuffer::loadnorm(){
         float xy[2];
         float dtheta, theta, phi;
         float norm = 0;
-        float * tempnorm = new float[normPointSize * normMapRes/2];
+
         int _ck = 0;
 
-        //for(int i = 0; i < normMapRes; i ++){
-        //    for(int j = 0; j < normMapRes; j ++){
-        //         normtextbuf[i * normMapRes + j] = 1.0;
-        //    }
-        //}
-        for(int i = 1; i < normPointSize; i ++){
+        for(int i = 0; i < normPointSize; i ++){
             for(int j = 0; j < normMapRes / 2.0; j ++){
 
                 if(_ck % (normPointSize*normMapRes / 2 / 20) == 0 ){
-                    printf("%d%% ", _ck * 100/(normPointSize*normMapRes / 2));
+                    printf("%d%% ", _ck * 100/(normPointSize*normMapRes / 2)+1);
                     cout.flush();
                 }
                 _ck++;
                 r0 = ((float) j / ((float) (normMapRes/2.0)));
                 r1 = ((float) i / ((float) (normMapRes)));
+                if(i == 0){
+                    r1 = (1.0 / ((float) (normMapRes)));
+                }
 
                 float theta1 = acos((-1.0 + (r1+r0)*(r1+r0))/(1.0 + (r1+r0)*(r1+r0)));
                 float theta2 = acos((-1.0 + (r0-r1)*(r0-r1))/(1.0 + (r0-r1)*(r0-r1)));
@@ -247,6 +247,9 @@ void fluxBuffer::loadnorm(){
                 float x = 0;
                 float y = 0;
                 float newsize = i;
+                if(newsize < 1){
+                    newsize = 1;
+                }
                 norm = 0;
                 int n = 0;
                 for(x = 0.0; x < newsize; x++){
@@ -273,14 +276,11 @@ void fluxBuffer::loadnorm(){
                         }*/
                     }
                 }
-                //normtextbuf[i * normMapRes + j] = norm;
-                tempnorm[i * normPointSize + j]=norm;
-                //printf("%f   ", norm);
-                //if(dtheta == 0.0){
-                //    printf("%d, %d, %f, %f, %d \n", i, j, normtextbuf[i * normMapRes + j], dtheta, n);
-                //}
+
+                tempnorm[i * normMapRes/2 + j]=norm;
 
             }
+
         }
         
         
@@ -288,7 +288,10 @@ void fluxBuffer::loadnorm(){
             for(int j = 0; j < normMapRes; j ++){
                 int row = i * normPointSize / normMapRes;
                 int col = j / 2;
-                normtextbuf[i * normMapRes + j] = tempnorm[row * normPointSize + col];
+                normtextbuf[i * normMapRes + j] = tempnorm[row * normMapRes/2 + col];
+                //if(i == 0){
+                //    normtextbuf[i * normMapRes + j] = 4.0;
+                //}
             }
         }
                 
@@ -303,7 +306,9 @@ void fluxBuffer::loadnorm(){
         //printf("ok\n");
         oufile.close();
         //printf("Done \n");
+        delete tempnorm;
     }
+     
 }
 
 //18885004802

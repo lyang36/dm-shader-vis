@@ -42,6 +42,8 @@ public:
     
     int NSIDE;                //NSIDE for healpix map
     
+    bool isUseNormMap;        //whether or not use normal map
+    
 
     //initialization
     Parameter();

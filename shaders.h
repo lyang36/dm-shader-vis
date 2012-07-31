@@ -45,6 +45,7 @@ private:
     GLint rotmloc;
     GLint oposloc;
     GLint geofacloc;
+    GLint isnormmaploc;
     void setrotm(bool updown);  //setup rotation matrix, 9 variables
                                 //updown: true/up; false/down
     void loadUniform();
@@ -65,6 +66,7 @@ public:
     void setgeofac3fv(REAL * geo);
     void setrotmatrix(REAL * alignvec, REAL * obsvec, REAL * centervec, bool updown);     //setup rotation matrix
                                             //alignvec has 3 vars
+    void setusenormmap(bool isnm);          //whether use the norm map
     
     fluxShader(){
         

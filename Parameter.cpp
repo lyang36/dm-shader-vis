@@ -23,6 +23,7 @@ Parameter::Parameter(){
     OUTFILE = "";
     HEALPIXFILE = "";
     PICFILE = "";
+    isUseNormMap = false;
 }
 
 bool Parameter::readParameter(){
@@ -55,6 +56,10 @@ bool Parameter::readParameter(){
             }else if(word == "DATAFILE"){
                 line_buf >> DATAFILE;
                 cout << "DATAFILE " << DATAFILE << endl;
+            }else if(word == "USENORMMAP"){
+                    //line_buf >> DATAFILE;
+                isUseNormMap = true;
+                cout << "Use norm map? " << isUseNormMap << endl;
             }else if(word == "OPOS"){
                 line_buf >> oposx;
                 line_buf >> oposy;
