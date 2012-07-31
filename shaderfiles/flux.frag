@@ -18,7 +18,7 @@ float profile(vec3 r1,float dtheta){
     float t2 = acos(costheta);
     t2 = t2*t2;
     float d2 = t2 / dtheta / dtheta;
-    return costheta;//exp(- 1.5 * d2);
+    return exp(- 1.5 * d2);
      
     //try flat distribution
     //return 1.0;
@@ -60,8 +60,9 @@ void main(){
         if(usenormmap == 1){
             float r0 = sqrt(pr2);
             float r = newsize / geofac.z;
-            float norm = (texture2D(normmap, vec2(clamp(r0, 0.0, 1.0), clamp(r, 0.0, 1.0)))).r;
-            flux /= norm;
+            float norm = (texture2D(normmap, vec2(r0, r))).r;
+            //if(norm < 0.0) norm = 1.0;
+            flux = flux / norm / geofac.z / geofac.z;
         }
         
 

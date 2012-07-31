@@ -277,7 +277,7 @@ void fluxBuffer::loadnorm(){
                     }
                 }
 
-                tempnorm[i * normMapRes/2 + j]=norm;
+                tempnorm[i * normMapRes/2 + j]=norm / ((double)normPointSize * normPointSize);
 
             }
 

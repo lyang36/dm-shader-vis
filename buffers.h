@@ -62,15 +62,21 @@ public:
         glBindTexture(GL_TEXTURE_2D, normtex);
         
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F_ARB, normMapRes, normMapRes, 0, GL_RED, GL_FLOAT, normtextbuf);
-        for(int i = 0; i < normMapRes*normMapRes; i++){
-            printf("%f  ", normtextbuf[i]);
-        }
+        //for(int i = 0; i < normMapRes*normMapRes; i++){
+        //    printf("%f  ", normtextbuf[i]);
+        //}
         // set its parameters
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
         glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+        
+        // setup some generic opengl options
+        glClampColorARB(GL_CLAMP_VERTEX_COLOR_ARB, GL_FALSE);
+        glClampColorARB(GL_CLAMP_FRAGMENT_COLOR_ARB, GL_FALSE);
+        glClampColorARB(GL_CLAMP_READ_COLOR_ARB, GL_FALSE);
+        
     };
     
     void setMapRes(int m, int n){

@@ -27,7 +27,7 @@ float profile(vec3 r1, float dtheta){
     float t2 = acos(costheta);
     t2 = t2*t2;
     float d2 = t2 / dtheta / dtheta;
-    return costheta;//exp(- 1.5 * d2);
+    return exp(- 1.5 * d2);
 }
 
 //reverse stereoprojection
