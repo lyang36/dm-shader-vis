@@ -28,18 +28,15 @@ int main(int argc, char** argv){
     reader.setTest(params.TEST);
     reader.setPath(params.DATAFILE);
     reader.setBuf(params.CPU_MEM);
-	printf("ok1\n");    
+ 
 //#ifdef _WIN32 || _WIN64		   
-#if defined(_WIN32) || defined(_WIN64) || defined(__linux__)
-    glewInit();
-    glewExperimental = GL_TRUE; 
-#endif
-	printf("ok2\n"); 
-//	printf("ok\n");
+//#if defined(_WIN32) || defined(_WIN64) || defined(__linux__)
+//    glewInit();
+//    glewExperimental = GL_TRUE; 
+//#endif
     render Render;
     Render.reader = &reader;
     Render.params = &params;
-//  	printf("ok\n");
     Render.start(argc, argv);
     return 0;    
 }
