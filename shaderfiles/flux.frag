@@ -20,7 +20,7 @@ float profile(vec3 r1,float dtheta){
     //costheta = clamp(costheta, -1.0, 1.0);
     //float t2 = acos(costheta);
     //t2 = t2*t2;
-    float d2 = t2 / dtheta / dtheta;
+    float d2 = clamp(t2 / dtheta / dtheta, 0.0, 1.0);
     return exp(- 1.5 * d2);         //here comes the problems
     //return 1.0 - 1.5 * d2;
     
