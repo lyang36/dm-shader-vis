@@ -78,7 +78,7 @@ void render::init(){
 }
 
 void render::drawFlux(){
-    Particles part;
+    //Particles part;
     if(!reader->isOpen()){
         reader->open();
     }
@@ -107,7 +107,7 @@ void render::drawFlux(){
         vx = vx / vn;
         vy = vy / vn;
         vz = vz / vn;
-        REAL costheta = vz;
+        //REAL costheta = vz;
         REAL sintheta = sqrt(1-vz * vz);
         REAL cosphi, sinphi;
         if(sintheta < 1.0e-8){
@@ -294,7 +294,7 @@ void render::findMinMax(float &fluxmin, float &fluxmax){
         float y = (int)(i%windowSize) - windowSize / 2.0;
         float r = windowSize / 2.0;
         if(x*x + y*y <= r*r){
-            float pr = (x*x + y*y) / (windowSize / 2.0) / (windowSize / 2.0) ;
+            //float pr = (x*x + y*y) / (windowSize / 2.0) / (windowSize / 2.0) ;
             average += (fluxmapL[i] + fluxmapU[i])/ (float) pixss;
             total += (fluxmapL[i] + fluxmapU[i]);// * (1 + pr) * (1 + pr) / 4.0;
         }else{
@@ -633,9 +633,9 @@ double render::_getpixflux(int x1, int y1, bool isupshere){
         
         double _flux = 0;
         if(ky < 1) kx = 1;
-        if(ky > windowSize) ky = windowSize;
+        if(ky > (int)windowSize) ky = windowSize;
         if(kx < 0) kx = 0;
-        if(kx > windowSize - 1) kx = windowSize - 1;
+        if(kx > (int)windowSize - 1) kx = windowSize - 1;
         if(!isupshere){
             _flux = fluxmapU[(windowSize - ky) * windowSize + kx];
         }
@@ -652,15 +652,15 @@ double render::_getpixflux(int x1, int y1, bool isupshere){
 void render::saveHealPix(){
     double * healmap;
     int nside = params -> NSIDE;
-    int pixss = windowSize * windowSize;
+    //int pixss = windowSize * windowSize;
     int npix = nside * nside * 12;
     healmap = (double *) calloc(npix, sizeof(double));
     if(healmap == NULL){
         printf("Not enough memory, cannot convert to healpix map!\n");
         return;
     }
-    double domega = 4.0 * PI / (double) npix;
-    double detheta = sqrt(domega);
+    //double domega = 4.0 * PI / (double) npix;
+    //double detheta = sqrt(domega);
     double theta;
     double phi;
     
@@ -670,8 +670,8 @@ void render::saveHealPix(){
 
     
     for(int i = 0; i < npix; i++){
-        double x, y,r, factor;
-        int j;
+        //double x, y,r, factor;
+        //int j;
         pix2ang_ring(nside, i, &theta, &phi);
         //now we have theta and phi and dtheta
         //converte (theta, phi, dtheta) to the projectio plane, we have
@@ -689,11 +689,11 @@ void render::saveHealPix(){
         double pr = sin(theta)/(1-cos(theta));
         double pxc = pr * cos(phi);
         double pyc = pr * sin(phi);
-        double sintpr = sin(theta+detheta);
-        double sintmr = sin(theta-detheta);
-        double costpr = cos(theta+detheta);
-        double costmr = cos(theta-detheta);
-        double pxr = (sintmr/(1-costmr)-sintpr/(1-costpr))/2.0;
+        //double sintpr = sin(theta+detheta);
+        //double sintmr = sin(theta-detheta);
+        //double costpr = cos(theta+detheta);
+        //double costmr = cos(theta-detheta);
+        //double pxr = (sintmr/(1-costmr)-sintpr/(1-costpr))/2.0;
 
         
         double xc = (pxc) * (double)d;

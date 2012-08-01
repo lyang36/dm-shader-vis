@@ -45,7 +45,7 @@ bool DataReader::open(){
     dataInputFile.read((char*)&partNumbers, sizeof(int));
     cout << "Particles: " << partNumbers << endl;
     if(testnum != -1){
-        if(partNumbers > testnum){
+        if((int)partNumbers > testnum){
                 partNumbers = testnum;
         }
     } 
@@ -57,7 +57,7 @@ bool DataReader::open(){
 void DataReader::loadBuffer(){
     int resParts = partNumbers - (readCursor - memCursor + memParts);
     //cout << "resparts: " << resParts << endl;
-    if(resParts > memBuffer){
+    if(resParts > (int)memBuffer){
         //setup new readCursor
         readCursor = readCursor - memCursor + memParts;
         memCursor = 0;

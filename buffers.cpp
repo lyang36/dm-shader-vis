@@ -196,7 +196,7 @@ void fluxBuffer::loadnorm(){
         }
         printf("Loading norm map from file %s ...\n", normfile.c_str());
         infile.read((char *) normtextbuf, sizeof(float) * normMapRes * normMapRes);
-        printf("Loaded ...\n", normfile.c_str());
+        printf("%s Loaded ...\n", normfile.c_str());
         infile.close();
         return;
     }else{
@@ -206,7 +206,7 @@ void fluxBuffer::loadnorm(){
         //otherwise, create the file
         float r0,r1;
         float vr0[3];
-        float xy[2];
+        //float xy[2];
         float dtheta, theta, phi;
         float norm = 0;
 
@@ -270,7 +270,7 @@ void fluxBuffer::loadnorm(){
                         float pr2 = xyr[0] * xyr[0] + xyr[1] * xyr[1];
                         norm += 4.0/(1.0+pr2)/(1.0+pr2) * projprofile(xyr, vr0, 1.0, dtheta);
                         n++;
-                        float t =  4.0/(1.0+pr2)/(1.0+pr2) * projprofile(xyr, vr0, 1.0, dtheta);
+                        //float t =  4.0/(1.0+pr2)/(1.0+pr2) * projprofile(xyr, vr0, 1.0, dtheta);
                         /*if(t == 0.0) {
                             printf("%f %f %f %f %f %f\n", xyr[0], xyr[1], vr0[0], vr0[1], vr0[2], dtheta);
                         }*/
