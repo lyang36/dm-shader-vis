@@ -510,7 +510,6 @@ void render::start(int argc, char **argv){
 
     //initialize glut and glew
 	glutInit(&argc, argv);
-    //glewInit();
     glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
     glutInitWindowSize(2 * windowSize, windowSize);
     glutCreateWindow("Dark Matter rendering!");
@@ -519,7 +518,7 @@ void render::start(int argc, char **argv){
     glewInit();
     glewExperimental = GL_TRUE; 
 
-    if(glewIsSupported("GL_VERSION_2_0")) cout << "true" <<endl;
+    //if(glewIsSupported("GL_VERSION_2_0")) cout << "true" <<endl;
 	    //check shaders
     if (GLEW_ARB_vertex_shader && GLEW_ARB_fragment_shader)
 		printf("Ready for GLSL\n");
@@ -554,6 +553,7 @@ void render::start(int argc, char **argv){
     CBL = cbufferL;
     CBU = cbufferU;
     CB = CBL;
+
     //initialize enviroment    
     init();
     //setup blending   

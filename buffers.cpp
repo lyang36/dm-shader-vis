@@ -297,15 +297,10 @@ void fluxBuffer::loadnorm(){
                 
         printf("Saving to file %s ... \n", normfile.c_str());
         ofstream oufile;
-        //printf("ok\n");
         oufile.open(normfile.c_str(), ios::out | ios::binary);
-        //printf("ok\n");
         oufile.write((char * ) &normMapRes, sizeof(int));
-        //printf("ok\n");
         oufile.write((char * ) normtextbuf, normMapRes * normMapRes * sizeof(float));
-        //printf("ok\n");
         oufile.close();
-        //printf("Done \n");
         delete tempnorm;
     }
      
