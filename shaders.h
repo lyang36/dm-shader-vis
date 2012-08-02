@@ -69,7 +69,7 @@ public:
 #if defined(_WIN32) || defined(_WIN64)
         vfile = "shaderfiles\\flux.vert";
         ffile = "shaderfiles\\flux.frag";
-        gfile = "shaderfiles\\flux.geom"
+        gfile = "shaderfiles\\flux.geom";
 #else
         vfile = "./shaderfiles/flux.vert";
         ffile = "./shaderfiles/flux.frag";
