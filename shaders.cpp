@@ -5,14 +5,6 @@
 using namespace std;
 void fluxShader::loadUniform(){
 
-    //zaxisloc = glGetUniformLocation(shader->progmObj,"zaxis");
-    //printf("zloc, %d\n", zaxisloc);
-    //xaxisloc = glGetUniformLocation(shader->progmObj,"xaxis");
-    //printf("xloc, %d\n", xaxisloc);
-
-    //yaxisloc = glGetUniformLocation(shader->progmObj,"yaxis");
-    //printf("yloc, %d\n", yaxisloc);
-
     rotmloc = glGetUniformLocation(shader->progmObj,"rotmatrix");
     
     oposloc = glGetUniformLocation(shader->progmObj,"opos");

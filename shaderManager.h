@@ -16,6 +16,7 @@ class shaderObj{
 public: 
     GLhandleARB vertexShader;
     GLhandleARB fragmentShader;
+    GLhandleARB geometryShader;
     GLhandleARB progmObj;
     void begin();
     void end();
@@ -28,7 +29,11 @@ private:
     char * textFileRead(const char * fn);
 public:
     shaderObj * loadShaderFile(const char * vfile, const char * ffile);
+    shaderObj * loadShaderFile(const char * vfile, const char * gfile,
+                               const char * ffile); //load a geometry shader
     shaderObj * loadShader(const char *vf, const char * ff);
+    shaderObj * loadShader(const char *vf, const char * gf,
+                           const char * ff);        //load a geometry shader
 };
 
 

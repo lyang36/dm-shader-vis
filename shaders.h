@@ -14,7 +14,7 @@ using namespace std;
 class Shader{
 protected:
     shaderObj * shader;
-	string vfile, ffile;
+	string vfile, ffile, gfile;
     bool good;
     
 public:
@@ -54,12 +54,7 @@ private:
     REAL * cpos;
     REAL rotmatrix[9];
 public:
-    //void setzaxis3f(REAL x, REAL y, REAL z); //set vpos
-    //void setzaxis3fv(REAL * vpos);
-    //void setyaxis3f(REAL x, REAL y, REAL z); //set vpos
-    //void setyaxis3fv(REAL * vpos);
-    //void setxaxis3f(REAL x, REAL y, REAL z); //set vpos
-    //void setxaxis3fv(REAL * vpos);
+
     void setopos3f(REAL x, REAL y, REAL z); //set opos
     void setopos3fv(REAL * opos);
     void setgeofac3f(REAL x, REAL y, REAL z); //set opos
@@ -74,12 +69,14 @@ public:
 #if defined(_WIN32) || defined(_WIN64)
         vfile = "shaderfiles\\flux.vert";
         ffile = "shaderfiles\\flux.frag";
+        gfile = "shaderfiles\\flux.geom"
 #else
         vfile = "./shaderfiles/flux.vert";
         ffile = "./shaderfiles/flux.frag";
+        gfile = "./shaderfiles/flux.geom";
 #endif
         shaderManager SM;
-        shader = SM.loadShaderFile(vfile.c_str(), ffile.c_str());
+        shader = SM.loadShaderFile(vfile.c_str(), gfile.c_str(), ffile.c_str());
         if(shader == 0){
             printf("Shader error!\n");
             exit(0);
@@ -87,7 +84,6 @@ public:
         if(shader->progmObj == 0){
             printf("Shader error!\n");
             exit(0);
-            //good = false;
         }else{
             good = true;
         }
