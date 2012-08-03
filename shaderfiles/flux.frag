@@ -61,7 +61,9 @@ void main(){
         vec2 xyp = p * (newsize / 2.0) + coor;
         vec2 xyr = xyp / (geofac.y / 2.0);
         float pr2 = dot(xyr, xyr);
-        flux = fluxfac * 4.0/(1.0+pr2)/(1.0+pr2) * profile(prev(xyr), dtheta);
+        //flux = fluxfac * 4.0/(1.0+pr2)/(1.0+pr2) * profile(prev(xyr), dtheta);
+		//TEST
+		flux = 1.0;
         if(usenormmap == 1){
             float r0 = sqrt(pr2);
             float r = newsize / geofac.z;

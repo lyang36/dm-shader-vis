@@ -8,11 +8,8 @@
 //the new coordinate system based on the vpos
 #define PI 3.1415926535897932
 
-                //geometry fact{size(square),viewportsize, maxpointsize }
-//uniform float sdthetha;
-
 layout(points) in;
-layout (triangle_strip, max_vertices=4) out;
+layout(triangle_strip, max_vertices=4) out;
 //layout(points) out;
 out vec2 texCoord;
 out vec4 color;
@@ -22,6 +19,8 @@ in block
 	vec4 gl_Color;
 	vec4 particle; 
 } bl_In[];
+
+//in float abc;
 
  void main()
 {
@@ -34,19 +33,22 @@ in block
     float psize = gl_in[i].gl_PointSize;
 	//if(psize == 0.0) discard;
     // copy attributes
-    point = vec4(gl_in[i].gl_Position.x, gl_in[i].gl_Position.y, 0.0, 1.0);
-    texCoord = vec2(0,0);
-    gl_Position = point + vec4(-psize, -psize, 0, 0);
-    EmitVertex();
-    texCoord = vec2(1,0);
-    gl_Position = point + vec4(psize, -psize, 0, 0);
-    EmitVertex();
-    texCoord = vec2(0,1);
-    gl_Position = point + vec4(-psize, psize, 0, 0);
-    EmitVertex();
-    texCoord = vec2(1,1);
-    gl_Position = point + vec4(psize, psize, 0, 0);
-    EmitVertex();
-    
-    EndPrimitive();
+	
+	if(psize != 0.0)
+	{
+		point = vec4(gl_in[i].gl_Position.x, gl_in[i].gl_Position.y, 0.0, 1.0);
+		texCoord = vec2(0,0);
+		gl_Position = point + vec4(-psize, -psize, 0, 0);
+		EmitVertex();
+		texCoord = vec2(0,1);
+		gl_Position = point + vec4(-psize, psize, 0, 0);
+		EmitVertex();
+		texCoord = vec2(1,0);
+		gl_Position = point + vec4(psize, -psize, 0, 0);
+		EmitVertex();
+		texCoord = vec2(1,1);
+		gl_Position = point + vec4(psize, psize, 0, 0);
+		EmitVertex();
+		//EndPrimitive();
+	}
 }

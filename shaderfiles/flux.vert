@@ -2,6 +2,7 @@
 //convert the particles to point sprite
 /*input postion and parameter of exactly a particle*/
 /*outout: xc, yc, r, dtheta, */
+//TODO: rewrite the normalization function
 #version 150
 //the new coordinate system based on the vpos
 #define PI 3.1415926535897932
@@ -26,6 +27,7 @@ out block
 	vec4 particle;    //the radius of the particle circle and the coordianate
         //size, x, y, z
 } bl_out;
+float si;
 
 //This is very important, must be checked 
 float profile(vec3 r1,float dtheta){ 
@@ -60,7 +62,7 @@ float calc_norm(vec2 svec, float newsize, float dtheta){
     float y=0.0;
     for(x = 0.0; x < newsize; x++){
         for(y = 0.0; y < newsize; y++){
-            float px = (x+0.5)/newsize;
+            /*float px = (x+0.5)/newsize;
             float py = (y+0.5)/newsize;
             px = 2.0*(px-0.5); // -1...1
             py = 2.0*(py-0.5);
@@ -71,9 +73,10 @@ float calc_norm(vec2 svec, float newsize, float dtheta){
             
             vec2 xyp = xy * (newsize / 2.0) + coor;
             vec2 xyr = xyp / (geofac.y / 2.0);
-            float pr2 = dot(xyr, xyr);
-            norm += 4.0/(1.0+pr2)/(1.0+pr2) * profile(prev(xyr), dtheta);
-            //norm += 1.0;
+            float pr2 = dot(xyr, xyr);*/
+            //norm += 4.0/(1.0+pr2)/(1.0+pr2) * profile(prev(xyr), dtheta);
+			//TEST
+            norm += 1.0;
             
         }
     }
@@ -154,7 +157,7 @@ void main(){
         
         newpos = vec4(xc * geofac.x, yc * geofac.x, 0.0, 1.0);
         
-        if(newsize > geofac.z){
+        if(newsize > geofac.y){
             dsize = geofac.y / newsize * r;
             newsize = geofac.y;
         }else{
@@ -164,22 +167,30 @@ void main(){
         if(newsize < 1.0){
             newsize = 1.0;
         }
-        gl_PointSize = newsize * geofac.x / geofac.y / 2.0;  //point size
-		
+        
+		gl_PointSize = dsize * geofac.x ;//point size
+		si = dsize * geofac.y * 2.0;
+		if(si < 1.0) si = 1.0;
         particle = vec4(newsize, npvec.x, npvec.y, npvec.z);
+		//TEST
+		//particle = vec4(dsize * geofac.x * 2.0, npvec.x, npvec.y, npvec.z);
 		
         float normfac;
         float d2 = dtheta * dtheta;
         {
             if(usenormmap == 0){
                 normfac = calc_norm(vec2(xc, yc), newsize, dtheta);
+				//TEST
+				//normfac = calc_norm(vec2(xc, yc), si, dtheta);
             }else{
                 normfac = 1.0;
             }
         }
         
         //Must add another vector (xc, yc)
-        gl_FrontColor = vec4(xc, yc, flux * normfac , dtheta);
+		//TEST
+		flux = 1.0;
+        gl_FrontColor = vec4(xc, yc, floor(flux * normfac) , dtheta);
 		
     }else{
 		//QUESTION: why cannot discard
