@@ -1,14 +1,15 @@
 //draw projected gaussian profile
-#version 120
+#version 150 compatibility
 #define PI 3.1415926535897932
 uniform vec3 geofac;
             //orthsize, windowsize, pointsize
 
-varying vec4 particle;
+in vec4 particle;
 uniform sampler2D normmap;
 uniform int usenormmap;    //whether use the norm map? true: 1 else:0
-varying vec2 texCoord;
-
+in vec2 texCoord;
+out vec4 gl_FragColor;
+in vec4 color;
 
 
 //This is very important, must be checked 
@@ -43,12 +44,13 @@ float projprofile(vec2 xy, float fc, float dtheta){
 void main(){
     //float dsize = particle.r;
     float newsize = particle.r;
-    vec2 xyc = gl_Color.rg;
+	if(newsize == 0.0) discard;
+    vec2 xyc = color.rg;
     vec2 coor = xyc *geofac.y / 2.0;
     float flux = 0.0;
-    float fluxfac = gl_Color.b;
-    /*if(fluxfac != 0.0){
-        float dtheta = gl_Color.a;
+    float fluxfac = color.b;
+    if(fluxfac != 0.0){
+        float dtheta = color.a;
         vec2 p = floor(newsize * texCoord);
         
         p = (p+0.5) / newsize;
@@ -59,9 +61,7 @@ void main(){
         vec2 xyp = p * (newsize / 2.0) + coor;
         vec2 xyr = xyp / (geofac.y / 2.0);
         float pr2 = dot(xyr, xyr);
-        fluxfac = 1.0;
         flux = fluxfac * 4.0/(1.0+pr2)/(1.0+pr2) * profile(prev(xyr), dtheta);
-        //flux = fluxfac;
         if(usenormmap == 1){
             float r0 = sqrt(pr2);
             float r = newsize / geofac.z;
@@ -74,8 +74,8 @@ void main(){
         gl_FragColor = vec4(flux, 0, 0, 1.0);
     }else{
         gl_FragColor = vec4(0, 0, 0, 0);
-    }*/
+    }
     //vec2 p = vec2(gl_TexCoord[0].s,gl_TexCoord[0].t);
     //vec2 p = (texCoord - vec2(0.5, 0.5))*2.0;
-    gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+    gl_FragColor = vec4(fluxfac, 0.0, 0.0, 1.0);
 }

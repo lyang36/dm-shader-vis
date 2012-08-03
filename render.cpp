@@ -215,7 +215,7 @@ void render::drawFlux(){
         fshaderL->begin();
         {
             glDrawArrays(GL_POINTS, 0, reader->getMemparts());
-            glFlush();
+            //glFlush();
             //printf("Particles: %d\n", reader->getMemparts());
         }
         fshaderL->end();
@@ -226,7 +226,7 @@ void render::drawFlux(){
         fshaderU->begin();
         {
             glDrawArrays(GL_POINTS, 0, reader->getMemparts());
-            glFlush();
+            //glFlush();
             //printf("Particles: %d\n", reader->getMemparts());
         }
         fshaderU->end();

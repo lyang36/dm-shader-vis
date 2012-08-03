@@ -2,7 +2,7 @@
 //convert the particles to point sprite
 /*input postion and parameter of exactly a particle*/
 /*outout: xc, yc, r, dtheta, */
-
+#version 150
 //the new coordinate system based on the vpos
 #define PI 3.1415926535897932
 
@@ -12,15 +12,23 @@ uniform vec3 geofac;
                 //geometry fact{size(square),viewportsize, maxpointsize }
 //uniform float sdthetha;
 
-varying vec4 particle;    //the radius of the particle circle and the coordianate
-        //size, x, y, z
+
 //varying float geo_newsize;
 
 uniform int usenormmap;    //whether use the norm map? true: 1 else:0
-            
+in vec4 gl_Color;
+in vec4  gl_Vertex;        
+out vec4 gl_FrontColor;  
+vec4 particle;
+out block
+{
+	vec4 gl_Color;
+	vec4 particle;    //the radius of the particle circle and the coordianate
+        //size, x, y, z
+} bl_out;
 
-//This is very important, must be checked
-float profile(vec3 r1,float dtheta){
+//This is very important, must be checked 
+float profile(vec3 r1,float dtheta){ 
     vec3 r0 = vec3(particle.gba);
     float costheta = dot(r0, r1)/(length(r0)*length(r1));
     //use tylor seriers
@@ -35,7 +43,6 @@ float profile(vec3 r1,float dtheta){
     //return 1.0 - 1.5 * d2;
     
 }
-
 //reverse stereoprojection
 vec3 prev(vec2 xy){
     float r2 = xy.x*xy.x + xy.y*xy.y;
@@ -70,6 +77,7 @@ float calc_norm(vec2 svec, float newsize, float dtheta){
             
         }
     }
+	//if(norm == 0.0) norm =1.0;
     return 1.0/norm;
     //return 1.0 / (newsize * newsize);
 }
@@ -83,7 +91,8 @@ void main(){
     
     vec4 newpos;
    //find the angle
-    vec3 pvec = vec3(gl_Vertex) - opos;    
+    vec3 pvec = vec3(gl_Vertex) - opos;
+	//vec3 pvec = vec3(gl_Position) - opos;       
                                         //input x, y z of the particle
                                         //transform it to the stereoprojection plane
     vec4 parameter = vec4(gl_Color);    //parameters
@@ -123,8 +132,6 @@ void main(){
             cosphi = npvec.x/sintheta;//newpvec.x / sintheta;
         }
         
-        //phi= PI / 2.0;
-        
         float flux = parameter.g * parameter.r / (4.0 * PI * distance * distance);
     
     
@@ -147,12 +154,17 @@ void main(){
         
         newpos = vec4(xc * geofac.x, yc * geofac.x, 0.0, 1.0);
         
-        dsize = r;
+        if(newsize > geofac.z){
+            dsize = geofac.y / newsize * r;
+            newsize = geofac.y;
+        }else{
+            dsize = r;
+        }
         
         if(newsize < 1.0){
             newsize = 1.0;
         }
-        gl_PointSize = r * geofac.r;//newsize;  //point size
+        gl_PointSize = newsize * geofac.x / geofac.y / 2.0;  //point size
 		
         particle = vec4(newsize, npvec.x, npvec.y, npvec.z);
 		
@@ -167,18 +179,20 @@ void main(){
         }
         
         //Must add another vector (xc, yc)
-        //flux = 1.0;
         gl_FrontColor = vec4(xc, yc, flux * normfac , dtheta);
-
-        gl_TexCoord[0] = gl_MultiTexCoord0;
 		
     }else{
 		//QUESTION: why cannot discard
         gl_PointSize = 0.0;  //point size
         newpos = vec4(0.0, 0.0, 0.0, 1.0);
         gl_FrontColor = vec4(0, 0, 0, 0);
-        gl_TexCoord[0] = gl_MultiTexCoord0;
+		particle = vec4(0.0, 0.0, 0.0, 0.0);
+		//partparams = vec4(0, 0, 0, 0);
+        //gl_TexCoord[0] = gl_MultiTexCoord0;
+		//discard;
     }
-    gl_Position = gl_ModelViewProjectionMatrix * newpos;   
+	bl_out.gl_Color = gl_FrontColor;
+	bl_out.particle = particle;
+    gl_Position =  newpos;   //gl_ModelViewProjectionMatrix *
     
 }
