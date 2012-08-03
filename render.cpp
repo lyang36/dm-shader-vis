@@ -83,6 +83,7 @@ void render::drawFlux(){
         reader->open();
     }
 
+	fluxDoubleBuffer * renderbuffer = new fluxDoubleBuffer(WSIZE, WSIZE);
     
     //bind buffer
     //fbufferL->bindBuf();
@@ -118,39 +119,22 @@ void render::drawFlux(){
             sinphi = vy / sintheta;
         }
     
-        //begin shader
-        fshaderL->begin();
-    
+
+        fshader->begin();
         //setup shader parameters 
-        fshaderL->setgeofac3f(orthsize, windowSize, pointSize);
-        
+        fshader->setgeofac3f(orthsize, windowSize, pointSize);
         //now use the rotatation matrix
-        //fshaderL->setzaxis3f(vx, vy, vz);
-        //fshaderL->setyaxis3f(-sinphi, cosphi, 0);
-        //fshaderL->setxaxis3f(cosphi*costheta, sinphi*costheta, -sintheta);
-        fshaderL->setopos3f(params->oposx, params->oposy, params->oposz);
-        fshaderL->setrotmatrix(params->vvec, params->opos, params->cpos, false);
-        fshaderL->setusenormmap(params->isUseNormMap);
-        
-        fshaderL->end();    
-    
-        //begin shader
-        fshaderU->begin();
-    
-        //setup shader parameters 
-        fshaderU->setgeofac3f(orthsize, windowSize, pointSize);
-    
-        //now use the rotatation matrix
-        fshaderU->setopos3f(params->oposx, params->oposy, params->oposz);
+        fshader->setopos3f(params->oposx, params->oposy, params->oposz);
         //reflect the view vector
-        fshaderU->setrotmatrix(params->vvec, params->opos, params->cpos, true);
-        fshaderU->setusenormmap(params->isUseNormMap);
-        fshaderU->end();     
-    
+		//TODO 2 matrix
+        fshader->setrotmatrix(params->vvec, params->opos, params->cpos, true);
+        fshader->setusenormmap(params->isUseNormMap);
+        fshader->end();
     }
-    
-    fbufferL->bindBuf();
-    {
+	
+	renderbuffer->setBuffer(fbufferL->getTex(), fbufferU->getTex());
+	renderbuffer->start();    
+	{
         //start drawing
         glPushAttrib(GL_VIEWPORT_BIT | GL_COLOR_BUFFER_BIT); 
         glViewport(0,0,WSIZE, WSIZE); 
@@ -166,31 +150,12 @@ void render::drawFlux(){
         glClearColor (0.0, 0.0, 0.0, 0.0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     }
-    fbufferL->unbindBuf();
-    
-    fbufferU->bindBuf();
-    {
-        //start drawing
-        glPushAttrib(GL_VIEWPORT_BIT | GL_COLOR_BUFFER_BIT); 
-        glViewport(0,0,WSIZE, WSIZE); 
-        
-        //setup matrix
-        glMatrixMode(GL_PROJECTION);
-        glLoadIdentity();
-        glOrtho(-orthsize, orthsize, -orthsize, orthsize, -100, 100);
-        glMatrixMode(GL_MODELVIEW);
-        glLoadIdentity();
-        
-        //clear color
-        glClearColor (0.0, 0.0, 0.0, 0.0);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    }
-    fbufferU->unbindBuf();   
-    
-    
+	renderbuffer->unbindBuf();
+
+
     //load particles here
-    cout << "--------------------------------------------------"<<endl;
-    cout << ("..10%..20%..30%..40%..50%..60%..70%..80%..90%.100%\n");
+    std::cout << "--------------------------------------------------"<<endl;
+    std::cout << ("..10%..20%..30%..40%..50%..60%..70%..80%..90%.100%\n");
     int kk = 0; //particle number counter
     
     int outc = reader->getPartNum() * 2 / 100 / (params->CPU_MEM) ;
@@ -198,67 +163,57 @@ void render::drawFlux(){
         outc = 1;
     }
 
+    renderbuffer->start();
+	//fbufferL->bindBuf();
+	fshader->begin();
+	glEnableClientState (GL_VERTEX_ARRAY);
+    glEnableClientState (GL_COLOR_ARRAY);
     while(reader->hasNext())
     {
         
         timeval tim;
         gettimeofday(&tim, NULL);
         double t1=tim.tv_sec+(tim.tv_usec/1000000.0);
+
+		//read particles
         GLfloat * vetexarray = (GLfloat *) reader->getBuf();
-        glEnableClientState (GL_VERTEX_ARRAY);
-        glEnableClientState (GL_COLOR_ARRAY);
+
         glColorPointer (3, GL_FLOAT, 6*sizeof(GLfloat), &(vetexarray[0]));
         glVertexPointer (3, GL_FLOAT, 6*sizeof(GLfloat), &(vetexarray[3]));
+
+		//draw particles
+		glDrawArrays(GL_POINTS, 0, reader->getMemparts());   
         
-        //lower sphere
-        fbufferL->bindBuf();
-        fshaderL->begin();
-        {
-            glDrawArrays(GL_POINTS, 0, reader->getMemparts());
-            //glFlush();
-            //printf("Particles: %d\n", reader->getMemparts());
-        }
-        fshaderL->end();
-        fbufferL->unbindBuf();
-        
-        //upper sphere
-        fbufferU->bindBuf();
-        fshaderU->begin();
-        {
-            glDrawArrays(GL_POINTS, 0, reader->getMemparts());
-            //glFlush();
-            //printf("Particles: %d\n", reader->getMemparts());
-        }
-        fshaderU->end();
-        fbufferU->unbindBuf();       
-        
-        gettimeofday(&tim, NULL);
+		//measure time
+		gettimeofday(&tim, NULL);
         double t2=tim.tv_sec+(tim.tv_usec/1000000.0);
         rendertime += t2 - t1;
         reader -> move2bufEnd();
-        
-        glDisableClientState (GL_VERTEX_ARRAY);
-        glDisableClientState (GL_COLOR_ARRAY);
-        //cout << reader->getMemparts() << endl;
-        
-        
-        
-        
+
+        //cout << reader->getMemparts() << endl; 
         kk++;
         if(kk % (outc) == 0){
-            cout << "*";
-            cout.flush();
+            std::cout << "*";
+            std::cout.flush();
         }
+
         reader->loadBuffer();
     }
-    cout << endl;
-    cout.flush();
+	        
+    glDisableClientState (GL_VERTEX_ARRAY);
+    glDisableClientState (GL_COLOR_ARRAY);
+	fshader->end();
+	renderbuffer->unbindBuf();
+	//fbufferL->unbindBuf();
+    std::cout << endl;
+    std::cout.flush();
 
 
     glBindTexture(GL_TEXTURE_2D, 0);
 
     glPopAttrib();
     reader->close();
+	delete renderbuffer;
 }
  
 void render::readFluxMap(){
@@ -336,6 +291,24 @@ void render::drawImage(){
         saveHealPix();
     }
     
+	//clear screen
+	{
+	    //start drawing
+        glPushAttrib(GL_VIEWPORT_BIT | GL_COLOR_BUFFER_BIT); 
+        glViewport(0,0,WSIZE, WSIZE); 
+    
+        //setup matrix
+        glMatrixMode(GL_PROJECTION);
+        glLoadIdentity();
+        glOrtho(-orthsize, orthsize, -orthsize, orthsize, -100, 100);
+        glMatrixMode(GL_MODELVIEW);
+        glLoadIdentity();
+
+        //clear color
+        glClearColor (0.0, 0.0, 0.0, 0.0);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	}
+
     fbufferL->bindTex();
     cshaderL -> begin();
     cshaderL -> setminmax(fluxmin, fluxmax);
@@ -532,13 +505,14 @@ void render::start(int argc, char **argv){
     //set up shaders and buffers
     if(!initialed){
 
-        fshaderL = new fluxShader();
+		fshader = new fluxShader();
+        //fshaderL = new fluxShader();
         cshaderL = new colorShader();
         fbufferL = new fluxBuffer(windowSize, windowSize);
         cbufferL = new colorBuffer(windowSize, windowSize);
         fbufferL->setBuffer();
         
-        fshaderU = new fluxShader();
+        //fshaderU = new fluxShader();
         cshaderU = new colorShader();
         fbufferU = new fluxBuffer(windowSize, windowSize);
         cbufferU = new colorBuffer(windowSize, windowSize);
@@ -591,8 +565,9 @@ void render::start(int argc, char **argv){
     picfile = params->PICFILE;
     glutMainLoop();
     
-    delete fshaderL;
-    delete fshaderU;   
+	delete fshader;
+    //delete fshaderL;
+    //delete fshaderU;   
     delete cshaderL;
     delete cshaderU;
     delete cbufferU;

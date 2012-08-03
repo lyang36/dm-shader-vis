@@ -10,12 +10,13 @@ class render{
 private:
     //L for the lower sphere
     //U for the upper sphere
-    fluxShader * fshaderL;
+    //fluxShader * fshaderL;
+	fluxShader * fshader;
     colorShader * cshaderL;
     fluxBuffer * fbufferL;
     colorBuffer * cbufferL;
     
-    fluxShader * fshaderU;
+    //fluxShader * fshaderU;
     colorShader * cshaderU;
     fluxBuffer * fbufferU;
     colorBuffer * cbufferU;

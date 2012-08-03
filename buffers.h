@@ -90,13 +90,8 @@ public:
         normPointSize = 256;
         normfile = "norm.dat";
         normtextbuf = NULL;
-        //isUseMap = false;
     };//:buffer(w,h);
-    
-    //bool isBufferLoaded(){
-    //    return isUseMap;
-    //}
-    
+       
     ~fluxBuffer(){
         if(normtextbuf != NULL){
             delete normtextbuf;
@@ -105,6 +100,49 @@ public:
     }
     
 };
+
+class fluxDoubleBuffer:public fluxBuffer{
+private:
+	GLuint bufferTex0;
+	GLuint bufferTex1;
+public:
+	fluxDoubleBuffer(unsigned int w, unsigned int h):fluxBuffer(w,h){
+    };
+	void attachTex(GLuint tex0, GLuint tex1){
+		bufferTex0 = tex0;
+		bufferTex1 = tex1;
+		/*
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+                           GL_TEXTURE_2D, tex0, 0);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1,
+                           GL_TEXTURE_2D, tex1, 0);
+
+						  */
+
+
+		glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, tex0);
+		glFramebufferTextureLayer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, tex0, 0, 0);
+		glFramebufferTextureLayer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, tex1, 0, 1);
+
+	};
+	void setBuffer(GLuint tex0, GLuint tex1){
+		genBuffer();
+		attachTex(tex0, tex1);
+		checkbuffer();
+		unbindBuf();	
+	};
+
+
+	void start(){
+		bindBuf();
+		//GLenum buffers[] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1};
+		//glDrawBuffers(2, buffers);
+
+		GLenum buffers[] = {GL_COLOR_ATTACHMENT0};
+		glDrawBuffers(1, buffers);
+	}
+};
+
 
 class minmaxBuffer:public buffer{     //min max buffer, for calculating min and max
 private:

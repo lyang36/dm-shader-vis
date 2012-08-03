@@ -9,6 +9,7 @@ uniform sampler2D normmap;
 uniform int usenormmap;    //whether use the norm map? true: 1 else:0
 in vec2 texCoord;
 out vec4 gl_FragColor;
+//out vec4 gl_FragData[2];
 in vec4 color;
 
 
@@ -61,9 +62,9 @@ void main(){
         vec2 xyp = p * (newsize / 2.0) + coor;
         vec2 xyr = xyp / (geofac.y / 2.0);
         float pr2 = dot(xyr, xyr);
-        //flux = fluxfac * 4.0/(1.0+pr2)/(1.0+pr2) * profile(prev(xyr), dtheta);
+        flux = fluxfac * 4.0/(1.0+pr2)/(1.0+pr2) * profile(prev(xyr), dtheta);
 		//TEST
-		flux = 1.0;
+		//flux = fluxfac;
         if(usenormmap == 1){
             float r0 = sqrt(pr2);
             float r = newsize / geofac.z;
@@ -74,10 +75,9 @@ void main(){
         
 
         gl_FragColor = vec4(flux, 0, 0, 1.0);
+		//gl_FragData[0] = vec4(flux, 0, 0, 1.0);
+		//gl_FragData[1] = vec4(0, 0, 0, 1.0);
     }else{
-        gl_FragColor = vec4(0, 0, 0, 0);
+        discard;
     }
-    //vec2 p = vec2(gl_TexCoord[0].s,gl_TexCoord[0].t);
-    //vec2 p = (texCoord - vec2(0.5, 0.5))*2.0;
-    gl_FragColor = vec4(fluxfac, 0.0, 0.0, 1.0);
 }
