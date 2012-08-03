@@ -3,7 +3,6 @@
 /*input postion and parameter of exactly a particle*/
 /*outout: xc, yc, r, dtheta, */
 
-
 //the new coordinate system based on the vpos
 #define PI 3.1415926535897932
 
@@ -15,6 +14,7 @@ uniform vec3 geofac;
 
 varying vec4 particle;    //the radius of the particle circle and the coordianate
         //size, x, y, z
+//varying float geo_newsize;
 
 uniform int usenormmap;    //whether use the norm map? true: 1 else:0
             
@@ -147,24 +147,15 @@ void main(){
         
         newpos = vec4(xc * geofac.x, yc * geofac.x, 0.0, 1.0);
         
-        if(newsize > geofac.z){
-            dsize = geofac.z / newsize * r;
-            newsize = geofac.z;
-        }else{
-            dsize = r;
-        }
+        dsize = r;
         
         if(newsize < 1.0){
             newsize = 1.0;
         }
-        gl_PointSize = newsize;  //point size
-    
-
-        //calculate normfac
-        //particle must be written before fhe nomal fac
-        //particle = vec4(dsize, npvec.x, npvec.y, npvec.z);
+        gl_PointSize = r * geofac.r;//newsize;  //point size
+		
         particle = vec4(newsize, npvec.x, npvec.y, npvec.z);
-        
+		
         float normfac;
         float d2 = dtheta * dtheta;
         {
@@ -180,17 +171,14 @@ void main(){
         gl_FrontColor = vec4(xc, yc, flux * normfac , dtheta);
 
         gl_TexCoord[0] = gl_MultiTexCoord0;
+		
     }else{
-        gl_PointSize = 1.0;  //point size
+		//QUESTION: why cannot discard
+        gl_PointSize = 0.0;  //point size
         newpos = vec4(0.0, 0.0, 0.0, 1.0);
         gl_FrontColor = vec4(0, 0, 0, 0);
         gl_TexCoord[0] = gl_MultiTexCoord0;
     }
-    //newpos = vec4(-3,-3, 0, 1);
-    //gl_PointSize = 200.0;  //point size
-    gl_Position = gl_ModelViewProjectionMatrix * newpos;    
-    gl_TexCoord[0] = gl_MultiTexCoord0;
-    //gl_FrontColor = vec4(dtheta,0,0,1);
-    //dsize = 0.4;
+    gl_Position = gl_ModelViewProjectionMatrix * newpos;   
     
 }

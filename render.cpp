@@ -59,10 +59,10 @@ void render::init(){
     glClampColorARB(GL_CLAMP_READ_COLOR_ARB, GL_FALSE);
 
 
-    glEnable(GL_POINT_SPRITE);
+    /*glEnable(GL_POINT_SPRITE);
     glTexEnvi(GL_POINT_SPRITE, GL_COORD_REPLACE, GL_TRUE);
     glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
-   
+    */
     
     GLfloat sizes[2];
     glGetFloatv(GL_ALIASED_POINT_SIZE_RANGE, sizes);
@@ -72,7 +72,7 @@ void render::init(){
     //printf("min and max point size %f, %f\n", sizes[0], sizes[1]);
 
     //must be this
-    glPointParameteri(GL_POINT_SPRITE_COORD_ORIGIN, GL_UPPER_LEFT);
+    //glPointParameteri(GL_POINT_SPRITE_COORD_ORIGIN, GL_UPPER_LEFT);
 
     glPointSize(pointSize);
 }
