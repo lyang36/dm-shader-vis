@@ -193,6 +193,7 @@ public:
         checkbuffer();
         glBindTexture(GL_TEXTURE_2D, tex1);
         glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F_ARB, 0, 0, twidth, theight, 0);
+        
         glBindTexture(GL_TEXTURE_2D, 0);
         
 	};

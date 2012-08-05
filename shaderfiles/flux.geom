@@ -151,12 +151,11 @@ void emitparticle(float dtheta, float theta, float distance, vec3 npvec,
 	//calculate normfac
 	//particle must be written before fhe nomal fac
 	//particle = vec4(dsize, npvec.x, npvec.y, npvec.z);
-	flux = 1.0;
+	//flux = 1.0;
 	particle = vec4(newsize, npvec.x, npvec.y, npvec.z);
 	color = vec4(xc, yc, flux * normfac , dtheta);
 	gl_Layer = layer;
 	float psize = newsize * geofac.x / geofac.y;//dsize * geofac.x;
-	gl_Layer = 0;
 	texCoord = vec2(0,0);
 	gl_Position = newpos + vec4(-psize, -psize, 0, 0);
 	EmitVertex();
@@ -194,6 +193,8 @@ void main()
     float costheta = npvec.z;//dot(npvec, nzaxis);
     float theta = acos(costheta);      //0.955
     
+    //gl_Layer = 0;
+    
 	//the lower sphere
     if((theta > PI / 2.0 || theta + dtheta >= PI / 2.0) && dtheta < PI / 2.0)
     {
@@ -209,6 +210,6 @@ void main()
     if((theta > PI / 2.0 || theta + dtheta >= PI / 2.0) && dtheta < PI / 2.0)
     {
 		emitparticle(dtheta, theta, distance, npvec, parameter, 1);
-    }    
+    }  
 	
 }

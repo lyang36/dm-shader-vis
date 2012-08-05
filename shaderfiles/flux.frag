@@ -1,6 +1,7 @@
 //draw projected gaussian profile
 #version 150 compatibility
 #define PI 3.1415926535897932
+precision highp float;
 uniform vec3 geofac;
             //orthsize, windowsize, pointsize
 
@@ -8,7 +9,7 @@ in vec4 particle;
 uniform sampler2D normmap;
 uniform int usenormmap;    //whether use the norm map? true: 1 else:0
 in vec2 texCoord;
-out vec4 gl_FragColor;
+//out vec4 gl_FragColor;
 //out vec4 gl_FragData[2];
 in vec4 color;
 
