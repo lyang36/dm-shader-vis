@@ -132,8 +132,10 @@ void render::drawFlux(){
         fshader->end();
     }
 	
-	renderbuffer->setBuffer(fbufferL->getTex(), fbufferU->getTex());
-	renderbuffer->start();    
+	//renderbuffer->setBuffer(fbufferL->getTex(), fbufferU->getTex());
+    renderbuffer->configure();
+	//renderbuffer->start();
+    renderbuffer->bindBuf();
 	{
         //start drawing
         glPushAttrib(GL_VIEWPORT_BIT | GL_COLOR_BUFFER_BIT); 
@@ -163,8 +165,10 @@ void render::drawFlux(){
         outc = 1;
     }
 
-    renderbuffer->start();
+    //renderbuffer->start();
 	//fbufferL->bindBuf();
+
+    renderbuffer->bindBuf();
 	fshader->begin();
 	glEnableClientState (GL_VERTEX_ARRAY);
     glEnableClientState (GL_COLOR_ARRAY);
@@ -204,6 +208,7 @@ void render::drawFlux(){
     glDisableClientState (GL_COLOR_ARRAY);
 	fshader->end();
 	renderbuffer->unbindBuf();
+    renderbuffer->copytex(fbufferL->getTex(), fbufferU->getTex());
 	//fbufferL->unbindBuf();
     std::cout << endl;
     std::cout.flush();

@@ -25,7 +25,7 @@ void buffer::checkbuffer(){
     
     if(status != GL_FRAMEBUFFER_COMPLETE){
         fboUsed = false;
-        printf("No frame buffer!\n");
+        printf("No frame buffer, Code: %d!\n", status);
         exit(-1);
     }
 }

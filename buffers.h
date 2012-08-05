@@ -91,56 +91,118 @@ public:
         normfile = "norm.dat";
         normtextbuf = NULL;
     };//:buffer(w,h);
-       
+      
+    unsigned int getwidth(){
+        return twidth;
+    };
+    
+    unsigned int getheigth(){
+        return theight;
+    };
+    
+    
     ~fluxBuffer(){
         if(normtextbuf != NULL){
             delete normtextbuf;
             normtextbuf = NULL;
         }
-    }
+    };
     
 };
 
 class fluxDoubleBuffer:public fluxBuffer{
 private:
-	GLuint bufferTex0;
-	GLuint bufferTex1;
+	GLuint tDepthCubeMap;
+	GLuint tColorCubeMap;
 public:
 	fluxDoubleBuffer(unsigned int w, unsigned int h):fluxBuffer(w,h){
     };
-	void attachTex(GLuint tex0, GLuint tex1){
-		bufferTex0 = tex0;
-		bufferTex1 = tex1;
-		/*
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
-                           GL_TEXTURE_2D, tex0, 0);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1,
-                           GL_TEXTURE_2D, tex1, 0);
+    
+	
+    void genBuffer(){
+        
+        // create a framebuffer object
+        //GLuint fboId;
+        glGenFramebuffers(1, &fboId);
+        //glBindFramebuffer(GL_FRAMEBUFFER, fboId);
+        bindBuf();
+        printf("Buffer generated!\n");
+        //printf("frame: %d, render: %d \n", fboId, rboId);
+    }
+    
+	void configure(){ //set a cube texture, bind it to the buffer
+        
+        
+        glEnable(GL_TEXTURE_CUBE_MAP);
+        // depth cube map
+        glGenTextures(1, &tDepthCubeMap);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, tDepthCubeMap);
+        glTexParameterf(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameterf(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameterf(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameterf(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+         
+        glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+        for (int face = 0; face < 6; face++) {
+            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, 0, GL_DEPTH_COMPONENT32,
+                         twidth, theight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+        }
+        
+        // color cube map
+        glGenTextures(1, &tColorCubeMap);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, tColorCubeMap);
+        glTexParameterf(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameterf(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameterf(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameterf(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameterf(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+        for (int face = 0; face < 6; face++) {
+            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, 0, GL_RGBA32F_ARB,
+                         twidth, theight, 0, GL_RGBA, GL_FLOAT, NULL);
+        }
+        
+        // framebuffer object
+        glGenFramebuffers(1, &fboId);
+        glBindFramebuffer(GL_FRAMEBUFFER, fboId);
+        glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, tDepthCubeMap, 0);
+        glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, tColorCubeMap, 0);
+        
+        glDrawBuffer(GL_COLOR_ATTACHMENT0);
+        
+        checkbuffer();
+        unbindBuf();
+    };
+                            
+                            //copy the texture back to the original one
+	void copytex(GLuint tex0, GLuint tex1){        
 
-						  */
-
-
-		glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, tex0);
-		glFramebufferTextureLayer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, tex0, 0, 0);
-		glFramebufferTextureLayer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, tex1, 0, 1);
-
+        glGenRenderbuffers(1, &rboId);
+        glBindRenderbuffer(GL_RENDERBUFFER, rboId);
+        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT32, twidth, theight);
+        bindBuf();
+        //Attach depth buffer to FBO
+        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rboId);
+        
+        glFramebufferTexture2D(GL_FRAMEBUFFER,  GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X, tColorCubeMap, 0);
+        checkbuffer();
+        glBindTexture(GL_TEXTURE_2D, tex0);
+        //glReadBuffer(GL_COLOR_ATTACHMENT0);
+        glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F_ARB, 0, 0, twidth, theight, 0);
+        
+        glFramebufferTexture2D(GL_FRAMEBUFFER,  GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_NEGATIVE_X, tColorCubeMap, 0);
+        checkbuffer();
+        glBindTexture(GL_TEXTURE_2D, tex1);
+        glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F_ARB, 0, 0, twidth, theight, 0);
+        glBindTexture(GL_TEXTURE_2D, 0);
+        
 	};
-	void setBuffer(GLuint tex0, GLuint tex1){
-		genBuffer();
-		attachTex(tex0, tex1);
-		checkbuffer();
-		unbindBuf();	
-	};
+    
 
-
-	void start(){
-		bindBuf();
-		//GLenum buffers[] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1};
-		//glDrawBuffers(2, buffers);
-
-		GLenum buffers[] = {GL_COLOR_ATTACHMENT0};
-		glDrawBuffers(1, buffers);
-	}
+    ~fluxDoubleBuffer(){
+        glDeleteTextures(1, &tColorCubeMap);
+        glDeleteTextures(1, &tDepthCubeMap);
+        glDisable(GL_TEXTURE_CUBE_MAP);
+    };
 };
 
 
