@@ -24,6 +24,26 @@ Parameter::Parameter(){
     HEALPIXFILE = "";
     PICFILE = "";
     isUseNormMap = false;
+
+	#if defined(_WIN32) || defined(_WIN64)
+        triangleVertexShader = "shaderfiles\\flux.gvert";
+        triangleGeometryShader = "shaderfiles\\flux.tgeom";
+        triangleFragmentShader = "shaderfiles\\flux.tfrag";
+
+		pointVertexShader = "shaderfiles\\flux.gvert";
+		pointGeometryShader = "shaderfiles\\flux.pgeom";
+		pointFragmentShader = "shaderfiles\\flux.pfrag";
+	#else
+        triangleVertexShader = "./shaderfiles/flux.gvert";
+        triangleGeometryShader = "./shaderfiles/flux.tgeom";
+        triangleFragmentShader = "./shaderfiles/flux.tfrag";
+
+		pointVertexShader = "./shaderfiles/flux.gvert";
+        pointGeometryShader = "./shaderfiles/flux.pgeom";
+        pointFragmentShader = "./shaderfiles/flux.pfrag";
+	#endif
+
+
 }
 
 bool Parameter::readParameter(){
@@ -102,6 +122,24 @@ bool Parameter::readParameter(){
             }else if(word == "PICFILE"){
                 line_buf >> PICFILE;
                 cout << "PICFILE " << PICFILE << endl; 
+            }else if(word == "TVERTEXSHADER"){
+                line_buf >> triangleVertexShader;
+                cout << "Triangle Vertex Shader " << triangleVertexShader << endl; 
+            }else if(word == "TGEOMETRYSHADER"){
+                line_buf >> triangleGeometryShader;
+                cout << "Triangle Geometry Shader " << triangleGeometryShader << endl; 
+            }else if(word == "TFRAGMENTSHADER"){
+                line_buf >> triangleFragmentShader;
+                cout << "Triangle Fragment Shader " << triangleFragmentShader << endl; 
+            }else if(word == "PVERTEXSHADER"){
+                line_buf >> pointVertexShader;
+                cout << "Point Vertex Shader " << pointVertexShader << endl; 
+            }else if(word == "PGEOMETRYSHADER"){
+                line_buf >> pointGeometryShader;
+                cout << "Point Geometry Shader " << pointGeometryShader << endl; 
+            }else if(word == "PFRAGMENTSHADER"){
+                line_buf >> pointFragmentShader;
+                cout << "Point Fragment Shader " << pointFragmentShader << endl; 
             }
         }
         //cout << word << " -- " << line << endl;

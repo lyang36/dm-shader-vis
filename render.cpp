@@ -74,7 +74,7 @@ void render::init(){
     //must be this
     //glPointParameteri(GL_POINT_SPRITE_COORD_ORIGIN, GL_UPPER_LEFT);
 
-    glPointSize(pointSize);
+    //glPointSize(pointSize);
 }
 
 void render::drawFlux(){
@@ -99,8 +99,7 @@ void render::drawFlux(){
     }
     
     
-    {//setup shaders L and U
-        
+    {//setup shaders    
         REAL vx = params->vposx;
         REAL vy = params->vposy;
         REAL vz = params->vposz;
@@ -120,16 +119,27 @@ void render::drawFlux(){
         }
     
 
-        fshader->begin();
+        triangleShader->begin();
         //setup shader parameters 
-        fshader->setgeofac3f(orthsize, windowSize, pointSize);
+        triangleShader->setgeofac3f(orthsize, windowSize, pointSize);
         //now use the rotatation matrix
-        fshader->setopos3f(params->oposx, params->oposy, params->oposz);
+        triangleShader->setopos3f(params->oposx, params->oposy, params->oposz);
         //reflect the view vector
 		//TODO 2 matrix
-        fshader->setrotmatrix(params->vvec, params->opos, params->cpos, true);
-        fshader->setusenormmap(params->isUseNormMap);
-        fshader->end();
+        triangleShader->setrotmatrix(params->vvec, params->opos, params->cpos, true);
+        triangleShader->setusenormmap(params->isUseNormMap);
+        triangleShader->end();
+
+		pointShader->begin();
+        //setup shader parameters 
+        pointShader->setgeofac3f(orthsize, windowSize, pointSize);
+        //now use the rotatation matrix
+        pointShader->setopos3f(params->oposx, params->oposy, params->oposz);
+        //reflect the view vector
+		//TODO 2 matrix
+        pointShader->setrotmatrix(params->vvec, params->opos, params->cpos, true);
+        pointShader->setusenormmap(params->isUseNormMap);
+        pointShader->end();
     }
 	
 	//renderbuffer->configure(fbufferL->getTex(), fbufferU->getTex());
@@ -169,7 +179,7 @@ void render::drawFlux(){
 	//fbufferL->bindBuf();
 
     renderbuffer->bindBuf();
-	fshader->begin();
+
 	glEnableClientState (GL_VERTEX_ARRAY);
     glEnableClientState (GL_COLOR_ARRAY);
     while(reader->hasNext())
@@ -186,7 +196,15 @@ void render::drawFlux(){
         glVertexPointer (3, GL_FLOAT, 6*sizeof(GLfloat), &(vetexarray[3]));
 
 		//draw particles
+		triangleShader->begin();
+		glDrawArrays(GL_POINTS, 0, reader->getMemparts());  
+		//glFlush();
+		triangleShader->end();
+
+		pointShader->begin();
 		glDrawArrays(GL_POINTS, 0, reader->getMemparts());   
+		//glFlush();
+		pointShader->end();
         
 		//measure time
 		gettimeofday(&tim, NULL);
@@ -204,9 +222,9 @@ void render::drawFlux(){
         reader->loadBuffer();
     }
 	        
+	glFlush();
     glDisableClientState (GL_VERTEX_ARRAY);
     glDisableClientState (GL_COLOR_ARRAY);
-	fshader->end();
 	renderbuffer->unbindBuf();
     renderbuffer->copytex(fbufferL->getTex(), fbufferU->getTex());
 	//fbufferL->unbindBuf();
@@ -510,7 +528,10 @@ void render::start(int argc, char **argv){
     //set up shaders and buffers
     if(!initialed){
 
-		fshader = new fluxShader();
+		triangleShader = new fluxShader(params->triangleVertexShader, 
+			params->triangleGeometryShader, params->triangleFragmentShader);
+		pointShader = new fluxShader(params->pointVertexShader, 
+			params->pointGeometryShader, params->pointFragmentShader);
         //fshaderL = new fluxShader();
         cshaderL = new colorShader();
         fbufferL = new fluxBuffer(windowSize, windowSize);
@@ -570,7 +591,8 @@ void render::start(int argc, char **argv){
     picfile = params->PICFILE;
     glutMainLoop();
     
-	delete fshader;
+	delete triangleShader;
+	delete pointShader;
     //delete fshaderL;
     //delete fshaderU;   
     delete cshaderL;

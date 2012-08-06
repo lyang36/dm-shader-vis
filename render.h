@@ -11,7 +11,12 @@ private:
     //L for the lower sphere
     //U for the upper sphere
     //fluxShader * fshaderL;
-	fluxShader * fshader;
+
+	//rendering triangle primitives
+	fluxShader * triangleShader;
+	//rendering one point primitives
+	fluxShader * pointShader;
+
     colorShader * cshaderL;
     fluxBuffer * fbufferL;
     colorBuffer * cbufferL;

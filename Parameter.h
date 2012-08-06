@@ -31,6 +31,14 @@ public:
     REAL vvec[3];
     REAL cposx, cposy, cposz; //center position
     REAL cpos[3];
+
+	string triangleVertexShader;
+	string triangleGeometryShader;
+	string triangleFragmentShader;
+
+	string pointVertexShader;
+	string pointGeometryShader;
+	string pointFragmentShader;
     
     
     REAL WSIZE, PSIZE;           //size of the projection plane (a side)
@@ -50,5 +58,6 @@ public:
     //readparameter from the configure.ini
     //if data is ready return is_ready
     bool readParameter();
+
 };
 #endif

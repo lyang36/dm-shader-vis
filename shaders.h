@@ -63,10 +63,10 @@ public:
                                             //alignvec has 3 vars
     void setusenormmap(bool isnm);          //whether use the norm map
     
-    fluxShader(){
+    fluxShader(string v, string g, string f){
         
 //#ifdef _WIN32 || _WIN64
-#if defined(_WIN32) || defined(_WIN64)
+/*#if defined(_WIN32) || defined(_WIN64)
         vfile = "shaderfiles\\flux.vert";
         ffile = "shaderfiles\\flux.frag";
         gfile = "shaderfiles\\flux.geom";
@@ -75,6 +75,10 @@ public:
         ffile = "./shaderfiles/flux.frag";
         gfile = "./shaderfiles/flux.geom";
 #endif
+*/
+		vfile = v;
+		gfile = g;
+		ffile = f;
         shaderManager SM;
         shader = SM.loadShaderFile(vfile.c_str(), gfile.c_str(), ffile.c_str());
         if(shader == 0){
