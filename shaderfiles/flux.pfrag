@@ -1,0 +1,23 @@
+//draw projected gaussian profile
+#version 150 compatibility
+#define PI 3.1415926535897932
+precision highp float;
+uniform vec3 geofac;
+            //orthsize, windowsize, pointsize
+
+
+uniform sampler2D normmap;
+uniform int usenormmap;    //whether use the norm map? true: 1 else:0
+
+in vec4 color;
+
+
+
+void main(){
+    float flux = color.b;
+    if(flux != 0.0){
+        gl_FragColor = vec4(flux, 0, 0, 1.0);
+    }else{
+        discard;
+    }
+}

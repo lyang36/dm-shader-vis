@@ -74,7 +74,7 @@ void render::init(){
     //must be this
     //glPointParameteri(GL_POINT_SPRITE_COORD_ORIGIN, GL_UPPER_LEFT);
 
-    //glPointSize(pointSize);
+    glPointSize(1.0);
 }
 
 void render::drawFlux(){
@@ -196,10 +196,10 @@ void render::drawFlux(){
         glVertexPointer (3, GL_FLOAT, 6*sizeof(GLfloat), &(vetexarray[3]));
 
 		//draw particles
-		triangleShader->begin();
-		glDrawArrays(GL_POINTS, 0, reader->getMemparts());  
+		//triangleShader->begin();
+		//glDrawArrays(GL_POINTS, 0, reader->getMemparts());  
 		//glFlush();
-		triangleShader->end();
+		//triangleShader->end();
 
 		pointShader->begin();
 		glDrawArrays(GL_POINTS, 0, reader->getMemparts());   

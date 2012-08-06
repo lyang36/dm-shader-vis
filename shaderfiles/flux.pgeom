@@ -1,0 +1,145 @@
+//particle shader
+//convert the particles to point sprite
+/*input postion and parameter of exactly a particle*/
+/*outout: xc, yc, r, dtheta, */
+
+//GEOMETRY SHADER
+#version 150
+//the new coordinate system based on the vpos
+#define PI 3.1415926535897932
+
+layout(points) in;
+layout(triangle_strip, max_vertices=8) out;
+
+
+uniform mat3 rotmatrix; //rotation matrix
+uniform vec3 opos;
+uniform vec3 geofac;
+                //geometry fact{size(square),viewportsize, maxpointsize }
+				
+out vec4 color;
+
+in block
+{
+	vec4 gl_Color;
+	vec4 particle; 
+} bl_In[];
+
+
+void emitparticle(float dtheta, float theta, float distance, vec3 npvec,
+		vec4 parameter, int layer){
+    
+	vec4 newpos;
+
+    float dsize;
+	float sintheta = sin(theta);
+	float sinphi;
+	float cosphi;
+	if(sintheta < 1.0e-8 ){
+		//phi = 0.0;
+		sinphi = 0.0;
+		cosphi = 1.0;
+	}else{
+		sinphi = npvec.y/sintheta;
+		cosphi = npvec.x/sintheta;
+	}
+		  
+	float flux = parameter.g * parameter.r / (4.0 * PI * distance * distance);
+    
+    //TEST
+    //flux = 1.0;
+
+	float xc, yc, r;
+
+	//transform the vertex:
+	//stereoproject a circle
+	float sintpr = sin(theta + dtheta);
+	float costpr = cos(theta + dtheta);
+	float sintmr = sin(theta - dtheta);
+	float costmr = cos(theta - dtheta);
+	float a = sintpr/(1.0-costpr);
+	float b = sintmr/(1.0-costmr);
+	r = -(a - b)/2.0;
+    
+    if(a > 1.0) return;
+	if(r > 1.0) return;
+	
+    float prho = (a + b)/2.0;
+	xc = prho * cosphi;
+	yc = prho * sinphi;
+	float newsize = floor(r *geofac.y); ///!!!!!!!!!!!!!!!!
+
+	
+	newpos = vec4(xc * geofac.x, yc * geofac.x, 0.0, 1.0);
+	
+	if(newsize > geofac.z){
+		dsize = geofac.z / newsize * r;
+		newsize = geofac.z;
+	}else{
+		dsize = r;
+	}
+	
+	if(newsize <= 1.0){//if larger than one point, discard this primitive
+		newsize = 1.0;
+	}else{
+		return;
+	}
+
+	flux = 1.0;
+	color = vec4(xc, yc, flux, dtheta);
+    gl_Layer = layer;
+    gl_PointSize = 1.0;  //point size
+	gl_Position = newpos;
+	EmitVertex();
+	EndPrimitive();
+
+}
+
+
+
+void main()
+{
+
+
+    vec3 pvec = vec3(bl_In[0].particle) - opos;    
+                                        //input x, y z of the particle
+                                        //transform it to the stereoprojection plane
+    vec4 parameter = vec4(bl_In[0].gl_Color);    //parameters
+                                        //mass, density and hsmooth
+    
+    float dtheta;                       //anular radias   
+    float distance = length(pvec);
+    dtheta = parameter.b / distance;    //2.186
+    
+    //rotation and normalize
+    vec3 npvec = normalize(rotmatrix * pvec);
+    
+    
+    //TEST
+    //npvec = normalize(vec3(0.0, 1.0, 0.0));
+    //dtheta = 0.01;
+    
+    
+    float costheta = npvec.z;//dot(npvec, nzaxis);
+    float theta = acos(costheta);      //0.955
+    
+    if(dtheta < PI / 2.0){
+        //the lower sphere
+        if((theta + dtheta >= PI / 2.0))// && dtheta < PI / 2.0)
+        {
+            emitparticle(dtheta, theta, distance, npvec, parameter, 1);
+        }
+        //the half sphere
+	    //rotation and normalize
+        npvec.z = -npvec.z;
+        costheta = npvec.z;//dot(npvec, nzaxis);
+        theta = acos(costheta);      //0.955
+        //the upper sphere 
+        if((theta + dtheta >= PI / 2.0))// && dtheta < PI / 2.0)
+        {
+            emitparticle(dtheta, theta, distance, npvec, parameter, 0);
+        }
+
+    }
+	
+}
