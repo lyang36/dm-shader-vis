@@ -6,6 +6,8 @@ void main()
 {
     float MIN = FMIN;
     float MAX = FMAX;
+    //MIN = 0.008190;
+    //MAX = 30.378386;
     if(FMIN == 0.0){
         MIN = 1.0e-20;
     }

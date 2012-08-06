@@ -132,7 +132,7 @@ void render::drawFlux(){
         fshader->end();
     }
 	
-	//renderbuffer->setBuffer(fbufferL->getTex(), fbufferU->getTex());
+	//renderbuffer->configure(fbufferL->getTex(), fbufferU->getTex());
     renderbuffer->configure();
 	//renderbuffer->start();
     renderbuffer->bindBuf();

@@ -1,4 +1,4 @@
-﻿Build started 8/5/2012 2:33:42 PM.
+﻿Build started 8/6/2012 12:28:53 AM.
      1>Project "E:\Dropbox\Projects\dm-shader-vis\dm-shader-vis.vcxproj" on node 2 (build target(s)).
      1>InitializeBuildStatus:
          Creating "Release\dm-shader-vis.unsuccessfulbuild" because "AlwaysCreate" was specified.
@@ -30,4 +30,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:03.72
+Time Elapsed 00:00:04.01

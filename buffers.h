@@ -110,6 +110,7 @@ public:
     
 };
 
+
 class fluxDoubleBuffer:public fluxBuffer{
 private:
 	GLuint tDepthCubeMap;
@@ -183,13 +184,14 @@ public:
         //Attach depth buffer to FBO
         glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rboId);
         
-        glFramebufferTexture2D(GL_FRAMEBUFFER,  GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X, tColorCubeMap, 0);
+        glFramebufferTexture2D(GL_FRAMEBUFFER,  GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + 0, tColorCubeMap, 0);
         checkbuffer();
         glBindTexture(GL_TEXTURE_2D, tex0);
         //glReadBuffer(GL_COLOR_ATTACHMENT0);
         glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F_ARB, 0, 0, twidth, theight, 0);
         
-        glFramebufferTexture2D(GL_FRAMEBUFFER,  GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_NEGATIVE_X, tColorCubeMap, 0);
+        glFramebufferTexture2D(GL_FRAMEBUFFER,  GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + 1, tColorCubeMap, 0);
+        
         checkbuffer();
         glBindTexture(GL_TEXTURE_2D, tex1);
         glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F_ARB, 0, 0, twidth, theight, 0);
@@ -206,6 +208,44 @@ public:
     };
 };
 
+/*
+
+class fluxDoubleBuffer:public fluxBuffer{
+private:
+    GLuint bufferTex0;
+    GLuint bufferTex1;
+public:
+    fluxDoubleBuffer(unsigned int w, unsigned int h):fluxBuffer(w,h){
+    };
+    void attachTex(GLuint tex0, GLuint tex1){
+        bufferTex0 = tex0;
+        bufferTex1 = tex1;
+        
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+         GL_TEXTURE_2D, tex0, 0);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1,
+         GL_TEXTURE_2D, tex1, 0);
+
+        
+    };
+    void configure(GLuint tex0, GLuint tex1){
+        genBuffer();
+        attachTex(tex0, tex1);
+        checkbuffer();
+        unbindBuf();
+    };
+    
+    
+    void start(){
+        bindBuf();
+        //GLenum buffers[] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1};
+        //glDrawBuffers(2, buffers);
+        
+        GLenum buffers[] = {GL_COLOR_ATTACHMENT0};
+        glDrawBuffers(1, buffers);
+    }
+};
+*/
 
 class minmaxBuffer:public buffer{     //min max buffer, for calculating min and max
 private:

@@ -31,8 +31,8 @@ in block
 
 
 //This is very important, must be checked 
-float profile(vec3 r1,float dtheta){ 
-    vec3 r0 = vec3(particle.gba);
+float profile(vec3 r1,float dtheta, vec4 par){ 
+    vec3 r0 = vec3(par.gba);
     float costheta = dot(r0, r1)/(length(r0)*length(r1));
     //use tylor seriers
     //acos has too much error
@@ -53,7 +53,7 @@ vec3 prev(vec2 xy){
 }
 
 
-float calc_norm(vec2 svec, float newsize, float dtheta){
+float calc_norm(vec2 svec, float newsize, float dtheta, vec4 par){
     float norm = 0.0;
     
     vec2 coor = svec * geofac.y / 2.0;
@@ -75,7 +75,7 @@ float calc_norm(vec2 svec, float newsize, float dtheta){
             vec2 xyp = xy * (newsize / 2.0) + coor;
             vec2 xyr = xyp / (geofac.y / 2.0);
             float pr2 = dot(xyr, xyr);
-            norm += 4.0/(1.0+pr2)/(1.0+pr2) * profile(prev(xyr), dtheta);
+            norm += 4.0/(1.0+pr2)/(1.0+pr2) * profile(prev(xyr), dtheta, par);
 			//TEST
             //norm += 1.0;
             
@@ -87,9 +87,9 @@ float calc_norm(vec2 svec, float newsize, float dtheta){
 
 void emitparticle(float dtheta, float theta, float distance, vec3 npvec,
 		vec4 parameter, int layer){
+    
 	vec4 newpos;
-    //find the angle
-    //float phi;
+
     float dsize;
 	float sintheta = sin(theta);
 	float sinphi;
@@ -104,7 +104,9 @@ void emitparticle(float dtheta, float theta, float distance, vec3 npvec,
 	}
 		  
 	float flux = parameter.g * parameter.r / (4.0 * PI * distance * distance);
-
+    
+    //TEST
+    //flux = 1.0;
 
 	float xc, yc, r;
 
@@ -117,7 +119,11 @@ void emitparticle(float dtheta, float theta, float distance, vec3 npvec,
 	float a = sintpr/(1.0-costpr);
 	float b = sintmr/(1.0-costmr);
 	r = -(a - b)/2.0;
-	float prho = (a + b)/2.0;
+    
+    if(a > 1.0) return;
+	if(r > 1.0) return;
+	
+    float prho = (a + b)/2.0;
 	xc = prho * cosphi;
 	yc = prho * sinphi;
 	float newsize = floor(r *geofac.y); ///!!!!!!!!!!!!!!!!
@@ -135,14 +141,13 @@ void emitparticle(float dtheta, float theta, float distance, vec3 npvec,
 	if(newsize < 1.0){
 		newsize = 1.0;
 	}
-	gl_PointSize = newsize;  //point size
-
 	
 	float normfac;
 	float d2 = dtheta * dtheta;
+	particle = vec4(newsize, npvec.x, npvec.y, npvec.z);
 	{
 		if(usenormmap == 0){
-			normfac = calc_norm(vec2(xc, yc), newsize, dtheta);
+			normfac = calc_norm(vec2(xc, yc), newsize, dtheta, particle);
 		}else{
 			normfac = 1.0;
 		}
@@ -152,21 +157,30 @@ void emitparticle(float dtheta, float theta, float distance, vec3 npvec,
 	//particle must be written before fhe nomal fac
 	//particle = vec4(dsize, npvec.x, npvec.y, npvec.z);
 	//flux = 1.0;
-	particle = vec4(newsize, npvec.x, npvec.y, npvec.z);
+
 	color = vec4(xc, yc, flux * normfac , dtheta);
-	gl_Layer = layer;
-	float psize = newsize * geofac.x / geofac.y;//dsize * geofac.x;
+
+	float psize;// = newsize * geofac.x / geofac.y;//dsize * geofac.x;
+    psize = newsize * geofac.x / geofac.y;
+    
+	float x1, x2, y1, y2;
+	x1 = newpos.x - psize;
+	x2 = newpos.x + psize;
+	y1 = newpos.y - psize;
+	y2 = newpos.y + psize;
+    gl_Layer = layer;
+    gl_PointSize = newsize;  //point size
 	texCoord = vec2(0,0);
-	gl_Position = newpos + vec4(-psize, -psize, 0, 0);
+	gl_Position = vec4(x1, y1, 0.0, 1.0);
 	EmitVertex();
 	texCoord = vec2(0,1);
-	gl_Position = newpos + vec4(-psize, psize, 0, 0);
+	gl_Position = vec4(x2, y1, 0.0, 1.0);
 	EmitVertex();
 	texCoord = vec2(1,0);
-	gl_Position = newpos + vec4(psize, -psize, 0, 0);
+	gl_Position = vec4(x1, y2, 0.0, 1.0);
 	EmitVertex();
 	texCoord = vec2(1,1);
-	gl_Position = newpos + vec4(psize, psize, 0, 0);
+	gl_Position = vec4(x2, y2, 0.0, 1.0);
 	EmitVertex();
 	EndPrimitive();
 
@@ -190,26 +204,33 @@ void main()
     
     //rotation and normalize
     vec3 npvec = normalize(rotmatrix * pvec);
+    
+    
+    //TEST
+    //npvec = normalize(vec3(0.0, 1.0, 0.0));
+    //dtheta = 0.01;
+    
+    
     float costheta = npvec.z;//dot(npvec, nzaxis);
     float theta = acos(costheta);      //0.955
     
-    //gl_Layer = 0;
-    
-	//the lower sphere
-    if((theta > PI / 2.0 || theta + dtheta >= PI / 2.0) && dtheta < PI / 2.0)
-    {
-		emitparticle(dtheta, theta, distance, npvec, parameter, 0);
-    }
-	
-	//the half sphere
+    if(dtheta < PI / 2.0){
+        //the lower sphere
+        if((theta + dtheta >= PI / 2.0))// && dtheta < PI / 2.0)
+        {
+            emitparticle(dtheta, theta, distance, npvec, parameter, 1);
+        }
+        //the half sphere
 	    //rotation and normalize
-    npvec.z = -npvec.z;
-    costheta = npvec.z;//dot(npvec, nzaxis);
-    theta = acos(costheta);      //0.955
-	//the upper sphere
-    if((theta > PI / 2.0 || theta + dtheta >= PI / 2.0) && dtheta < PI / 2.0)
-    {
-		emitparticle(dtheta, theta, distance, npvec, parameter, 1);
-    }  
+        npvec.z = -npvec.z;
+        costheta = npvec.z;//dot(npvec, nzaxis);
+        theta = acos(costheta);      //0.955
+        //the upper sphere 
+        if((theta + dtheta >= PI / 2.0))// && dtheta < PI / 2.0)
+        {
+            emitparticle(dtheta, theta, distance, npvec, parameter, 0);
+        }
+
+    }
 	
 }
