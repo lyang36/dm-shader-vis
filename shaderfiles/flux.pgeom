@@ -9,7 +9,7 @@
 #define PI 3.1415926535897932
 
 layout(points) in;
-layout(triangle_strip, max_vertices=8) out;
+layout(points, max_vertices=8) out;
 
 
 uniform mat3 rotmatrix; //rotation matrix
@@ -72,20 +72,12 @@ void emitparticle(float dtheta, float theta, float distance, vec3 npvec,
 	
 	newpos = vec4(xc * geofac.x, yc * geofac.x, 0.0, 1.0);
 	
-	if(newsize > geofac.z){
-		dsize = geofac.z / newsize * r;
-		newsize = geofac.z;
-	}else{
-		dsize = r;
-	}
-	
 	if(newsize <= 1.0){//if larger than one point, discard this primitive
 		newsize = 1.0;
 	}else{
 		return;
 	}
 
-	flux = 1.0;
 	color = vec4(xc, yc, flux, dtheta);
     gl_Layer = layer;
     gl_PointSize = 1.0;  //point size

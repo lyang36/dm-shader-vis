@@ -4,14 +4,7 @@
 precision highp float;
 uniform vec3 geofac;
             //orthsize, windowsize, pointsize
-
-
-uniform sampler2D normmap;
-uniform int usenormmap;    //whether use the norm map? true: 1 else:0
-
 in vec4 color;
-
-
 
 void main(){
     float flux = color.b;
