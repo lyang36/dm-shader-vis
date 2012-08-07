@@ -44,28 +44,29 @@ float projprofile(vec2 xy, float fc, float dtheta){
 
 
 void main(){
-    //float dsize = particle.r;
+
     float newsize = particle.r;
 	if(newsize == 0.0) discard;
     vec2 xyc = color.rg;
-    vec2 coor = xyc *geofac.y / 2.0;
+    vec2 coor = xyc * geofac.y / 2.0;
     float flux = 0.0;
     float fluxfac = color.b;
+	
     if(fluxfac != 0.0){
+	
         float dtheta = color.a;
         vec2 p = floor(newsize * texCoord);
-        
+
         p = (p+0.5) / newsize;
         p = 2.0*(p-0.5);
         float u = dot(p, p);
         if (u > 1.0) discard;
-        
+
         vec2 xyp = p * (newsize / 2.0) + coor;
         vec2 xyr = xyp / (geofac.y / 2.0);
         float pr2 = dot(xyr, xyr);
         flux = fluxfac * 4.0/(1.0+pr2)/(1.0+pr2) * profile(prev(xyr), dtheta);
-		//TEST
-		//flux = fluxfac;
+
         if(usenormmap == 1){
             float r0 = sqrt(pr2);
             float r = newsize / geofac.z;
@@ -73,11 +74,9 @@ void main(){
             //if(norm < 0.0) norm = 1.0;
             flux = flux / norm;
         }
-        
-
+		
         gl_FragColor = vec4(flux, 0, 0, 1.0);
-		//gl_FragData[0] = vec4(flux, 0, 0, 1.0);
-		//gl_FragData[1] = vec4(0, 0, 0, 1.0);
+		
     }else{
         discard;
     }

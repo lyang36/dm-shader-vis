@@ -11,7 +11,7 @@ all: obj
 	@echo success
 
 obj:
-	$(CC) -c main.cpp buffers.cpp pix2ang_ring.cpp shaders.cpp Parameter.cpp\
+	$(CC) -c -Wall main.cpp buffers.cpp pix2ang_ring.cpp shaders.cpp Parameter.cpp\
                    render.cpp ang2pix_ring.cpp shaderManager.cpp datareader.cpp $(IFLAG)  
 
 clean:

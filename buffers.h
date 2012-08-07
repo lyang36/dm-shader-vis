@@ -131,7 +131,7 @@ public:
         //printf("frame: %d, render: %d \n", fboId, rboId);
     }
     
-	void configure(){ //set a cube texture, bind it to the buffer
+    void configure(){ //set a cube texture, bind it to the buffer
         
         
         glEnable(GL_TEXTURE_CUBE_MAP);
@@ -162,14 +162,17 @@ public:
                          twidth, theight, 0, GL_RGBA, GL_FLOAT, NULL);
         }
         
+
         // framebuffer object
         glGenFramebuffers(1, &fboId);
+
         glBindFramebuffer(GL_FRAMEBUFFER, fboId);
         glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, tDepthCubeMap, 0);
         glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, tColorCubeMap, 0);
         
         glDrawBuffer(GL_COLOR_ATTACHMENT0);
         
+
         checkbuffer();
         unbindBuf();
     };

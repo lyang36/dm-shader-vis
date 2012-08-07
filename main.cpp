@@ -29,7 +29,7 @@ int main(int argc, char** argv){
     reader.setPath(params.DATAFILE);
     reader.setBuf(params.CPU_MEM);
  
-	render Render;
+    render Render;
     Render.reader = &reader;
     Render.params = &params;
     Render.start(argc, argv);
