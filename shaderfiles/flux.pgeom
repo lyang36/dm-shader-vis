@@ -9,7 +9,7 @@
 #define PI 3.1415926535897932
 
 layout(points) in;
-layout(points, max_vertices=8) out;
+layout(points, max_vertices=1) out;
 
 
 uniform mat3 rotmatrix; //rotation matrix
@@ -26,7 +26,7 @@ in block
 } bl_In[];
 
 
-void emitparticle(float dtheta, float theta, float distance, vec3 npvec,
+bool emitparticle(float dtheta, float theta, float distance, vec3 npvec,
 		vec4 parameter, int layer){
     
 	vec4 newpos;
@@ -43,14 +43,14 @@ void emitparticle(float dtheta, float theta, float distance, vec3 npvec,
 	float b = sintmr/(1.0-costmr);
 	r = -(a - b)/2.0;
     
-    if(a > 1.0) return;
-	if(r > 1.0) return;
+    if(a > 1.0) return false;
+	if(r > 1.0) return false;
 	float newsize = floor(r *geofac.y); ///!!!!!!!!!!!!!!!!
 		
 	if(newsize <= 1.0){//if larger than one point, discard this primitive
 
 	}else{
-		return;
+		return false;
 	}
 	
 	float sintheta = sin(theta);
@@ -83,7 +83,7 @@ void emitparticle(float dtheta, float theta, float distance, vec3 npvec,
 	gl_Position = newpos;
 	EmitVertex();
 	EndPrimitive();
-
+	return true;
 }
 
 
@@ -118,7 +118,8 @@ void main()
         //the lower sphere
         if((theta + dtheta >= PI / 2.0))// && dtheta < PI / 2.0)
         {
-            emitparticle(dtheta, theta, distance, npvec, parameter, 1);
+            if(emitparticle(dtheta, theta, distance, npvec, parameter, 1))
+				return;
         }
         //the half sphere
 	    //rotation and normalize
