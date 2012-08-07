@@ -31,24 +31,6 @@ void emitparticle(float dtheta, float theta, float distance, vec3 npvec,
     
 	vec4 newpos;
 
-    float dsize;
-	float sintheta = sin(theta);
-	float sinphi;
-	float cosphi;
-	if(sintheta < 1.0e-8 ){
-		//phi = 0.0;
-		sinphi = 0.0;
-		cosphi = 1.0;
-	}else{
-		sinphi = npvec.y/sintheta;
-		cosphi = npvec.x/sintheta;
-	}
-		  
-	float flux = parameter.g * parameter.r / (4.0 * PI * distance * distance);
-    
-    //TEST
-    //flux = 1.0;
-
 	float xc, yc, r;
 
 	//transform the vertex:
@@ -63,20 +45,37 @@ void emitparticle(float dtheta, float theta, float distance, vec3 npvec,
     
     if(a > 1.0) return;
 	if(r > 1.0) return;
-	
-    float prho = (a + b)/2.0;
-	xc = prho * cosphi;
-	yc = prho * sinphi;
 	float newsize = floor(r *geofac.y); ///!!!!!!!!!!!!!!!!
-
-	
-	newpos = vec4(xc * geofac.x, yc * geofac.x, 0.0, 1.0);
-	
+		
 	if(newsize <= 1.0){//if larger than one point, discard this primitive
-		newsize = 1.0;
+
 	}else{
 		return;
 	}
+	
+	float sintheta = sin(theta);
+	float sinphi;
+	float cosphi;
+	if(sintheta < 1.0e-8 ){
+		//phi = 0.0;
+		sinphi = 0.0;
+		cosphi = 1.0;
+	}else{
+		sinphi = npvec.y/sintheta;
+		cosphi = npvec.x/sintheta;
+	}
+		  
+
+ 
+	float flux = parameter.g * parameter.r / (4.0 * PI * distance * distance);	
+    float prho = (a + b)/2.0;
+	xc = prho * cosphi;
+	yc = prho * sinphi;
+
+
+	
+	newpos = vec4(xc * geofac.x, yc * geofac.x, 0.0, 1.0);
+
 
 	color = vec4(xc, yc, flux, dtheta);
     gl_Layer = layer;

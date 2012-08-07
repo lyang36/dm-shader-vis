@@ -185,9 +185,7 @@ void render::drawFlux(){
     while(reader->hasNext())
     {
         
-	    timeval tim;
-        gettimeofday(&tim, NULL);
-        double t1=tim.tv_sec+(tim.tv_usec/1000000.0);
+
 
 		//read particles
         GLfloat * vetexarray = (GLfloat *) reader->getBuf();
@@ -196,17 +194,19 @@ void render::drawFlux(){
         glVertexPointer (3, GL_FLOAT, 6*sizeof(GLfloat), &(vetexarray[3]));
 
 
-
+	    timeval tim;
+        gettimeofday(&tim, NULL);
+        double t1=tim.tv_sec+(tim.tv_usec/1000000.0);
 
 		//draw particles
 		triangleShader->begin();
 		glDrawArrays(GL_POINTS, 0, reader->getMemparts());  
-		//triangleShader->end();
+		triangleShader->end();
 
 		pointShader->begin();
 		glDrawArrays(GL_POINTS, 0, reader->getMemparts());   
 		pointShader->end();
-
+		
 		//TIME MEASURING
 		glFinish();        
 		//measure time
