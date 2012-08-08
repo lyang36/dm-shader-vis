@@ -201,21 +201,23 @@ void render::drawFlux(){
     while(reader->hasNext())
     {
         
-        timeval tim;
-        gettimeofday(&tim, NULL);
-        double t1=tim.tv_sec+(tim.tv_usec/1000000.0);
+
         GLfloat * vetexarray = (GLfloat *) reader->getBuf();
         glEnableClientState (GL_VERTEX_ARRAY);
         glEnableClientState (GL_COLOR_ARRAY);
         glColorPointer (3, GL_FLOAT, 6*sizeof(GLfloat), &(vetexarray[0]));
         glVertexPointer (3, GL_FLOAT, 6*sizeof(GLfloat), &(vetexarray[3]));
         
+		timeval tim;
+        gettimeofday(&tim, NULL);
+        double t1=tim.tv_sec+(tim.tv_usec/1000000.0);
+
         //lower sphere
         fbufferL->bindBuf();
         fshaderL->begin();
         {
             glDrawArrays(GL_POINTS, 0, reader->getMemparts());
-            glFlush();
+            //glFlush();
             //printf("Particles: %d\n", reader->getMemparts());
         }
         fshaderL->end();
@@ -226,12 +228,12 @@ void render::drawFlux(){
         fshaderU->begin();
         {
             glDrawArrays(GL_POINTS, 0, reader->getMemparts());
-            glFlush();
+            //glFlush();
             //printf("Particles: %d\n", reader->getMemparts());
         }
         fshaderU->end();
         fbufferU->unbindBuf();       
-        
+        glFinish();
         gettimeofday(&tim, NULL);
         double t2=tim.tv_sec+(tim.tv_usec/1000000.0);
         rendertime += t2 - t1;

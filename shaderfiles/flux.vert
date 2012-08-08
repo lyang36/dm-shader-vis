@@ -6,7 +6,7 @@
 
 //the new coordinate system based on the vpos
 #define PI 3.1415926535897932
-
+#define e32 4.4816890703380648226           //e^(3/2)
 uniform mat3 rotmatrix; //rotation matrix
 uniform vec3 opos;
 uniform vec3 geofac;
@@ -74,6 +74,14 @@ float calc_norm(vec2 svec, float newsize, float dtheta){
     //return 1.0 / (newsize * newsize);
 }
 
+float calc_norm1(float theta0){
+    return 2.0*(-1.0 + e32) * PI * theta0 * theta0 / (3.0 * e32) -
+        (PI * (-5.0 + 2.0 * e32) * theta0 * theta0 * theta0 * theta0) / (27.0 * e32)
+        +(PI * (-29.0 + 8.0 * e32) * PI * theta0 * theta0 * theta0 * theta0 * theta0 * theta0) / ( 1620.0 * e32);
+    //(2 (-1 + E^(3/2)) \[Pi] \[Theta]0^2)/(
+    //                                      3 E^(3/2)) - (((-5 + 2 E^(3/2)) \[Pi]) \[Theta]0^4)/(27 E^(3/2))
+	//normfac = 1.0 / (geofac.y * geofac.y) / calc_norm1(dtheta) * 4.0;
+}
 
 void main(){
 /*    gl_PointSize = 100.0;
@@ -168,8 +176,9 @@ void main(){
         float normfac;
         float d2 = dtheta * dtheta;
         {
-            if(usenormmap == 0){
-                normfac = calc_norm(vec2(xc, yc), newsize, dtheta);
+            if(usenormmap == 0 && newsize != 1.0){
+                //normfac = calc_norm(vec2(xc, yc), newsize, dtheta);
+				normfac = 1.0 / (geofac.y * geofac.y) / calc_norm1(dtheta) * 4.0;
             }else{
                 normfac = 1.0;
             }
