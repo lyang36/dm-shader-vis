@@ -1,31 +1,10 @@
-﻿Build started 8/7/2012 5:04:21 PM.
+﻿Build started 8/7/2012 5:58:39 PM.
      1>Project "E:\Dropbox\Projects\dm-shader-vis\dm-shader-vis.vcxproj" on node 2 (build target(s)).
      1>InitializeBuildStatus:
          Creating "Release\dm-shader-vis.unsuccessfulbuild" because "AlwaysCreate" was specified.
        ClCompile:
-         c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\CL.exe /c /Zi /nologo /W3 /WX- /O2 /Oi /Oy- /GL /D _MBCS /Gm- /EHsc /MD /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Release\\" /Fd"Release\vc100.pdb" /Gd /TP /analyze- /errorReport:prompt ang2pix_ring.cpp buffers.cpp datareader.cpp gettime.cpp main.cpp Parameter.cpp pix2ang_ring.cpp render.cpp shaderManager.cpp shaders.cpp
-         ang2pix_ring.cpp
-         buffers.cpp
-         datareader.cpp
-         gettime.cpp
-     1>gettime.cpp(52): warning C4996: '__timezone': This function or variable may be unsafe. Consider using _get_timezone instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-                 c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\time.h(139) : see declaration of '__timezone'
-     1>gettime.cpp(53): warning C4996: '__daylight': This function or variable may be unsafe. Consider using _get_daylight instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-                 c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\time.h(131) : see declaration of '__daylight'
-         main.cpp
-         Parameter.cpp
-         pix2ang_ring.cpp
+         c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\CL.exe /c /Zi /nologo /W3 /WX- /O2 /Oi /Oy- /GL /D _MBCS /Gm- /EHsc /MD /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Release\\" /Fd"Release\vc100.pdb" /Gd /TP /analyze- /errorReport:prompt render.cpp
          render.cpp
-         shaderManager.cpp
-     1>shaderManager.cpp(55): warning C4996: 'open': The POSIX name for this item is deprecated. Instead, use the ISO C++ conformant name: _open. See online help for details.
-                 c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\io.h(312) : see declaration of 'open'
-     1>shaderManager.cpp(57): warning C4996: 'lseek': The POSIX name for this item is deprecated. Instead, use the ISO C++ conformant name: _lseek. See online help for details.
-                 c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\io.h(310) : see declaration of 'lseek'
-     1>shaderManager.cpp(59): warning C4996: 'close': The POSIX name for this item is deprecated. Instead, use the ISO C++ conformant name: _close. See online help for details.
-                 c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\io.h(302) : see declaration of 'close'
-     1>shaderManager.cpp(62): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-                 c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\stdio.h(234) : see declaration of 'fopen'
-         shaders.cpp
        Link:
          c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"E:\Dropbox\Projects\dm-shader-vis\\dm-shader-vis.exe" /NOLOGO glew32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /ManifestFile:"Release\dm-shader-vis.exe.intermediate.manifest" /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /DEBUG /PDB:"E:\Dropbox\Projects\dm-shader-vis\dm-shader-vis.pdb" /OPT:REF /OPT:ICF /LTCG /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"E:\Dropbox\Projects\dm-shader-vis\\dm-shader-vis.lib" /MACHINE:X86 Release\ang2pix_ring.obj
          Release\buffers.obj
@@ -49,4 +28,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:06.58
+Time Elapsed 00:00:06.61

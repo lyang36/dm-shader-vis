@@ -7,6 +7,7 @@
 #version 330
 //the new coordinate system based on the vpos
 #define PI 3.1415926535897932
+#define e32 4.4816890703380648226           //e^(3/2)
 
 layout(points) in;
 //layout(triangle_strip, max_vertices=8) out;
@@ -31,7 +32,7 @@ in block
 	vec4 particle; 
 } bl_In[];
 
-//This is very important, must be checked 
+/*//This is very important, must be checked
 float profile(vec3 r1,float dtheta, vec4 par){ 
     vec3 r0 = vec3(par.gba);
     float costheta = dot(r0, r1)/(length(r0)*length(r1));
@@ -82,6 +83,14 @@ float calc_norm(vec2 svec, float newsize, float dtheta, vec4 par){
     }
 
     return 1.0/norm;
+}
+*/
+float calc_norm1(float theta0){
+    return 2.0*(-1.0 + e32) * PI * theta0 * theta0 / (3.0 * e32) -
+        (PI * (-5.0 + 2.0 * e32) * theta0 * theta0 * theta0 * theta0) / (27.0 * e32)
+        +(PI * (-29.0 + 8.0 * e32) * PI * theta0 * theta0 * theta0 * theta0 * theta0 * theta0) / ( 1620.0 * e32);
+    //(2 (-1 + E^(3/2)) \[Pi] \[Theta]0^2)/(
+    //                                      3 E^(3/2)) - (((-5 + 2 E^(3/2)) \[Pi]) \[Theta]0^4)/(27 E^(3/2))
 }
 
 bool emitparticle(float dtheta, float theta, float distance, vec3 npvec,
@@ -157,7 +166,9 @@ bool emitparticle(float dtheta, float theta, float distance, vec3 npvec,
 	particle = vec4(newsize, npvec.x, npvec.y, npvec.z);
 	{
 		if(usenormmap == 0){
-			normfac = calc_norm(vec2(xc, yc), newsize, dtheta, particle);
+			//normfac = calc_norm(vec2(xc, yc), newsize, dtheta, particle);
+            //Use the integration to calculate
+            normfac = 1.0 / (geofac.y * geofac.y) / calc_norm1(dtheta) * 4.0;
 		}else{
 			normfac = 1.0;
 		}
@@ -171,28 +182,7 @@ bool emitparticle(float dtheta, float theta, float distance, vec3 npvec,
 
 	float psize;// = newsize * geofac.x / geofac.y;//dsize * geofac.x;
     psize = newsize * geofac.x / geofac.y;
-    
-/*	float x1, x2, y1, y2;
-	x1 = newpos.x - psize;
-	x2 = newpos.x + psize;
-	y1 = newpos.y - psize;
-	y2 = newpos.y + psize;
-    gl_Layer = layer;
-    gl_PointSize = newsize;  //point size
-	texCoord = vec2(0,0);
-	gl_Position = vec4(x1, y1, 0.0, 1.0);
-	EmitVertex();
-	texCoord = vec2(0,1);
-	gl_Position = vec4(x2, y1, 0.0, 1.0);
-	EmitVertex();
-	texCoord = vec2(1,0);
-	gl_Position = vec4(x1, y2, 0.0, 1.0);
-	EmitVertex();
-	texCoord = vec2(1,1);
-	gl_Position = vec4(x2, y2, 0.0, 1.0);
-	EmitVertex();
-	EndPrimitive();
-*/	
+    	
 	//TRIANGLE
 	gl_Layer = layer;
 	texCoord = vec2(0,1.0) + vec2(0.5, 0.5);
