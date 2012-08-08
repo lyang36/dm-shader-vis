@@ -207,7 +207,7 @@ void fluxBuffer::loadnorm(){
         float r0,r1;
         float vr0[3];
         //float xy[2];
-        float dtheta, theta, phi;
+        float dtheta, theta;
         float norm = 0;
 
         int _ck = 0;
@@ -236,7 +236,6 @@ void fluxBuffer::loadnorm(){
                     theta = abs(2*PI - theta2 + theta1) / 2.0;
                     }
             
-                phi = 0;
                 vr0[0] = sin(theta);
                 vr0[1] = 0.0;
                 vr0[2] = cos(theta);

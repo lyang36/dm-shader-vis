@@ -100,7 +100,7 @@ void render::drawFlux(){
     
     {//setup shaders L and U
         
-        REAL vx = params->vposx;
+        /*REAL vx = params->vposx;
         REAL vy = params->vposy;
         REAL vz = params->vposz;
         REAL vn = sqrt(vx * vx + vy * vy + vz * vz);
@@ -116,7 +116,7 @@ void render::drawFlux(){
         }else{
             cosphi = vx / sintheta;
             sinphi = vy / sintheta;
-        }
+        }*/
     
         //begin shader
         fshaderL->begin();
@@ -466,8 +466,8 @@ void ReshapeFunc(int width, int height)
 
 void KeyboardFunc(unsigned char key, int x, int y)
 {
-  int foo;
-  foo = x + y; //Has no effect: just to avoid a warning 
+  //int foo;
+  //foo = x + y; //Has no effect: just to avoid a warning 
   if ('q' == key || 'Q' == key || 27 == key)
       exit(0);
   else if(key == 's' && picfile!=""){
