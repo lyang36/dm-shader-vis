@@ -32,6 +32,7 @@ using namespace std;
 colorBuffer * CB, *CBL, *CBU;       //for final rendering
 static unsigned int WSIZE, POINTSIZE;
 string picfile;
+bool isonscreen = false;
 
 void render::init(){
     glEnable(GL_TEXTURE_2D);
@@ -458,7 +459,10 @@ void rendsenc(){
     
     glBindTexture(GL_TEXTURE_2D, 0);
     glFlush();
-    glutSwapBuffers();
+    
+	if(isonscreen){
+		glutSwapBuffers();
+	}
 
 
 }
@@ -613,6 +617,7 @@ void render::start(int argc, char **argv){
     picfile = params->PICFILE;
     
     if(params->isOnScreenRend){
+		isonscreen = true;
         //set up glut
         glutDisplayFunc(&rendsenc);
         glutReshapeFunc(&ReshapeFunc);
