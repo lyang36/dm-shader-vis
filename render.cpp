@@ -516,9 +516,9 @@ void render::start(int argc, char **argv){
     glutInitWindowSize(2 * windowSize, windowSize);
     glutCreateWindow("Dark Matter rendering!");
        
-  
-    glewInit();
     glewExperimental = GL_TRUE; 
+    glewInit();
+    //glewExperimental = GL_TRUE; 
 
     //if(glewIsSupported("GL_VERSION_2_0")) cout << "true" <<endl;
 	    //check shaders
