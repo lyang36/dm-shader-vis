@@ -524,9 +524,16 @@ void render::start(int argc, char **argv){
         glutHideWindow();
     }
  
-    glewExperimental = GL_TRUE;
+    if(!(params->isOnScreenRend)){
+        glutHideWindow();
+    }
+
+    glewExperimental = GL_TRUE; 
     glewInit();
-    //glewExperimental = GL_TRUE; 
+
+    if(!(params->isOnScreenRend)){
+        glutHideWindow();
+    }
 
     //if(glewIsSupported("GL_VERSION_2_0")) cout << "true" <<endl;
 	    //check shaders
