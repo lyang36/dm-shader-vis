@@ -413,6 +413,7 @@ void render::drawImage(){
 
 void rendsenc(){
     //glClientActiveTexture(GL_TEXTURE0);
+	glViewport(0,0,2*WSIZE, WSIZE); 
     glActiveTexture(GL_TEXTURE0);
 
     CBL ->unbindBuf();
