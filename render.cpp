@@ -233,7 +233,12 @@ void render::drawFlux(){
         }
         fshaderU->end();
         fbufferU->unbindBuf();       
-        glFinish();
+
+        //TIME MEASURING
+        if(params->isTimeMeasure){
+            glFinish();
+        }
+        
         gettimeofday(&tim, NULL);
         double t2=tim.tv_sec+(tim.tv_usec/1000000.0);
         rendertime += t2 - t1;
@@ -464,6 +469,39 @@ void ReshapeFunc(int width, int height)
     glViewport(0, 0, width, height);
 }
 
+void savePic(){
+    glReadBuffer(GL_FRONT);
+    printf("Save pic to file: %s ...\n", picfile.c_str());
+    //save to file
+    ofstream fScreenshot(picfile.c_str(), ios::out | ios::binary);
+    if (!fScreenshot.good()) {
+        printf("Open pic file error.\n");
+    }else{
+        GLubyte *pixels = new GLubyte[WSIZE*2*WSIZE*3];
+        glReadPixels(0, 0, WSIZE*2, WSIZE, GL_RGB,
+                     GL_UNSIGNED_BYTE, pixels);
+        unsigned char TGAheader[12]={0,0,2,0,0,0,0,0,0,0,0,0};
+        unsigned char header[6] = {WSIZE*2%256,WSIZE*2/256,
+            WSIZE%256,WSIZE/256,24,0};
+        //convert to BGR format
+        unsigned char temp;
+        unsigned int i = 0;
+        while (i < WSIZE*2*WSIZE*3)
+        {
+            temp = pixels[i];       //grab blue
+            pixels[i] = pixels[i+2];//assign red to blue
+            pixels[i+2] = temp;     //assign blue to red
+            i += 3;     //skip to next blue byte
+        }
+        fScreenshot.write((char *)TGAheader, 12);
+        fScreenshot.write((char *)header, 6);
+        fScreenshot.write((char *)pixels, WSIZE*2*WSIZE*3);
+        fScreenshot.close();
+        printf("Saving ok.\n");
+        delete pixels;
+    }
+}
+
 void KeyboardFunc(unsigned char key, int x, int y)
 {
   //int foo;
@@ -471,37 +509,7 @@ void KeyboardFunc(unsigned char key, int x, int y)
   if ('q' == key || 'Q' == key || 27 == key)
       exit(0);
   else if(key == 's' && picfile!=""){
-      glReadBuffer(GL_FRONT);
-      printf("Save pic to file: %s\n", picfile.c_str());
-      //save to file
-      ofstream fScreenshot(picfile.c_str(), ios::out | ios::binary);
-      if (!fScreenshot.good()) {
-          printf("Open pic file error.\n");
-      }else{
-          GLubyte *pixels = new GLubyte[WSIZE*2*WSIZE*3];
-          glReadPixels(0, 0, WSIZE*2, WSIZE, GL_RGB, 
-                       GL_UNSIGNED_BYTE, pixels);
-          unsigned char TGAheader[12]={0,0,2,0,0,0,0,0,0,0,0,0};
-          unsigned char header[6] = {WSIZE*2%256,WSIZE*2/256,
-              WSIZE%256,WSIZE/256,24,0};
-          //convert to BGR format    
-          unsigned char temp;
-          unsigned int i = 0;
-          while (i < WSIZE*2*WSIZE*3)
-          {
-              temp = pixels[i];       //grab blue
-              pixels[i] = pixels[i+2];//assign red to blue
-              pixels[i+2] = temp;     //assign blue to red
-              i += 3;     //skip to next blue byte
-          }
-          fScreenshot.write((char *)TGAheader, 12);
-          fScreenshot.write((char *)header, 6);
-          fScreenshot.write((char *)pixels, WSIZE*2*WSIZE*3);
-          fScreenshot.close();
-          printf("Saving ok.\n");
-          delete pixels;
-      }
-
+      savePic();
   }
 }
 
@@ -534,13 +542,13 @@ void render::start(int argc, char **argv){
     //set up shaders and buffers
     if(!initialed){
 
-        fshaderL = new fluxShader();
+        fshaderL = new fluxShader(params->spriteVertexShader, params->spriteFragmentShader);
         cshaderL = new colorShader();
         fbufferL = new fluxBuffer(windowSize, windowSize);
         cbufferL = new colorBuffer(windowSize, windowSize);
         fbufferL->setBuffer();
         
-        fshaderU = new fluxShader();
+        fshaderU = new fluxShader(params->spriteVertexShader, params->spriteFragmentShader);
         cshaderU = new colorShader();
         fbufferU = new fluxBuffer(windowSize, windowSize);
         cbufferU = new colorBuffer(windowSize, windowSize);
@@ -562,10 +570,6 @@ void render::start(int argc, char **argv){
     glEnable (GL_BLEND);
     glBlendFunc (GL_ONE,GL_ONE);    //blending
 
-    //set up glut
-    glutDisplayFunc(&rendsenc);
-    glutReshapeFunc(&ReshapeFunc);
-    glutKeyboardFunc(&KeyboardFunc);
 
     //starting drawing
     cout << "Start rendering..." << endl;
@@ -585,13 +589,31 @@ void render::start(int argc, char **argv){
     delete fbufferU;
     gettimeofday(&tim, NULL);
     double t2=tim.tv_sec+(tim.tv_usec/1000000.0);
-    printf("End rendering. %.6lf seconds elapsed. Rendertime: %.6lf. Reading time: %.6lf\n",
-            t2-t1, rendertime, t2-t1-rendertime);
+    if(params->isTimeMeasure){
+        printf("End rendering. %.6lf seconds elapsed. Rendertime: %.6lf. Reading time: %.6lf\n",
+               t2-t1, rendertime, t2-t1-rendertime);
+    }else{
+        printf("End rendering. %.6lf seconds elapsed.\n",
+               t2-t1);
+    }
     cout << "--------------------------------------------------"<<endl;
     delete fluxmapL;
     delete fluxmapU;
     picfile = params->PICFILE;
-    glutMainLoop();
+    
+    if(params->isOnScreenRend){
+        //set up glut
+        glutDisplayFunc(&rendsenc);
+        glutReshapeFunc(&ReshapeFunc);
+        glutKeyboardFunc(&KeyboardFunc);
+        glutMainLoop();
+    }else{
+        rendsenc();
+        //Save the picture
+        savePic();
+    }
+    
+
     
     delete fshaderL;
     delete fshaderU;   

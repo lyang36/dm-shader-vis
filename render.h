@@ -59,6 +59,7 @@ public:
         rendertime = 0.0;
     };
     void start(int argc, char **argv);
+
 };
 
 #endif
