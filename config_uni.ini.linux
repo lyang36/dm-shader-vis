@@ -39,7 +39,7 @@ OUTFILE /home/lyang/Documents/temp/skyup_low.data
 
 #save to pic
 #PICFILE /users/lyang/Documents/temp/skymap.tga
-PICFILE /home/lyang/Documents/temp/skyup_low.data
+PICFILE /home/lyang/Documents/temp/skymap.tga
 
 #fluxfactor multiplied when converting to healpix map
 FLUXFACTOR 1.2620584e-06
