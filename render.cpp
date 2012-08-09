@@ -208,7 +208,7 @@ void render::drawFlux(){
         glColorPointer (3, GL_FLOAT, 6*sizeof(GLfloat), &(vetexarray[0]));
         glVertexPointer (3, GL_FLOAT, 6*sizeof(GLfloat), &(vetexarray[3]));
         
-		timeval tim;
+	timeval tim;
         gettimeofday(&tim, NULL);
         double t1=tim.tv_sec+(tim.tv_usec/1000000.0);
 
@@ -520,16 +520,22 @@ void render::start(int argc, char **argv){
     pointSize = params->PSIZE;
 
     //initialize glut and glew
-	glutInit(&argc, argv);
+    glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
     glutInitWindowSize(2 * windowSize, windowSize);
     glutCreateWindow("Dark Matter rendering!");
+
     if(!(params->isOnScreenRend)){
         glutHideWindow();
     }
-    
+
     glewExperimental = GL_TRUE; 
     glewInit();
+
+    if(!(params->isOnScreenRend)){
+        glutHideWindow();
+    }
+
     //glewExperimental = GL_TRUE; 
 
     //if(glewIsSupported("GL_VERSION_2_0")) cout << "true" <<endl;
