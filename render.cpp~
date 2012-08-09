@@ -410,8 +410,6 @@ void rendsenc(){
 	glViewport(0,0,2 * WSIZE, WSIZE); 
     glActiveTexture(GL_TEXTURE0);
 
-    CBL ->unbindBuf();
-    CBU ->unbindBuf();
     
 
     glDisable(GL_DEPTH_TEST);
@@ -596,6 +594,10 @@ void render::start(int argc, char **argv){
     cbufferL->setBuffer();
     cbufferU->setBuffer();
     drawImage();
+	
+    CBL ->unbindBuf();
+    CBU ->unbindBuf();
+	
     delete fbufferL;
     delete fbufferU;
     gettimeofday(&tim, NULL);
@@ -619,9 +621,14 @@ void render::start(int argc, char **argv){
         glutKeyboardFunc(&KeyboardFunc);
         glutMainLoop();
     }else{
+		fluxBuffer * screenbuffer = new fluxBuffer(2.0*windowSize, windowSize);
+		screenbuffer->setBuffer();
+		screenbuffer->bindBuf();
         rendsenc();
         //Save the picture
         savePic();
+		screenbuffer->unbindBuf();
+		delete screenbuffer;
     }
     
 
