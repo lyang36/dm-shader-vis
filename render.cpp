@@ -519,8 +519,11 @@ void render::start(int argc, char **argv){
     glutInitWindowSize(2 * windowSize, windowSize);
     glutCreateWindow("Dark Matter rendering!");
        
+    if(!(params->isOnScreenRend)){
+        glutHideWindow();
+    }
  
-    glewExperimental = GL_TRUE; 
+    glewExperimental = GL_TRUE;
     glewInit();
     //glewExperimental = GL_TRUE; 
 
