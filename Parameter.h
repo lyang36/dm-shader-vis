@@ -19,7 +19,11 @@
 using namespace std;
 
 class Parameter{
+private:
+    string conffile;
 public:
+
+    
     bool is_ready;
     int CPU_MEM;              //how many particles is in the CPU memory
     REAL FLUXFACTOR;
@@ -39,6 +43,10 @@ public:
 	string pointVertexShader;
 	string pointGeometryShader;
 	string pointFragmentShader;
+
+    string spriteVertexShader;
+    string spriteFragmentShader;
+
     
     
     REAL WSIZE, PSIZE;           //size of the projection plane (a side)
@@ -54,10 +62,13 @@ public:
     
 
     //initialization
-    Parameter();
+    Parameter(string conf);
     //readparameter from the configure.ini
     //if data is ready return is_ready
     bool readParameter();
+    
+    bool isTimeMeasure;       //whether measure rendering time
+    bool isOnScreenRend;    //whether show picture on screen
 
 };
 #endif

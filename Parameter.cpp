@@ -2,11 +2,13 @@
 #include <fstream>
 #include <sstream>
 #include <iostream>
+#include <cstdlib>
 #include "Parameter.h"
 
 using namespace std;
 
-Parameter::Parameter(){
+Parameter::Parameter(string conf){
+    
     is_ready = false;
     CPU_MEM = 0;
     FLUXFACTOR = 0;
@@ -24,6 +26,9 @@ Parameter::Parameter(){
     HEALPIXFILE = "";
     PICFILE = "";
     isUseNormMap = false;
+    isOnScreenRend = false;
+    isTimeMeasure = false;
+    conffile = conf;
 
 	#if defined(_WIN32) || defined(_WIN64)
         triangleVertexShader = "shaderfiles\\flux.gvert";
@@ -33,6 +38,9 @@ Parameter::Parameter(){
 		pointVertexShader = "shaderfiles\\flux.gvert";
 		pointGeometryShader = "shaderfiles\\flux.pgeom";
 		pointFragmentShader = "shaderfiles\\flux.pfrag";
+    
+        spriteVertexShader = "shaderfiles\\flux.vert";;
+        spriteFragmentShader = "shaderfiles\\flux.frag";;
 	#else
         triangleVertexShader = "./shaderfiles/flux.gvert";
         triangleGeometryShader = "./shaderfiles/flux.tgeom";
@@ -41,6 +49,9 @@ Parameter::Parameter(){
 		pointVertexShader = "./shaderfiles/flux.gvert";
         pointGeometryShader = "./shaderfiles/flux.pgeom";
         pointFragmentShader = "./shaderfiles/flux.pfrag";
+    
+        spriteVertexShader = "./shaderfiles/flux.vert";
+        spriteFragmentShader = "./shaderfiles/flux.frag";
 	#endif
 
 
@@ -49,12 +60,11 @@ Parameter::Parameter(){
 bool Parameter::readParameter(){
     ifstream conf;
     string line;
-//#ifdef _WIN32 || _WIN64
-#if defined(_WIN32) || defined(_WIN64)
-    conf.open ("config_win.ini");
-#else
-    conf.open ("config_uni.ini");
-#endif
+    conf.open(conffile.c_str());
+    if(!conf.good()){
+        printf("Configuration file not found!\n");
+        exit(1);
+    }
     while(conf.good()){
         stringstream line_buf;
         string word;
@@ -140,6 +150,18 @@ bool Parameter::readParameter(){
             }else if(word == "PFRAGMENTSHADER"){
                 line_buf >> pointFragmentShader;
                 cout << "Point Fragment Shader " << pointFragmentShader << endl; 
+            }else if(word == "FRAGMENTSHADER"){
+                line_buf >> spriteFragmentShader;
+                cout << "Sprite Fragment Shader " << spriteFragmentShader << endl;
+            }else if(word == "VERTEXSHADER"){
+                line_buf >> spriteVertexShader;
+                cout << "Sprite Fragment Shader " << spriteVertexShader << endl;
+            }else if(word == "TIMEMEASURE"){
+                isTimeMeasure = true;
+                cout << "Measure render time?" << isTimeMeasure << endl;
+            }else if(word == "ONSCREEN"){
+                isOnScreenRend = true;
+                cout << "Show picture on screen?" << isOnScreenRend << endl;
             }
         }
         //cout << word << " -- " << line << endl;
