@@ -25,36 +25,37 @@ Parameter::Parameter(string conf){
     OUTFILE = "";
     HEALPIXFILE = "";
     PICFILE = "";
+   
     isUseNormMap = false;
     isOnScreenRend = false;
     isTimeMeasure = false;
     conffile = conf;
 
 	#if defined(_WIN32) || defined(_WIN64)
-        triangleVertexShader = "shaderfiles\\flux.gvert";
-        triangleGeometryShader = "shaderfiles\\flux.tgeom";
-        triangleFragmentShader = "shaderfiles\\flux.tfrag";
+        SHADERDIR = "";
+	triangleVertexShader = SHADERDIR + "shaderfiles\\flux.gvert";
+        triangleGeometryShader = SHADERDIR + "shaderfiles\\flux.tgeom";
+        triangleFragmentShader = SHADERDIR + "shaderfiles\\flux.tfrag";
 
-		pointVertexShader = "shaderfiles\\flux.gvert";
-		pointGeometryShader = "shaderfiles\\flux.pgeom";
-		pointFragmentShader = "shaderfiles\\flux.pfrag";
+		pointVertexShader = SHADERDIR + "shaderfiles\\flux.gvert";
+		pointGeometryShader = SHADERDIR + "shaderfiles\\flux.pgeom";
+		pointFragmentShader = SHADERDIR + "shaderfiles\\flux.pfrag";
     
-        spriteVertexShader = "shaderfiles\\flux.vert";;
-        spriteFragmentShader = "shaderfiles\\flux.frag";;
+        spriteVertexShader = SHADERDIR + "shaderfiles\\flux.vert";;
+        spriteFragmentShader = SHADERDIR + "shaderfiles\\flux.frag";;
 	#else
-        triangleVertexShader = "./shaderfiles/flux.gvert";
-        triangleGeometryShader = "./shaderfiles/flux.tgeom";
-        triangleFragmentShader = "./shaderfiles/flux.tfrag";
+	SHADERDIR = "./";
+	triangleVertexShader = SHADERDIR + "shaderfiles\\flux.gvert";
+        triangleGeometryShader = SHADERDIR + "shaderfiles\\flux.tgeom";
+        triangleFragmentShader = SHADERDIR + "shaderfiles\\flux.tfrag";
 
-		pointVertexShader = "./shaderfiles/flux.gvert";
-        pointGeometryShader = "./shaderfiles/flux.pgeom";
-        pointFragmentShader = "./shaderfiles/flux.pfrag";
-    
-        spriteVertexShader = "./shaderfiles/flux.vert";
-        spriteFragmentShader = "./shaderfiles/flux.frag";
+                pointVertexShader = SHADERDIR + "shaderfiles\\flux.gvert";
+                pointGeometryShader = SHADERDIR + "shaderfiles\\flux.pgeom";
+                pointFragmentShader = SHADERDIR + "shaderfiles\\flux.pfrag";
+
+        spriteVertexShader = SHADERDIR + "shaderfiles\\flux.vert";;
+        spriteFragmentShader = SHADERDIR + "shaderfiles\\flux.frag";;
 	#endif
-
-
 }
 
 bool Parameter::readParameter(){

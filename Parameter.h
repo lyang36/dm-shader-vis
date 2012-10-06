@@ -56,6 +56,8 @@ public:
     string HEALPIXFILE;       //convert healpix file
     string PICFILE;           //picture file save
     
+    string SHADERDIR;	      //the shaderdir
+    
     int NSIDE;                //NSIDE for healpix map
     
     bool isUseNormMap;        //whether or not use normal map
