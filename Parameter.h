@@ -46,6 +46,8 @@ public:
 
     string spriteVertexShader;
     string spriteFragmentShader;
+    string colorfragmentshader;
+    string colorvertexshader;
 
     
     

@@ -121,13 +121,15 @@ void fluxShader::setrotm(bool updown){
         }
     }
     
-    for(int i = 0; i < 9 ; i ++){
+
+	//Rotate or not?
+    /*for(int i = 0; i < 9 ; i ++){
         rotmatrix[i] = 0;
     }
     
     rotmatrix[0] = 1;
     rotmatrix[4] = 1;
-    rotmatrix[8] = 1;
+    rotmatrix[8] = 1;*/
     
     if(updown){
         rotmatrix[2] *= -1;

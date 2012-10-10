@@ -153,15 +153,15 @@ public:
 
 class colorShader:public Shader{
 public:
-    colorShader(){
+    colorShader(string v, string f){
 //#ifdef _WIN32 || _WIN64
-#if defined(_WIN32) || defined(_WIN64)
-        vfile = "shaderfiles\\color.vert";
-        ffile = "shaderfiles\\color.frag";
-#else
-        vfile = "./shaderfiles/color.vert";
-        ffile = "./shaderfiles/color.frag";
-#endif
+//#if defined(_WIN32) || defined(_WIN64)
+        vfile = v;//"shaderfiles\\color.vert";
+        ffile = f;//"shaderfiles\\color.frag";
+//#else
+//        vfile = "./shaderfiles/color.vert";
+//        ffile = "./shaderfiles/color.frag";
+//#endif
         shaderManager SM;
         shader = SM.loadShaderFile(vfile.c_str(), ffile.c_str());
         if(shader == 0){

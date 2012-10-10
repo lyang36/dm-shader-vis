@@ -43,6 +43,8 @@ Parameter::Parameter(string conf){
     
         spriteVertexShader = SHADERDIR + "shaderfiles\\flux.vert";;
         spriteFragmentShader = SHADERDIR + "shaderfiles\\flux.frag";;
+	colorvertexshader = SHADERDIR + "shaderfiles\\color.vert";;
+        colorfragmentshader = SHADERDIR + "shaderfiles\\color.frag";;
 	#else
 	SHADERDIR = "./";
 	triangleVertexShader = SHADERDIR + "shaderfiles\\flux.gvert";
@@ -55,6 +57,8 @@ Parameter::Parameter(string conf){
 
         spriteVertexShader = SHADERDIR + "shaderfiles\\flux.vert";;
         spriteFragmentShader = SHADERDIR + "shaderfiles\\flux.frag";;
+	colorvertexshader = SHADERDIR + "shaderfiles\\color.vert";;
+        colorfragmentshader = SHADERDIR + "shaderfiles\\color.frag";;
 	#endif
 }
 
@@ -157,6 +161,12 @@ bool Parameter::readParameter(){
             }else if(word == "VERTEXSHADER"){
                 line_buf >> spriteVertexShader;
                 cout << "Sprite Fragment Shader " << spriteVertexShader << endl;
+            }else if(word == "COLORVERTEXSHADER"){
+                line_buf >> colorvertexshader;
+                cout << "Sprite Color Vertex Shader " << colorvertexshader << endl;
+            }else if(word == "COLORFRAGMENTSHADER"){
+                line_buf >> colorfragmentshader;
+                cout << "Sprite Color Fragment Shader " << colorfragmentshader << endl;
             }else if(word == "TIMEMEASURE"){
                 isTimeMeasure = true;
                 cout << "Measure render time?" << isTimeMeasure << endl;
