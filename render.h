@@ -8,19 +8,12 @@
 
 class render{
 private:
-    //L for the lower sphere
-    //U for the upper sphere
-    fluxShader * fshaderL;
-    colorShader * cshaderL;
-    fluxBuffer * fbufferL;
-    colorBuffer * cbufferL;
-    
-    fluxShader * fshaderU;
-    colorShader * cshaderU;
-    fluxBuffer * fbufferU;
-    colorBuffer * cbufferU;
-    
-    
+    //for the lower sphere
+    fluxShader * fshader;
+    colorShader * cshader;
+    fluxBuffer * fbuffer;
+    colorBuffer * cbuffer;
+   
     GLuint textureIni;  //initial empty texture
 
     unsigned int windowSize;       //2^m
@@ -34,13 +27,13 @@ private:
     bool initialed;     //is initialed?
     void findMinMax(float &fluxmax, float &fluxmin);
     
-    REAL * fluxmapL, *fluxmapU;  //L and U map
+    REAL * fluxmap;//, *fluxmapU;  //L and U map
     
     void readFluxMap();         //read map from the GPU
     
-    void saveHealPix();         //save healpix map to the file
+   	//void saveHealPix();         //save healpix map to the file
     void saveFluxMap();         //save flux map to the file
-    double _getpixflux(int x1, int y1, bool isupshere);
+    //double _getpixflux(int x1, int y1, bool isupshere);
     double totalFlux;
     double rendertime;
     
@@ -48,8 +41,7 @@ public:
     DataReader * reader;
     Parameter * params;
     render(){
-        fluxmapL = NULL;
-        fluxmapU = NULL;
+        fluxmap = NULL;
         
         windowSize = 512;
         pointSize = 256;

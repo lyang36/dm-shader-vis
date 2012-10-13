@@ -91,66 +91,33 @@ void render::drawFlux(){
     //bind texture
     if(params->isUseNormMap){
         printf("Generating normalization buffer...\n");
-        fbufferL -> setMapRes(windowSize, params->PSIZE);
-        fbufferL -> setNormTex();
+        fbuffer -> setMapRes(windowSize, params->PSIZE);
+        fbuffer -> setNormTex();
         printf("Norm map generated.\n");
     }else{
         glBindTexture(GL_TEXTURE_2D, textureIni);
     }
     
     
-    {//setup shaders L and U
+    {//setup shaders
         
-        /*REAL vx = params->vposx;
-        REAL vy = params->vposy;
-        REAL vz = params->vposz;
-        REAL vn = sqrt(vx * vx + vy * vy + vz * vz);
-        vx = vx / vn;
-        vy = vy / vn;
-        vz = vz / vn;
-        //REAL costheta = vz;
-        REAL sintheta = sqrt(1-vz * vz);
-        REAL cosphi, sinphi;
-        if(sintheta < 1.0e-8){
-            cosphi = 1;
-            sinphi = 0;
-        }else{
-            cosphi = vx / sintheta;
-            sinphi = vy / sintheta;
-        }*/
-    
         //begin shader
-        fshaderL->begin();
+        fshader->begin();
     
         //setup shader parameters 
-        fshaderL->setgeofac3f(orthsize, windowSize, pointSize);
+        fshader->setgeofac3f(orthsize, windowSize, pointSize);
         
         //now use the rotatation matrix
-        //fshaderL->setzaxis3f(vx, vy, vz);
-        //fshaderL->setyaxis3f(-sinphi, cosphi, 0);
-        //fshaderL->setxaxis3f(cosphi*costheta, sinphi*costheta, -sintheta);
-        fshaderL->setopos3f(params->oposx, params->oposy, params->oposz);
-        fshaderL->setrotmatrix(params->vvec, params->opos, params->cpos, false);
-        fshaderL->setusenormmap(params->isUseNormMap);
+        fshader->setopos3f(params->oposx, params->oposy, params->oposz);
+        fshader->setrotmatrix(params->vvec, params->opos, params->cpos);
+        fshader->setusenormmap(params->isUseNormMap);
         
-        fshaderL->end();    
-    
-        //begin shader
-        fshaderU->begin();
-    
-        //setup shader parameters 
-        fshaderU->setgeofac3f(orthsize, windowSize, pointSize);
-    
-        //now use the rotatation matrix
-        fshaderU->setopos3f(params->oposx, params->oposy, params->oposz);
-        //reflect the view vector
-        fshaderU->setrotmatrix(params->vvec, params->opos, params->cpos, true);
-        fshaderU->setusenormmap(params->isUseNormMap);
-        fshaderU->end();     
+        fshader->end();    
     
     }
     
-    fbufferL->bindBuf();
+    //Draw half sphere?	
+    fbuffer->bindBuf();
     {
         //start drawing
         glPushAttrib(GL_VIEWPORT_BIT | GL_COLOR_BUFFER_BIT); 
@@ -167,26 +134,7 @@ void render::drawFlux(){
         glClearColor (0.0, 0.0, 0.0, 0.0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     }
-    fbufferL->unbindBuf();
-    
-    fbufferU->bindBuf();
-    {
-        //start drawing
-        glPushAttrib(GL_VIEWPORT_BIT | GL_COLOR_BUFFER_BIT); 
-        glViewport(0,0,WSIZE, WSIZE); 
-        
-        //setup matrix
-        glMatrixMode(GL_PROJECTION);
-        glLoadIdentity();
-        glOrtho(-orthsize, orthsize, -orthsize, orthsize, -100, 100);
-        glMatrixMode(GL_MODELVIEW);
-        glLoadIdentity();
-        
-        //clear color
-        glClearColor (0.0, 0.0, 0.0, 0.0);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    }
-    fbufferU->unbindBuf();   
+    fbuffer->unbindBuf();
     
     
     //load particles here
@@ -209,31 +157,20 @@ void render::drawFlux(){
         glColorPointer (3, GL_FLOAT, 6*sizeof(GLfloat), &(vetexarray[0]));
         glVertexPointer (3, GL_FLOAT, 6*sizeof(GLfloat), &(vetexarray[3]));
         
-	timeval tim;
+		timeval tim;
         gettimeofday(&tim, NULL);
         double t1=tim.tv_sec+(tim.tv_usec/1000000.0);
 
         //lower sphere
-        fbufferL->bindBuf();
-        fshaderL->begin();
+        fbuffer->bindBuf();
+        fshader->begin();
         {
             glDrawArrays(GL_POINTS, 0, reader->getMemparts());
             //glFlush();
             //printf("Particles: %d\n", reader->getMemparts());
         }
-        fshaderL->end();
-        fbufferL->unbindBuf();
-        
-        //upper sphere
-        fbufferU->bindBuf();
-        fshaderU->begin();
-        {
-            glDrawArrays(GL_POINTS, 0, reader->getMemparts());
-            //glFlush();
-            //printf("Particles: %d\n", reader->getMemparts());
-        }
-        fshaderU->end();
-        fbufferU->unbindBuf();       
+        fshader->end();
+        fbuffer->unbindBuf();
 
         //TIME MEASURING
         if(params->isTimeMeasure){
@@ -271,26 +208,15 @@ void render::drawFlux(){
  
 void render::readFluxMap(){
     glPixelStorei(GL_PACK_ALIGNMENT, 4);  
-    fluxmapL = new float[windowSize*windowSize];
-    fluxmapU = new float[windowSize*windowSize];
+    fluxmap = new float[windowSize*windowSize];
 
-    fbufferL -> bindTex();
-    glGetTexImage(GL_TEXTURE_2D,0,GL_RED,GL_FLOAT,fluxmapL);
-    fbufferL->unbindTex();
-    
-    fbufferU -> bindTex();
-    glGetTexImage(GL_TEXTURE_2D,0,GL_RED,GL_FLOAT,fluxmapU);
-    fbufferU->unbindTex();
-
+    fbuffer -> bindTex();
+    glGetTexImage(GL_TEXTURE_2D,0,GL_RED,GL_FLOAT,fluxmap);
+    fbuffer->unbindTex();
     
 }
 
 void render::findMinMax(float &fluxmin, float &fluxmax){
-    //lower buffer
-    //fbufferL->bindBuf();
-    //float *pic = new float[windowSize*windowSize];
-    //glReadPixels(0, 0, windowSize, windowSize,
-    //             GL_RED, GL_FLOAT, pic);
     fluxmax = 0;
     fluxmin = 1.0e36;
     double average = 0.0;
@@ -302,28 +228,22 @@ void render::findMinMax(float &fluxmin, float &fluxmax){
         float y = (int)(i%windowSize) - windowSize / 2.0;
         float r = windowSize / 2.0;
         if(x*x + y*y <= r*r){
-            //float pr = (x*x + y*y) / (windowSize / 2.0) / (windowSize / 2.0) ;
-            average += (fluxmapL[i] + fluxmapU[i])/ (float) pixss;
-            total += (fluxmapL[i] + fluxmapU[i]);// * (1 + pr) * (1 + pr) / 4.0;
+            total += (fluxmap[i]);// * (1 + pr) * (1 + pr) / 4.0;
         }else{
             continue;
         }
-        if(fluxmax <= fluxmapL[i]) fluxmax = fluxmapL[i];
-        else if(fluxmin >= fluxmapL[i]) fluxmin = fluxmapL[i];
-        if(fluxmax <= fluxmapU[i]) fluxmax = fluxmapU[i];
-        else if(fluxmin >= fluxmapU[i]) fluxmin = fluxmapU[i];
+		
+        if(fluxmax <= fluxmap[i]) fluxmax = fluxmap[i];
+        else if(fluxmin >= fluxmap[i]) fluxmin = fluxmap[i];
     }
-    
-    average /= 2.0;
+
+    average = total / (float) pixss;
     printf("min = %f, max = %f\n", fluxmin, fluxmax);
     fluxmax = (fluxmax + average) / 4;
     fluxmin = (average + fluxmin) / 8;
-    //average = average * 2.0 * pixss *params->FLUXFACTOR/(4*PI/12.0/512.0/512.0);
+
     this->totalFlux = total;
     printf("fmin = %f, fmax = %f, average: %f total: %f\n", fluxmin, fluxmax, average, total);
-    //fbufferU->unbindBuf();
-    
-    //delete pic;
 }
 
 void render::drawImage(){
@@ -339,15 +259,15 @@ void render::drawImage(){
         saveFluxMap();
     }
     
-    if(params->HEALPIXFILE != ""){
+    /*if(params->HEALPIXFILE != ""){
         printf("Convert and save to healpix file \"%s\"...\n", (params->HEALPIXFILE).c_str());
         saveHealPix();
-    }
+    }*/
     
-    fbufferL->bindTex();
-    cshaderL -> begin();
-    cshaderL -> setminmax(fluxmin, fluxmax);
-    cbufferL -> bindBuf();
+    fbuffer->bindTex();
+    cshader -> begin();
+    cshader -> setminmax(fluxmin, fluxmax);
+    cbuffer -> bindBuf();
 
     glDisable(GL_DEPTH_TEST);
     glDisable(GL_POINT_SPRITE);
@@ -372,49 +292,13 @@ void render::drawImage(){
     glBindTexture(GL_TEXTURE_2D, 0);
     glFlush();
     
-    cbufferL ->unbindBuf();
-    cshaderL -> end();
-    fbufferL -> unbindTex();
-    
-    
-    fbufferU->bindTex();
-    cshaderU -> begin();
-    cshaderU -> setminmax(fluxmin, fluxmax);
-    cbufferU -> bindBuf();
-    
-    glDisable(GL_DEPTH_TEST);
-    glDisable(GL_POINT_SPRITE);
-    glClearColor(0, 0, 0, 0);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    
-    
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    glOrtho(-orthsize, orthsize, -orthsize, orthsize, -100, 100);
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-    
-    glBegin(GL_QUADS);
-    
-    glTexCoord2i(0, 0); glVertex3f(-orthsize, -orthsize, 10);
-    glTexCoord2i(0, 1); glVertex3f(-orthsize, orthsize, 10);
-    glTexCoord2i(1, 1); glVertex3f(orthsize,  orthsize, 10);
-    glTexCoord2i(1, 0); glVertex3f(orthsize,  -orthsize, 10);
-    
-    glEnd();
-    glBindTexture(GL_TEXTURE_2D, 0);
-    glFlush();
-    
-    cbufferU ->unbindBuf();
-    cshaderU -> end();
-    fbufferU -> unbindTex();
-
-
+    cbuffer ->unbindBuf();
+    cshader -> end();
+    fbuffer -> unbindTex();
 }
 
 void rendsenc(){
-    //glClientActiveTexture(GL_TEXTURE0);
-	glViewport(0,0,2*WSIZE, WSIZE); 
+	glViewport(0,0,WSIZE, WSIZE); 
     glActiveTexture(GL_TEXTURE0);
 
     
@@ -430,29 +314,18 @@ void rendsenc(){
 
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    glOrtho(-4, 4, -2, 2, -100, 100);
+    glOrtho(-2, 2, -2, 2, -100, 100);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 
-    CBL ->bindTex();
+    CB ->bindTex();
     //glPushMatrix();
     //glTranslatef(-0.02, 0, 0);
     glBegin(GL_QUADS);
-    glTexCoord2i(0, 0); glVertex3f(-4, -2, 10);
-    glTexCoord2i(0, 1); glVertex3f(-4, 2, 10);
-    glTexCoord2i(1, 1); glVertex3f(0,  2, 10);
-    glTexCoord2i(1, 0); glVertex3f(0,  -2, 10);
-    glEnd();
-    //glPopMatrix();
-    
-    CBU ->bindTex();
-    //glPushMatrix();
-    //glTranslatef(0.02, 0, 0);
-    glBegin(GL_QUADS);
-    glTexCoord2i(0, 0); glVertex3f(0, -2, 10);
-    glTexCoord2i(0, 1); glVertex3f(0, 2, 10);
-    glTexCoord2i(1, 1); glVertex3f(4,  2, 10);
-    glTexCoord2i(1, 0); glVertex3f(4,  -2, 10);
+    glTexCoord2i(0, 0); glVertex3f(-2, -2, 10);
+    glTexCoord2i(0, 1); glVertex3f(-2, 2, 10);
+    glTexCoord2i(1, 1); glVertex3f(2,  2, 10);
+    glTexCoord2i(1, 0); glVertex3f(2,  -2, 10);
     glEnd();
     //glPopMatrix();
 
@@ -475,21 +348,22 @@ void ReshapeFunc(int width, int height)
 void savePic(){
     glReadBuffer(GL_FRONT);
     printf("Save pic to file: %s ...\n", picfile.c_str());
+
     //save to file
     ofstream fScreenshot(picfile.c_str(), ios::out | ios::binary);
     if (!fScreenshot.good()) {
         printf("Open pic file error.\n");
     }else{
-        GLubyte *pixels = new GLubyte[WSIZE*2*WSIZE*3];
-        glReadPixels(0, 0, WSIZE*2, WSIZE, GL_RGB,
+        GLubyte *pixels = new GLubyte[WSIZE*WSIZE*3];
+        glReadPixels(0, 0, WSIZE, WSIZE, GL_RGB,
                      GL_UNSIGNED_BYTE, pixels);
         unsigned char TGAheader[12]={0,0,2,0,0,0,0,0,0,0,0,0};
-        unsigned char header[6] = {WSIZE*2%256,WSIZE*2/256,
+        unsigned char header[6] = {WSIZE%256,WSIZE/256,
             WSIZE%256,WSIZE/256,24,0};
         //convert to BGR format
         unsigned char temp;
         unsigned int i = 0;
-        while (i < WSIZE*2*WSIZE*3)
+        while (i < WSIZE*WSIZE*3)
         {
             temp = pixels[i];       //grab blue
             pixels[i] = pixels[i+2];//assign red to blue
@@ -498,7 +372,7 @@ void savePic(){
         }
         fScreenshot.write((char *)TGAheader, 12);
         fScreenshot.write((char *)header, 6);
-        fScreenshot.write((char *)pixels, WSIZE*2*WSIZE*3);
+        fScreenshot.write((char *)pixels, WSIZE*WSIZE*3);
         fScreenshot.close();
         printf("Saving ok.\n");
         delete pixels;
@@ -524,7 +398,7 @@ void render::start(int argc, char **argv){
     //initialize glut and glew
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
-    glutInitWindowSize(2 * windowSize, windowSize);
+    glutInitWindowSize(windowSize, windowSize);
     glutCreateWindow("Dark Matter rendering!");
 
     if(!(params->isOnScreenRend)){
@@ -554,27 +428,18 @@ void render::start(int argc, char **argv){
     //set up shaders and buffers
     if(!initialed){
 
-        fshaderL = new fluxShader(params->spriteVertexShader, params->spriteFragmentShader);
-        cshaderL = new colorShader(params->colorvertexshader, params->colorfragmentshader);
-        fbufferL = new fluxBuffer(windowSize, windowSize);
-        cbufferL = new colorBuffer(windowSize, windowSize);
-        fbufferL->setBuffer();
-        
-        fshaderU = new fluxShader(params->spriteVertexShader, params->spriteFragmentShader);
-        cshaderU = new colorShader(params->colorvertexshader, params->colorfragmentshader);
-        fbufferU = new fluxBuffer(windowSize, windowSize);
-        cbufferU = new colorBuffer(windowSize, windowSize);
-        fbufferU->setBuffer();
-        
+        fshader = new fluxShader(params->spriteVertexShader, params->spriteFragmentShader);
+        cshader = new colorShader(params->colorvertexshader, params->colorfragmentshader);
+        fbuffer = new fluxBuffer(windowSize, windowSize);
+        cbuffer = new colorBuffer(windowSize, windowSize);
+        fbuffer->setBuffer();      
         initialed = true;
     }
 
     //set the global pointers
     WSIZE = windowSize;
     POINTSIZE = pointSize;
-    CBL = cbufferL;
-    CBU = cbufferU;
-    CB = CBL;
+    CB = cbuffer;
 
     //initialize enviroment    
     init();
@@ -588,20 +453,16 @@ void render::start(int argc, char **argv){
     timeval tim;
     gettimeofday(&tim, NULL);
     double t1=tim.tv_sec+(tim.tv_usec/1000000.0);   
-
-    //cbufferL->setBuffer();
-    //cbufferU->setBuffer();
-    
+  
     drawFlux();
 
-    cbufferL->setBuffer();
-    cbufferU->setBuffer();
+    cbuffer->setBuffer();
     drawImage();
 	
-    CBL ->unbindBuf();
-    CBU ->unbindBuf();
-    delete fbufferL;
-    delete fbufferU;
+    CB ->unbindBuf();
+
+    delete fbuffer;
+
     gettimeofday(&tim, NULL);
     double t2=tim.tv_sec+(tim.tv_usec/1000000.0);
     if(params->isTimeMeasure){
@@ -612,8 +473,9 @@ void render::start(int argc, char **argv){
                t2-t1);
     }
     cout << "--------------------------------------------------"<<endl;
-    delete fluxmapL;
-    delete fluxmapU;
+
+    delete fluxmap;
+
     picfile = params->PICFILE;
     
     if(params->isOnScreenRend){
@@ -624,7 +486,7 @@ void render::start(int argc, char **argv){
         glutKeyboardFunc(&KeyboardFunc);
         glutMainLoop();
     }else{
-		fluxBuffer * screenbuffer = new fluxBuffer(2.0*windowSize, windowSize);
+		fluxBuffer * screenbuffer = new fluxBuffer(windowSize, windowSize);
 		screenbuffer->setBuffer();
 		screenbuffer->bindBuf();
         rendsenc();
@@ -636,15 +498,28 @@ void render::start(int argc, char **argv){
     
 
     
-    delete fshaderL;
-    delete fshaderU;   
-    delete cshaderL;
-    delete cshaderU;
-    delete cbufferU;
-    delete cbufferL; 
+    delete fshader;
+    delete cshader;
+    delete cbuffer; 
 
 }
 
+
+void render::saveFluxMap(){
+    ofstream output_file ((params->OUTFILE).c_str(), ios::out | ios::binary);
+
+    if(output_file.good()){
+        int si = (int) (params -> WSIZE);
+        output_file.write ((char *) &si, sizeof(int)); 
+        output_file.write ((char *)fluxmap, si * si * sizeof(Real));
+    }else{
+        cout << "Writing Error!";
+    }
+
+    output_file.close();
+}
+
+/*
 double render::_getpixflux(int x1, int y1, bool isupshere){
     //inside the circle
     double f11 = 0;
@@ -788,16 +663,7 @@ void render::saveHealPix(){
     free(healmap);
 }
 
-void render::saveFluxMap(){
-    ofstream output_file ((params->OUTFILE).c_str(), ios::out | ios::binary);
-    if(output_file.good()){
-        int si = (int) (params -> WSIZE);
-        output_file.write ((char *) &si, sizeof(int)); 
-        output_file.write ((char *)fluxmapL, si * si * sizeof(Real));
-        output_file.write ((char *)fluxmapU, si * si * sizeof(Real));
-    }else{
-        cout << "Writing Error!";
-    }
-    output_file.close();
-}
+
+*/
+
 

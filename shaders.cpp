@@ -28,8 +28,44 @@ void fluxShader::loadUniform(){
 
 
 
+void fluxShader::setrotm(){
 
-void fluxShader::setrotm(bool updown){
+    double x = align_vec[0];
+    double y = align_vec[1];
+    double z = align_vec[2];
+    double r = sqrt(x*x+y*y+z*z);
+    double z1 = x / r;
+    double z2 = y / r;
+    double z3 = z / r;
+    //Rotate or not?
+    for(int i = 0; i < 9 ; i ++){
+        rotmatrix[i] = 0;
+    }
+    
+    r = sqrt(z1 * z1 + z2 * z2);
+    rotmatrix[0] = -z2 / r;
+    rotmatrix[3] = +z1 / r;
+    rotmatrix[6] = 0;
+
+    r = sqrt(z1 * z3 * z1 * z3 + z2 * z3 * z2 * z3 + (z1*z1 + z2*z2) * (z1*z1 + z2 * z2));
+    rotmatrix[1] = -z1 * z3 / r;
+    rotmatrix[4] = -z2 * z3 / r;
+    rotmatrix[7] = (z1 * z1 + z2 * z2) / r;
+
+    rotmatrix[2] = -z1;
+    rotmatrix[5] = -z2;
+    rotmatrix[8] = -z3;
+    
+    printf("ROTMATRIX:\n");
+    printf("%f %f %f\n", rotmatrix[0], rotmatrix[1], rotmatrix[2]);
+    printf("%f %f %f\n", rotmatrix[3], rotmatrix[4], rotmatrix[5]);
+    printf("%f %f %f\n", rotmatrix[6], rotmatrix[7], rotmatrix[8]);
+
+    return; 
+}
+
+
+/*void fluxShader::setrotm(bool updown){
     REAL obsvec[] = {opos[0] - cpos[0], opos[1] - cpos[1], opos[2] - cpos[2]};
     REAL radius = sqrt(obsvec[0]*obsvec[0] + obsvec[1]*obsvec[1] + obsvec[2]*obsvec[2]);
     Real otheta = acos(obsvec[2]/radius);
@@ -109,6 +145,9 @@ void fluxShader::setrotm(bool updown){
         0.0, cos(gamma_t), sin(gamma_t),
         0.0, sin(gamma_t), cos(gamma_t)};
     
+	
+    
+
     //static Real rottmp[3][3];       
     for (int i = 0; i<3; i++){
         for (int j =0; j<3; j++){
@@ -123,13 +162,13 @@ void fluxShader::setrotm(bool updown){
     
 
 	//Rotate or not?
-    /*for(int i = 0; i < 9 ; i ++){
-        rotmatrix[i] = 0;
-    }
+    //for(int i = 0; i < 9 ; i ++){
+    //    rotmatrix[i] = 0;
+    //}
     
-    rotmatrix[0] = 1;
-    rotmatrix[4] = 1;
-    rotmatrix[8] = 1;*/
+    //rotmatrix[0] = 1;
+    //rotmatrix[4] = 1;
+    //rotmatrix[8] = 1;
     
     if(updown){
         rotmatrix[2] *= -1;
@@ -143,13 +182,14 @@ void fluxShader::setrotm(bool updown){
 
     return;                 
     
-}
+}*/
 
-void fluxShader::setrotmatrix(REAL * alignvec, REAL * obsvec, REAL * centvec, bool updown){
+
+void fluxShader::setrotmatrix(REAL * alignvec, REAL * obsvec, REAL * centvec){
     this->align_vec = alignvec;
     this->opos = obsvec;
     this->cpos = centvec;
-    setrotm(updown);
+    setrotm();
     glUniformMatrix3fv(rotmloc, 1, GL_FALSE, this->rotmatrix);
     
 }

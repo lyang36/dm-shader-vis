@@ -46,7 +46,7 @@ private:
     GLint oposloc;
     GLint geofacloc;
     GLint isnormmaploc;
-    void setrotm(bool updown);  //setup rotation matrix, 9 variables
+    void setrotm();  //setup rotation matrix, 9 variables
                                 //updown: true/up; false/down
     void loadUniform();
     REAL * align_vec;
@@ -54,30 +54,18 @@ private:
     REAL * cpos;
     REAL rotmatrix[9];
 public:
-    //void setzaxis3f(REAL x, REAL y, REAL z); //set vpos
-    //void setzaxis3fv(REAL * vpos);
-    //void setyaxis3f(REAL x, REAL y, REAL z); //set vpos
-    //void setyaxis3fv(REAL * vpos);
-    //void setxaxis3f(REAL x, REAL y, REAL z); //set vpos
-    //void setxaxis3fv(REAL * vpos);
+
     void setopos3f(REAL x, REAL y, REAL z); //set opos
     void setopos3fv(REAL * opos);
     void setgeofac3f(REAL x, REAL y, REAL z); //set opos
     void setgeofac3fv(REAL * geo);
-    void setrotmatrix(REAL * alignvec, REAL * obsvec, REAL * centervec, bool updown);     //setup rotation matrix
+    void setrotmatrix(REAL * alignvec, REAL * obsvec, REAL * centervec);     //setup rotation matrix
                                             //alignvec has 3 vars
     void setusenormmap(bool isnm);          //whether use the norm map
     
     fluxShader(string v, string f){
         
 //#ifdef _WIN32 || _WIN64
-/*#if defined(_WIN32) || defined(_WIN64)
-        vfile = "shaderfiles\\flux.vert";
-        ffile = "shaderfiles\\flux.frag";
-#else
-        vfile = "./shaderfiles/flux.vert";
-        ffile = "./shaderfiles/flux.frag";
-#endif*/
         vfile = v;
         ffile = f;
         shaderManager SM;

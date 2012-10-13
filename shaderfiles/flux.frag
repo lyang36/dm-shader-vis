@@ -40,24 +40,35 @@ float projprofile(vec2 xy, float fc, float dtheta){
 
 void main(){
     //float dsize = particle.r;
+	float lim_r = 0.5;
     float newsize = particle.r;
     vec2 xyc = gl_Color.rg;
     vec2 coor = xyc *geofac.y / 2.0;
     float flux = 0.0;
     float fluxfac = gl_Color.b;
+
+	float dtheta = gl_Color.a;
+	vec2 p = floor(newsize * vec2(gl_TexCoord[0].s,gl_TexCoord[0].t));
+			
+	p = (p+0.5) / newsize;
+	p = 2.0*(p-0.5);
+	float u = dot(p, p);
+	if (u > 1.0) discard;
+			
+	vec2 xyp = p * (newsize / 2.0) + coor;
+	vec2 xyr = xyp / (geofac.y / 2.0);
+	float pr2 = dot(xyr, xyr);
+	
+	//seting up the view angle
+	if(pr2 > lim_r * lim_r){
+		gl_FragColor = vec4(0, 0, 0, 1.0);
+		return;
+	}
+
 	if(newsize != 1.0){
 		if(fluxfac != 0.0){
-			float dtheta = gl_Color.a;
-			vec2 p = floor(newsize * vec2(gl_TexCoord[0].s,gl_TexCoord[0].t));
-			
-			p = (p+0.5) / newsize;
-			p = 2.0*(p-0.5);
-			float u = dot(p, p);
-			if (u > 1.0) discard;
-			
-			vec2 xyp = p * (newsize / 2.0) + coor;
-			vec2 xyr = xyp / (geofac.y / 2.0);
-			float pr2 = dot(xyr, xyr);
+
+
 			flux = fluxfac * 4.0/(1.0+pr2)/(1.0+pr2) * profile(prev(xyr), dtheta);
 			//flux = fluxfac;
 			if(usenormmap == 1){
