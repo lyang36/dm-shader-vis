@@ -16,8 +16,12 @@ uniform vec3 geofac;
 varying vec4 particle;    //the radius of the particle circle and the coordianate
         //size, x, y, z
 
+varying float viewangle_scale_factor; //the same with scale factor
+float scale_factor;   //the scale factor for different view angle
+
 uniform int usenormmap;    //whether use the norm map? true: 1 else:0
-            
+
+uniform float lim_angle;   //only draw the particles with angle larger than this one. For full semi-sphere drawing, this angle should be PI/2.0. Otherwise it should be larger. the view angle will then be PI - lim_angle
 
 //This is very important, must be checked
 float profile(vec3 r1,float dtheta){
@@ -38,6 +42,7 @@ float profile(vec3 r1,float dtheta){
 
 //reverse stereoprojection
 vec3 prev(vec2 xy){
+    xy /= scale_factor;
     float r2 = xy.x*xy.x + xy.y*xy.y;
     return vec3(2.0 * xy.x/(1.0 + r2), 2.0 * xy.y/(1.0 + r2), (r2 - 1.0)/(r2 + 1.0));
 }
@@ -84,10 +89,6 @@ float calc_norm1(float theta0){
 }
 
 void main(){
-/*    gl_PointSize = 100.0;
-    gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;
-    gl_TexCoord[0] = gl_MultiTexCoord0;
-    gl_FrontColor = vec4(xaxis.x,yaxis.y, zaxis.z,0);*/
     
     vec4 newpos;
    //find the angle
@@ -114,10 +115,12 @@ void main(){
     float costheta = npvec.z;//dot(npvec, nzaxis);
     //costheta -3.0 / 5.0;
     float theta = acos(costheta);      //0.955
+    scale_factor = 1.0 / (sin(lim_angle) / (1.0 - cos(lim_angle)));
+    viewangle_scale_factor = scale_factor;
     
     //vec3 newpvec = vec3(dot(npvec, nxaxis), dot(npvec, nyaxis),costheta);
     
-    if((theta > PI / 2.0 || theta + dtheta >= PI / 2.0) && dtheta < PI / 2.0)
+    if((theta > lim_angle || theta + dtheta >= lim_angle) && dtheta < PI / 2.0)
     {
         float sintheta = sin(theta);
         float sinphi;
@@ -150,10 +153,17 @@ void main(){
         float prho = (a + b)/2.0;
         xc = prho * cosphi;
         yc = prho * sinphi;
+        
+        //xc, yc, r scale:
+        xc *= scale_factor;
+        yc *= scale_factor;
+        r *= scale_factor;
+        
         float newsize = floor(r *geofac.y); ///!!!!!!!!!!!!!!!!
-
         
         newpos = vec4(xc * geofac.x, yc * geofac.x, 0.0, 1.0);
+        
+
         
         if(newsize > geofac.z){
             dsize = geofac.z / newsize * r;
@@ -169,8 +179,6 @@ void main(){
     
 
         //calculate normfac
-        //particle must be written before fhe nomal fac
-        //particle = vec4(dsize, npvec.x, npvec.y, npvec.z);
         particle = vec4(newsize, npvec.x, npvec.y, npvec.z);
         
         float normfac;

@@ -1,10 +1,10 @@
-CC=g++
 #MACOS
-LFLAGS= -lGL -lglut -lGLEW
+
+CC=g++
+
+LFLAGS=-framework Carbon -framework OpenGL -framework GLUT
 IFLAG= -I /usr/include/GL/ 
-#-I /home/lyang/soft/glew/include/ 
-#GLEWO=/usr/lib/libGLEW.a 
-#GLEWO=/home/lyang/soft/glew/lib/libGLEW.a
+GLEWO=/usr/lib/libGLEW.a 
 
 all: obj
 	$(CC) *.o $(GLEWO) -o dmvis $(LFLAGS)
@@ -12,7 +12,7 @@ all: obj
 
 obj:
 	$(CC) -c -Wall main.cpp buffers.cpp pix2ang_ring.cpp shaders.cpp Parameter.cpp\
-                   render.cpp ang2pix_ring.cpp shaderManager.cpp datareader.cpp $(IFLAG)  
+		   render.cpp ang2pix_ring.cpp shaderManager.cpp datareader.cpp	$(IFLAG)  
 
 clean:
 	rm -f *.o

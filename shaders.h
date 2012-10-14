@@ -46,6 +46,7 @@ private:
     GLint oposloc;
     GLint geofacloc;
     GLint isnormmaploc;
+    GLint lim_angleloc;
     void setrotm();  //setup rotation matrix, 9 variables
                                 //updown: true/up; false/down
     void loadUniform();
@@ -62,6 +63,8 @@ public:
     void setrotmatrix(REAL * alignvec, REAL * obsvec, REAL * centervec);     //setup rotation matrix
                                             //alignvec has 3 vars
     void setusenormmap(bool isnm);          //whether use the norm map
+    
+    void setlimitangle(float lim_angle);    //the observation angle limited
     
     fluxShader(string v, string f){
         

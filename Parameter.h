@@ -74,5 +74,11 @@ public:
     bool isTimeMeasure;       //whether measure rendering time
     bool isOnScreenRend;    //whether show picture on screen
 
+    float viewAngle;        //the view angle of the observer, default: PI/2
+
+
+    float viewDistance;     //the distance from the observation point to the given center. In kpc.
+    float viewTheta, viewPhi; //The theta and phi relative to the given center.
+    float disFactor;          //the distance scale factor, convert the simulaiton coordinates to kpc. 
 };
 #endif

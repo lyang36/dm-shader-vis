@@ -7,6 +7,9 @@ uniform vec3 geofac;
 varying vec4 particle;
 uniform sampler2D normmap;
 uniform int usenormmap;    //whether use the norm map? true: 1 else:0
+//float lim_r = 0.5;         //the limite of the r observed, beyond which the fragment will be discarded.
+
+varying float viewangle_scale_factor; //the same with scale factor
 
 
 //This is very important, must be checked 
@@ -28,6 +31,7 @@ float profile(vec3 r1,float dtheta){
 
 //reverse stereoprojection
 vec3 prev(vec2 xy){
+    xy /= viewangle_scale_factor;
     float r2 = xy.x*xy.x + xy.y*xy.y;
     return vec3(2.0 * xy.x/(1.0 + r2), 2.0 * xy.y/(1.0 + r2), (r2 - 1.0)/(r2 + 1.0));
 }
@@ -39,8 +43,6 @@ float projprofile(vec2 xy, float fc, float dtheta){
 
 
 void main(){
-    //float dsize = particle.r;
-	float lim_r = 0.5;
     float newsize = particle.r;
     vec2 xyc = gl_Color.rg;
     vec2 coor = xyc *geofac.y / 2.0;
@@ -60,10 +62,9 @@ void main(){
 	float pr2 = dot(xyr, xyr);
 	
 	//seting up the view angle
-	if(pr2 > lim_r * lim_r){
-		gl_FragColor = vec4(0, 0, 0, 1.0);
-		return;
-	}
+	//if(pr2 > lim_r * lim_r){
+    //    discard;
+	//}
 
 	if(newsize != 1.0){
 		if(fluxfac != 0.0){

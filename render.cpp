@@ -33,6 +33,7 @@ colorBuffer * CB, *CBL, *CBU;       //for final rendering
 static unsigned int WSIZE, POINTSIZE;
 string picfile;
 bool isonscreen = false;
+float LIM_R;
 
 void render::init(){
     glEnable(GL_TEXTURE_2D);
@@ -111,8 +112,9 @@ void render::drawFlux(){
         fshader->setopos3f(params->oposx, params->oposy, params->oposz);
         fshader->setrotmatrix(params->vvec, params->opos, params->cpos);
         fshader->setusenormmap(params->isUseNormMap);
+        fshader->setlimitangle(params->viewAngle);
         
-        fshader->end();    
+        fshader->end();
     
     }
     
@@ -227,6 +229,7 @@ void render::findMinMax(float &fluxmin, float &fluxmax){
         float x = (int)(i/windowSize) - windowSize / 2.0;
         float y = (int)(i%windowSize) - windowSize / 2.0;
         float r = windowSize / 2.0;
+        r = r * sin(PI - params->viewAngle) / (1 - cos(PI - params->viewAngle));
         if(x*x + y*y <= r*r){
             total += (fluxmap[i]);// * (1 + pr) * (1 + pr) / 4.0;
         }else{
@@ -259,10 +262,6 @@ void render::drawImage(){
         saveFluxMap();
     }
     
-    /*if(params->HEALPIXFILE != ""){
-        printf("Convert and save to healpix file \"%s\"...\n", (params->HEALPIXFILE).c_str());
-        saveHealPix();
-    }*/
     
     fbuffer->bindTex();
     cshader -> begin();
@@ -320,12 +319,16 @@ void rendsenc(){
 
     CB ->bindTex();
     //glPushMatrix();
-    //glTranslatef(-0.02, 0, 0);
+    //float r = LIM_R;
     glBegin(GL_QUADS);
-    glTexCoord2i(0, 0); glVertex3f(-2, -2, 10);
-    glTexCoord2i(0, 1); glVertex3f(-2, 2, 10);
-    glTexCoord2i(1, 1); glVertex3f(2,  2, 10);
-    glTexCoord2i(1, 0); glVertex3f(2,  -2, 10);
+    //glTexCoord2f((1-r) / 2.0 , (1-r) / 2.0); glVertex3f(-2, -2, 10);
+    //glTexCoord2f((1-r) / 2.0 , (1+r) / 2.0); glVertex3f(-2, 2, 10);
+    //glTexCoord2f((1+r) / 2.0, (1+r) / 2.0); glVertex3f(2,  2, 10);
+    //glTexCoord2f((1+r) / 2.0, (1-r) / 2.0); glVertex3f(2,  -2, 10);
+    glTexCoord2f(0, 0); glVertex3f(-2, -2, 10);
+    glTexCoord2f(0, 1); glVertex3f(-2, 2, 10);
+    glTexCoord2f(1, 1); glVertex3f(2,  2, 10);
+    glTexCoord2f(1, 0); glVertex3f(2,  -2, 10);
     glEnd();
     //glPopMatrix();
 
@@ -392,9 +395,12 @@ void KeyboardFunc(unsigned char key, int x, int y)
 
 
 void render::start(int argc, char **argv){
+    //float r = sin(PI - params->viewAngle) / (1 - cos(PI - params->viewAngle));
+    //LIM_R = r;
+    
     windowSize = params->WSIZE;
     pointSize = params->PSIZE;
-
+    
     //initialize glut and glew
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
@@ -518,152 +524,3 @@ void render::saveFluxMap(){
 
     output_file.close();
 }
-
-/*
-double render::_getpixflux(int x1, int y1, bool isupshere){
-    //inside the circle
-    double f11 = 0;
-    int d = round(windowSize / 2.0);
-    double _r = sqrt((double)(x1 * x1 + y1 * y1)/(double)(d * d));
-    if(x1 * x1 + y1 * y1 <= d * d){
-        if(x1 < -(d)) x1 = -(d);
-        if(x1 > d-1) x1 = d-1;
-        if(y1 < -(d-1)) y1 = -(d-1);
-        if(y1 > d) y1 = d;
-        if(isupshere){
-            f11 = fluxmapU[(d - y1) * windowSize + x1 + d];
-        }else{
-            f11 = fluxmapL[(d - y1) * windowSize + x1 + d];
-        }
-        f11 =  f11;// / (4.0 / (1 + _r*_r)/(1 + _r*_r));
-    }else{
-        //converted it to theta phi and add it to another sphere
-        double _y = (double) y1 / (double)d;
-        double _x = (double) x1 / (double)d;
-        double _sinphi = _y / _r;
-        double _cosphi = _x / _r;
-        double _theta;
-        _theta = (_r == 0.0) ? PI : 2.0 * atan(1.0 / _r);
-        _theta = PI - _theta;
-        double r1 = sin(_theta)/(1-cos(_theta));
-        double _px = r1 * _cosphi;
-        double _py = r1 * _sinphi;
-        int kx = floor((_px + 1.0) * windowSize / 2);
-        int ky = floor((_py + 1.0) * windowSize / 2);
-        
-        double _flux = 0;
-        if(ky < 1) kx = 1;
-        if(ky > (int)windowSize) ky = windowSize;
-        if(kx < 0) kx = 0;
-        if(kx > (int)windowSize - 1) kx = windowSize - 1;
-        if(!isupshere){
-            _flux = fluxmapU[(windowSize - ky) * windowSize + kx];
-        }
-        else{
-            _flux = fluxmapL[(windowSize - ky) * windowSize + kx];
-        }
-        f11 = _flux;// / (4.0 / (1 + r1*r1)/(1 + r1*r1));
-    }
-    return f11;
-
-}
-
-
-void render::saveHealPix(){
-    double * healmap;
-    int nside = params -> NSIDE;
-    //int pixss = windowSize * windowSize;
-    int npix = nside * nside * 12;
-    healmap = (double *) calloc(npix, sizeof(double));
-    if(healmap == NULL){
-        printf("Not enough memory, cannot convert to healpix map!\n");
-        return;
-    }
-    //double domega = 4.0 * PI / (double) npix;
-    //double detheta = sqrt(domega);
-    double theta;
-    double phi;
-    
-    double _rffmin = 1.0e36;
-    double _rffmax = 0.0;
-    double total_f = 0.0;
-
-    
-    for(int i = 0; i < npix; i++){
-        //double x, y,r, factor;
-        //int j;
-        pix2ang_ring(nside, i, &theta, &phi);
-        //now we have theta and phi and dtheta
-        //converte (theta, phi, dtheta) to the projectio plane, we have
-        phi = 2*PI - phi + PI;
-
-        
-        bool isupshere = false;
-        if(theta < PI/2){
-            theta = PI - theta;
-            isupshere = true;
-        }
-        
-        int d = round(windowSize / 2.0);
-        //bilinear interpolation
-        double pr = sin(theta)/(1-cos(theta));
-        double pxc = pr * cos(phi);
-        double pyc = pr * sin(phi);
-        //double sintpr = sin(theta+detheta);
-        //double sintmr = sin(theta-detheta);
-        //double costpr = cos(theta+detheta);
-        //double costmr = cos(theta-detheta);
-        //double pxr = (sintmr/(1-costmr)-sintpr/(1-costpr))/2.0;
-
-        
-        double xc = (pxc) * (double)d;
-        double yc = (pyc) * (double)d;
-        double x1 = floor(xc);
-        double x2 = x1 + 1;
-        double y1 = floor(yc);
-        double y2 = y1 + 1;
-        //printf("reading %d\n", i);
-        
-        double f11 = _getpixflux(round(x1), round(y1), isupshere);
-        double f12 = _getpixflux(round(x1), round(y2), isupshere);
-        double f21 = _getpixflux(round(x2), round(y1), isupshere);
-        double f22 = _getpixflux(round(x2), round(y2), isupshere);
-        
-        double flux = 0;
-        double fr1 = (x2 - xc) / (x2 - x1) * f11 + (xc - x1) / (x2 - x1) * f21;
-        double fr2 = (x2 - xc) / (x2 - x1) * f12 + (xc - x1) / (x2 - x1) * f22;
-        flux = (y2 - yc) / (y2 - y1) * fr1 + (yc - y1) / (y2 - y1) * fr2;
-        
-        healmap[i] = flux / (4.0 / (1 + pr*pr)/(1 + pr*pr)) * windowSize * windowSize / 4.0;
-        //printf("read ok %d\n", i);
-        total_f += healmap[i];
-        // * 
-        //4 * PI * (windowSize * windowSize) / npix;// / (4.0 / (1 + pr*pr)/(1 + pr*pr));;
-        // * params->FLUXFACTOR / 
-        if(flux > _rffmax) _rffmax = flux;
-        if(flux < _rffmin) _rffmin = flux;
-        
-    }
-    float _ft = 0;
-    for(int i = 0; i < npix; i++){
-        healmap[i] = healmap[i] * params->FLUXFACTOR;// / total_f * totalFlux * params->FLUXFACTOR /domega;
-        _ft += healmap[i];// / total_f * totalFlux * params->FLUXFACTOR /domega;;
-    }
-    
-    printf("%f %f total: %f %f times %f %d\n", _rffmax, _rffmin, total_f * (4*PI/npix), _ft, total_f * (4*PI/npix) / totalFlux, npix/(2*windowSize*windowSize));
-    cout.flush();
-        
-    ofstream output_file ((params->HEALPIXFILE).c_str(), ios::out | ios::binary);
-    if(output_file.good()){
-        output_file.write ((char *)healmap, 12 * nside * nside * sizeof(double));
-    }else{
-        cout << "Writing Error!";
-    }
-    output_file.close();
-    free(healmap);
-}
-
-
-*/
-
-

@@ -3,6 +3,7 @@
 #include <sstream>
 #include <iostream>
 #include <cstdlib>
+#include <cmath>
 #include "Parameter.h"
 
 using namespace std;
@@ -25,11 +26,18 @@ Parameter::Parameter(string conf){
     OUTFILE = "";
     HEALPIXFILE = "";
     PICFILE = "";
+    
+    viewDistance = 8;
+    viewTheta = 0.0;
+    viewPhi = 0.0;
+    disFactor = 40000.0;            //?kpc
    
     isUseNormMap = false;
     isOnScreenRend = false;
     isTimeMeasure = false;
     conffile = conf;
+
+    viewAngle = PI / 2.0;
 
 	#if defined(_WIN32) || defined(_WIN64)
         SHADERDIR = "";
@@ -96,7 +104,7 @@ bool Parameter::readParameter(){
                     //line_buf >> DATAFILE;
                 isUseNormMap = true;
                 cout << "Use norm map? " << isUseNormMap << endl;
-            }else if(word == "OPOS"){
+            }/*else if(word == "OPOS"){
                 line_buf >> oposx;
                 line_buf >> oposy;
                 line_buf >> oposz;
@@ -104,7 +112,7 @@ bool Parameter::readParameter(){
                 opos[1] = oposy;
                 opos[2] = oposz;
                 printf("OPOS: %f, %f, %f\n", oposx, oposy, oposz);
-            }else if(word == "CPOS"){
+            }*/else if(word == "CPOS"){
                 line_buf >> cposx;
                 line_buf >> cposy;
                 line_buf >> cposz;
@@ -112,7 +120,19 @@ bool Parameter::readParameter(){
                 cpos[1] = cposy;
                 cpos[2] = cposz;
                 printf("CPOS: %f, %f, %f\n", cposx, cposy, cposz);
-            }else if(word == "VVEC"){
+            }else if(word == "VIEWDISTANCE"){
+                line_buf >> viewDistance;
+                printf("View in distance of %f kpc\n", viewDistance);
+            }else if(word == "VIEWTHETA"){
+                line_buf >> viewTheta;
+                printf("View in theta of %f\n", viewTheta);
+            }else if(word == "VIEWPHI"){
+                line_buf >> viewPhi;
+                printf("View in phi of %f\n", viewPhi);
+            }else if(word == "DISFACTOR"){
+                line_buf >> disFactor;
+                printf("The length 1 of how many kpcs? %f\n", disFactor);
+            }/*else if(word == "VVEC"){
                 line_buf >> vposx;
                 line_buf >> vposy;
                 line_buf >> vposz;
@@ -120,7 +140,7 @@ bool Parameter::readParameter(){
                 vvec[1] = vposy;
                 vvec[2] = vposz;
                 printf("VPOS: %f, %f, %f\n", vposx, vposy, vposz);
-            }else if(word == "TEST"){
+            }*/else if(word == "TEST"){
                 line_buf >> TEST;
                 if(TEST != -1){
                     cout << "Test with " << TEST << " particles" << endl; 
@@ -173,10 +193,30 @@ bool Parameter::readParameter(){
             }else if(word == "ONSCREEN"){
                 isOnScreenRend = true;
                 cout << "Show picture on screen?" << isOnScreenRend << endl;
+            }else if(word == "VIEWANGLE"){
+                line_buf >> viewAngle;
+                cout << "Specify viewAngle: " << viewAngle << endl;
             }
         }
         //cout << word << " -- " << line << endl;
     }
     conf.close();
+    //Calculate the observation pos and view vector
+    vvec[0] = - sin(viewTheta) * cos(viewPhi);
+    vvec[1] = - sin(viewTheta) * sin(viewPhi) ;
+    vvec[2] = - cos(viewTheta);
+    vposx = vvec[0];
+    vposy = vvec[1];
+    vposz = vvec[2];
+    printf("VPOS: %f, %f, %f\n", vposx, vposy, vposz);
+    
+    opos[0] = viewDistance / disFactor * sin(viewTheta) * cos(viewPhi) + cposx;
+    opos[1] = viewDistance / disFactor * sin(viewTheta) * sin(viewPhi) + cposy;
+    opos[2] = viewDistance / disFactor * cos(viewTheta) + cposz;
+    oposx = opos[0];
+    oposy = opos[1];
+    oposz = opos[2];
+    printf("OPOS: %f, %f, %f\n", oposx, oposy, oposz);
+    
     return 0;
 }
