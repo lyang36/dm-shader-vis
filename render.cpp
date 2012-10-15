@@ -30,6 +30,7 @@
 using namespace std;
 
 colorBuffer * CB, *CBL, *CBU;       //for final rendering
+double VANGLE, VTHETA, VPHI, VDIS, DISMIN, DISMAX;
 static unsigned int WSIZE, POINTSIZE;
 string picfile;
 bool isonscreen = false;
@@ -255,7 +256,8 @@ void render::drawImage(){
     
     readFluxMap();
     findMinMax(fluxmin, fluxmax);
-    
+    DISMIN = fluxmin;
+    DISMAX = fluxmax;
     
     if(params->OUTFILE != ""){
         printf("Save to file \"%s\"...\n", (params->OUTFILE).c_str());
@@ -296,6 +298,23 @@ void render::drawImage(){
     fbuffer -> unbindTex();
 }
 
+
+void displaytext(string s, double x, double y){
+    glRasterPos2i(x, y);
+    double heightshift = 0.0;
+    void * font = GLUT_BITMAP_9_BY_15;
+    for (string::iterator i = s.begin(); i != s.end(); ++i)
+    {
+        char c = *i;
+        if(c == '\n'){
+            heightshift -= 15;
+            glRasterPos2i(x, y + heightshift);
+        }else{
+            glutBitmapCharacter(font, c);
+        }
+    }
+}
+
 void rendsenc(){
 	glViewport(0,0,WSIZE, WSIZE); 
     glActiveTexture(GL_TEXTURE0);
@@ -321,10 +340,6 @@ void rendsenc(){
     //glPushMatrix();
     //float r = LIM_R;
     glBegin(GL_QUADS);
-    //glTexCoord2f((1-r) / 2.0 , (1-r) / 2.0); glVertex3f(-2, -2, 10);
-    //glTexCoord2f((1-r) / 2.0 , (1+r) / 2.0); glVertex3f(-2, 2, 10);
-    //glTexCoord2f((1+r) / 2.0, (1+r) / 2.0); glVertex3f(2,  2, 10);
-    //glTexCoord2f((1+r) / 2.0, (1-r) / 2.0); glVertex3f(2,  -2, 10);
     glTexCoord2f(0, 0); glVertex3f(-2, -2, 10);
     glTexCoord2f(0, 1); glVertex3f(-2, 2, 10);
     glTexCoord2f(1, 1); glVertex3f(2,  2, 10);
@@ -332,9 +347,31 @@ void rendsenc(){
     glEnd();
     //glPopMatrix();
 
-    
+
     glBindTexture(GL_TEXTURE_2D, 0);
     glFlush();
+    
+    
+    glMatrixMode(GL_PROJECTION);
+    glPushMatrix();
+    glLoadIdentity();
+    gluOrtho2D(0.0, WSIZE, 0.0, WSIZE);
+    
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+    glLoadIdentity();
+    
+    
+    char ct[100];
+    sprintf(ct,"Distance: %3.2f kpc.\nF_min = %3.2f\nF_max = %3.2f \nTheta:%3.2f\nPhi:%3.2f ",VDIS,
+            DISMIN, DISMAX, VTHETA/PI*180.0, VPHI/PI*180.0);
+    displaytext(ct, 0, WSIZE-15);
+    
+    glMatrixMode(GL_MODELVIEW);
+    glPopMatrix();
+    
+    glMatrixMode(GL_PROJECTION);
+    glPopMatrix();
     
 	if(isonscreen){
 		glutSwapBuffers();
@@ -342,6 +379,8 @@ void rendsenc(){
 
 
 }
+
+
 
 void ReshapeFunc(int width, int height)
 {
@@ -400,6 +439,10 @@ void render::start(int argc, char **argv){
     
     windowSize = params->WSIZE;
     pointSize = params->PSIZE;
+    VANGLE = params->viewAngle;
+    VPHI = params->viewPhi;
+    VDIS = params->viewDistance;
+    VTHETA = params->viewTheta;
     
     //initialize glut and glew
     glutInit(&argc, argv);
