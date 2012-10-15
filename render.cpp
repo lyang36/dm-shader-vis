@@ -31,6 +31,7 @@ using namespace std;
 
 colorBuffer * CB, *CBL, *CBU;       //for final rendering
 double VANGLE, VTHETA, VPHI, VDIS, DISMIN, DISMAX;
+double SCALEFAC;
 static unsigned int WSIZE, POINTSIZE;
 string picfile;
 bool isonscreen = false;
@@ -363,9 +364,13 @@ void rendsenc(){
     
     
     char ct[100];
-    sprintf(ct,"Distance: %3.2f kpc.\nF_min = %3.2f\nF_max = %3.2f \nTheta:%3.2f\nPhi:%3.2f ",VDIS,
-            DISMIN, DISMAX, VTHETA/PI*180.0, VPHI/PI*180.0);
+    sprintf(ct,"Distance: %3.2f kpc.\nTheta:%3.2f\nPhi:%3.2f\nView:%3.2f",VDIS, VTHETA/PI*180.0, VPHI/PI*180.0, VANGLE/PI*180.0);
     displaytext(ct, 0, WSIZE-15);
+    
+    sprintf(ct,"\nF_min = %3.2f\nF_max = %3.2f\nUnit: Log(Gev^2 cm^-6 kpc)",
+            log10(DISMIN * SCALEFAC), log10(DISMAX * SCALEFAC));
+    displaytext(ct, 0, 15 * 3);
+    //"Gev^2 cm^-6 kpc"
     
     glMatrixMode(GL_MODELVIEW);
     glPopMatrix();
@@ -443,6 +448,7 @@ void render::start(int argc, char **argv){
     VPHI = params->viewPhi;
     VDIS = params->viewDistance;
     VTHETA = params->viewTheta;
+    SCALEFAC = params->FLUXFACTOR;
     
     //initialize glut and glew
     glutInit(&argc, argv);
