@@ -30,7 +30,14 @@ float profile(vec3 r1,float dtheta){
     //costheta = clamp(costheta, -1.0, 1.0);
     //float t2 = acos(costheta);
     //t2 = t2*t2;
-    float d2 = clamp(t2 / dtheta / dtheta, 0.0, 1.0);
+    //float d2 = clamp(t2 / dtheta / dtheta, 0.0, 1.0);
+    float d2 = (t2 / dtheta / dtheta, 0.0, 1.0);
+    if(t2 > 1.0){
+        return 0.0;
+    }
+    if(t2 < 0.0){
+        t2 = 0.0;
+    }
     return exp(- 1.5 * d2);         //here comes the problems
     //return 1.0 - 1.5 * d2;
     
@@ -78,9 +85,6 @@ float calc_norm1(float theta0){
     return 2.0*(-1.0 + e32) * PI * theta0 * theta0 / (3.0 * e32) -
         (PI * (-5.0 + 2.0 * e32) * theta0 * theta0 * theta0 * theta0) / (27.0 * e32)
         +(PI * (-29.0 + 8.0 * e32) * PI * theta0 * theta0 * theta0 * theta0 * theta0 * theta0) / ( 1620.0 * e32);
-    //(2 (-1 + E^(3/2)) \[Pi] \[Theta]0^2)/(
-    //                                      3 E^(3/2)) - (((-5 + 2 E^(3/2)) \[Pi]) \[Theta]0^4)/(27 E^(3/2))
-	//normfac = 1.0 / (geofac.y * geofac.y) / calc_norm1(dtheta) * 4.0;
 }
 
 void main(){
@@ -177,8 +181,8 @@ void main(){
         float d2 = dtheta * dtheta;
         {
             if(usenormmap == 0 && newsize != 1.0){
-                //normfac = calc_norm(vec2(xc, yc), newsize, dtheta);
-				normfac = 1.0 / (geofac.y * geofac.y) / calc_norm1(dtheta) * 4.0;
+                normfac = calc_norm(vec2(xc, yc), newsize, dtheta);
+				//normfac = 1.0 / (geofac.y * geofac.y) / calc_norm1(dtheta) * 4.0;
             }else{
                 normfac = 1.0;
             }
