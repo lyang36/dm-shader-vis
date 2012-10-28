@@ -121,7 +121,8 @@ void render::drawFlux(){
     
         //begin shader
         fshaderL->begin();
-    
+        fshaderL->setIsUseRotm(params->isROTM);
+
         //setup shader parameters 
         fshaderL->setgeofac3f(orthsize, windowSize, pointSize);
         
@@ -137,6 +138,8 @@ void render::drawFlux(){
     
         //begin shader
         fshaderU->begin();
+        fshaderU->setIsUseRotm(params->isROTM);
+
     
         //setup shader parameters 
         fshaderU->setgeofac3f(orthsize, windowSize, pointSize);

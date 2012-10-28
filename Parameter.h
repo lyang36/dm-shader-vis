@@ -72,5 +72,7 @@ public:
     bool isTimeMeasure;       //whether measure rendering time
     bool isOnScreenRend;    //whether show picture on screen
 
+    bool isROTM;            //whether use the rotation matrix
+
 };
 #endif

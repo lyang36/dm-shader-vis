@@ -13,6 +13,19 @@ WSIZE 512
 #nside for the healpix map
 NSIDE 512 
 
+#fragmentshader
+FRAGMENTSHADER ./shaderfiles/flux.frag 
+
+#vertex shader
+VERTEXSHADER ./shaderfiles/flux.vert
+
+#color vertex shader
+COLORVERTEXSHADER ./shaderfiles/color.vert
+
+#color fragment shader
+COLORFRAGMENTSHADER ./shaderfiles/color.frag
+
+
 #datafile:
 DATAFILE /users/lyang/Documents/temp/data_float.bin
 #DATAFILE ~/data/data_float.bin
@@ -42,6 +55,9 @@ FLUXFACTOR 1.2620584e-06
 
 #whether use normal map
 #USENORMMAP
+
+#whether use rotation matrix
+ROTATE
 
 #-1 to avoid test
 #set n to get numbers of particles read

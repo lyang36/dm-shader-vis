@@ -29,11 +29,12 @@ Parameter::Parameter(string conf){
     isUseNormMap = false;
     isOnScreenRend = false;
     isTimeMeasure = false;
+    isROTM = false;
     conffile = conf;
 
 	#if defined(_WIN32) || defined(_WIN64)
         SHADERDIR = "";
-	triangleVertexShader = SHADERDIR + "shaderfiles\\flux.gvert";
+	    triangleVertexShader = SHADERDIR + "shaderfiles\\flux.gvert";
         triangleGeometryShader = SHADERDIR + "shaderfiles\\flux.tgeom";
         triangleFragmentShader = SHADERDIR + "shaderfiles\\flux.tfrag";
 
@@ -44,17 +45,17 @@ Parameter::Parameter(string conf){
         spriteVertexShader = SHADERDIR + "shaderfiles\\flux.vert";;
         spriteFragmentShader = SHADERDIR + "shaderfiles\\flux.frag";;
 	#else
-	SHADERDIR = "./";
-	triangleVertexShader = SHADERDIR + "shaderfiles\\flux.gvert";
-        triangleGeometryShader = SHADERDIR + "shaderfiles\\flux.tgeom";
-        triangleFragmentShader = SHADERDIR + "shaderfiles\\flux.tfrag";
+	    SHADERDIR = "./";
+	    triangleVertexShader = SHADERDIR + "shaderfiles/flux.gvert";
+        triangleGeometryShader = SHADERDIR + "shaderfiles/flux.tgeom";
+        triangleFragmentShader = SHADERDIR + "shaderfiles/flux.tfrag";
 
-                pointVertexShader = SHADERDIR + "shaderfiles\\flux.gvert";
-                pointGeometryShader = SHADERDIR + "shaderfiles\\flux.pgeom";
-                pointFragmentShader = SHADERDIR + "shaderfiles\\flux.pfrag";
+        pointVertexShader = SHADERDIR + "shaderfiles/flux.gvert";
+        pointGeometryShader = SHADERDIR + "shaderfiles/flux.pgeom";
+        pointFragmentShader = SHADERDIR + "shaderfiles/flux.pfrag";
 
-        spriteVertexShader = SHADERDIR + "shaderfiles\\flux.vert";;
-        spriteFragmentShader = SHADERDIR + "shaderfiles\\flux.frag";;
+        spriteVertexShader = SHADERDIR + "shaderfiles/flux.vert";;
+        spriteFragmentShader = SHADERDIR + "shaderfiles/flux.frag";;
 	#endif
 }
 
@@ -160,6 +161,9 @@ bool Parameter::readParameter(){
             }else if(word == "TIMEMEASURE"){
                 isTimeMeasure = true;
                 cout << "Measure render time?" << isTimeMeasure << endl;
+            }else if(word == "ROTATE"){
+                isROTM = true;
+                cout << "Use rotation matrix?" << isROTM << endl;
             }else if(word == "ONSCREEN"){
                 isOnScreenRend = true;
                 cout << "Show picture on screen?" << isOnScreenRend << endl;

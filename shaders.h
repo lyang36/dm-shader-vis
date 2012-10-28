@@ -53,6 +53,8 @@ private:
     REAL * opos;
     REAL * cpos;
     REAL rotmatrix[9];
+
+    bool isRotm;                //set whether use the rotation matrix
 public:
     //void setzaxis3f(REAL x, REAL y, REAL z); //set vpos
     //void setzaxis3fv(REAL * vpos);
@@ -67,6 +69,9 @@ public:
     void setrotmatrix(REAL * alignvec, REAL * obsvec, REAL * centervec, bool updown);     //setup rotation matrix
                                             //alignvec has 3 vars
     void setusenormmap(bool isnm);          //whether use the norm map
+    void setIsUseRotm(bool isrotm){
+        isRotm = isrotm;
+    };
     
     fluxShader(string v, string f){
         
@@ -78,6 +83,7 @@ public:
         vfile = "./shaderfiles/flux.vert";
         ffile = "./shaderfiles/flux.frag";
 #endif*/
+        setIsUseRotm(false);
         vfile = v;
         ffile = f;
         shaderManager SM;
