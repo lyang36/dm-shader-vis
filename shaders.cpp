@@ -127,10 +127,46 @@ void fluxShader::setrotm(bool updown){
         for(int i = 0; i < 9 ; i ++){
             rotmatrix[i] = 0;
         }
-    
-        rotmatrix[0] = 1;
-        rotmatrix[4] = 1;
-        rotmatrix[8] = 1;
+        double x = align_vec[0];
+        double y = align_vec[1];
+        double z = align_vec[2];
+        double r = sqrt(x*x+y*y+z*z);
+        double z1 = x / r;
+        double z2 = y / r;
+        double z3 = z / r;
+        r = sqrt(z1 * z1 + z2 * z2);
+        if(r == 0.0){
+            if(z3 < 0){
+                rotmatrix[0] = 1;
+                rotmatrix[4] = 1;
+                rotmatrix[8] = 1;
+            }else{
+                rotmatrix[0] = -1;
+                rotmatrix[4] = -1;
+                rotmatrix[8] = -1;
+            }
+            
+        }else{
+            
+            
+            rotmatrix[0] = -z2 / r;
+            rotmatrix[3] = +z1 / r;
+            rotmatrix[6] = 0;
+            
+            
+            r = sqrt(z1 * z3 * z1 * z3 + z2 * z3 * z2 * z3 + (z1*z1 + z2*z2) * (z1*z1 + z2 * z2));
+            rotmatrix[1] = -z1 * z3 / r;
+            rotmatrix[4] = -z2 * z3 / r;
+            rotmatrix[7] = (z1 * z1 + z2 * z2) / r;
+            
+            rotmatrix[2] = -z1;
+            rotmatrix[5] = -z2;
+            rotmatrix[8] = -z3;
+        }
+        
+        //rotmatrix[0] = 1;
+        //rotmatrix[4] = 1;
+        //rotmatrix[8] = 1;
     }
 
     if(updown){
