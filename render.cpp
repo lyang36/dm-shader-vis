@@ -114,6 +114,7 @@ void render::drawFlux(){
         fshader->setopos3f(params->oposx, params->oposy, params->oposz);
         fshader->setrotmatrix(params->vvec, params->opos, params->cpos);
         fshader->setusenormmap(params->isUseNormMap);
+        printf("View angle: %f\n", params->viewAngle);
         fshader->setlimitangle(params->viewAngle);
         
         fshader->end();
@@ -573,3 +574,92 @@ void render::saveFluxMap(){
 
     output_file.close();
 }
+
+/*
+void render::saveHealPix(){
+    double * healmap;
+    int nside = params -> NSIDE;
+    //int pixss = windowSize * windowSize;
+    int npix = nside * nside * 12;
+    healmap = (double *) calloc(npix, sizeof(double));
+    if(healmap == NULL){
+        printf("Not enough memory, cannot convert to healpix map!\n");
+        return;
+    }
+    //double domega = 4.0 * PI / (double) npix;
+    //double detheta = sqrt(domega);
+    double theta;
+    double phi;
+    
+    double _rffmin = 1.0e36;
+    double _rffmax = 0.0;
+    double total_f = 0.0;
+
+    
+    for(int i = 0; i < npix; i++){
+        //double x, y,r, factor;
+        //int j;
+        pix2ang_ring(nside, i, &theta, &phi);
+        //now we have theta and phi and dtheta
+        //converte (theta, phi, dtheta) to the projectio plane, we have
+        phi = 2*PI - phi + PI;
+
+        
+        bool isupshere = false;
+        if(theta < PI/2){
+            theta = PI - theta;
+            isupshere = true;
+        }
+        
+        int d = round(windowSize / 2.0);
+        //bilinear interpolation
+        double pr = sin(theta)/(1-cos(theta));
+        double pxc = pr * cos(phi);
+        double pyc = pr * sin(phi);
+
+        double xc = (pxc) * (double)d;
+        double yc = (pyc) * (double)d;
+        double x1 = floor(xc);
+        double x2 = x1 + 1;
+        double y1 = floor(yc);
+        double y2 = y1 + 1;
+        //printf("reading %d\n", i);
+        
+        double f11 = _getpixflux(round(x1), round(y1), isupshere);
+        double f12 = _getpixflux(round(x1), round(y2), isupshere);
+        double f21 = _getpixflux(round(x2), round(y1), isupshere);
+        double f22 = _getpixflux(round(x2), round(y2), isupshere);
+        
+        double flux = 0;
+        double fr1 = (x2 - xc) / (x2 - x1) * f11 + (xc - x1) / (x2 - x1) * f21;
+        double fr2 = (x2 - xc) / (x2 - x1) * f12 + (xc - x1) / (x2 - x1) * f22;
+        flux = (y2 - yc) / (y2 - y1) * fr1 + (yc - y1) / (y2 - y1) * fr2;
+        
+        healmap[i] = flux / (4.0 / (1 + pr*pr)/(1 + pr*pr)) * windowSize * windowSize / 4.0;
+        //printf("read ok %d\n", i);
+        total_f += healmap[i];
+        // * 
+        //4 * PI * (windowSize * windowSize) / npix;// / (4.0 / (1 + pr*pr)/(1 + pr*pr));;
+        // * params->FLUXFACTOR / 
+        if(flux > _rffmax) _rffmax = flux;
+        if(flux < _rffmin) _rffmin = flux;
+        
+    }
+    float _ft = 0;
+    for(int i = 0; i < npix; i++){
+        healmap[i] = healmap[i] * params->FLUXFACTOR;// / total_f * totalFlux * params->FLUXFACTOR /domega;
+        _ft += healmap[i];// / total_f * totalFlux * params->FLUXFACTOR /domega;;
+    }
+    
+    printf("%f %f total: %f %f times %f %d\n", _rffmax, _rffmin, total_f * (4*PI/npix), _ft, total_f * (4*PI/npix) / totalFlux, npix/(2*windowSize*windowSize));
+    cout.flush();
+        
+    ofstream output_file ((params->HEALPIXFILE).c_str(), ios::out | ios::binary);
+    if(output_file.good()){
+        output_file.write ((char *)healmap, 12 * nside * nside * sizeof(double));
+    }else{
+        cout << "Writing Error!";
+    }
+    output_file.close();
+    free(healmap);
+}*/

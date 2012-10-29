@@ -113,7 +113,7 @@ void fluxShader::setusenormmap(bool isnm){
 
 
 void fluxShader::setlimitangle(float angle){
-    glUniform1f(lim_angleloc, PI - angle);
+    glUniform1f(lim_angleloc, angle);
 }
 
 

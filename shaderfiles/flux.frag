@@ -23,23 +23,22 @@ float profile(vec3 r1,float dtheta){
     //costheta = clamp(costheta, -1.0, 1.0);
     //float t2 = acos(costheta);
     //t2 = t2*t2;
-    float d2 = clamp(t2 / dtheta / dtheta, 0.0, 1.0);
-    return exp(- 1.5 * d2);         //here comes the problems
-    //return 1.0 - 1.5 * d2;
-    
+    float d2 = (t2 / dtheta / dtheta, 0.0, 1.0);
+    if(t2 > 1.0){
+        return 0.0;
+    }
+    if(t2 < 0.0){
+        t2 = 0.0;
+    }
+    return exp(- 1.5 * d2); 
 }
 
 //reverse stereoprojection
 vec3 prev(vec2 xy){
-    xy /= viewangle_scale_factor;
+    xy = xy / viewangle_scale_factor;
     float r2 = xy.x*xy.x + xy.y*xy.y;
     return vec3(2.0 * xy.x/(1.0 + r2), 2.0 * xy.y/(1.0 + r2), (r2 - 1.0)/(r2 + 1.0));
 }
-
-float projprofile(vec2 xy, float fc, float dtheta){
-    return fc * profile(prev(xy), dtheta);
-}
-
 
 
 void main(){
@@ -62,15 +61,13 @@ void main(){
 	float pr2 = dot(xyr, xyr);
 	
 	//seting up the view angle
-	//if(pr2 > lim_r * lim_r){
-    //    discard;
-	//}
+    //float lim_r = 1.0 / viewangle_scale_factor;
+	if(pr2 > 1.0){
+        discard;
+	}
 
 	if(newsize != 1.0){
 		if(fluxfac != 0.0){
-
-
-			flux = fluxfac * 4.0/(1.0+pr2)/(1.0+pr2) * profile(prev(xyr), dtheta);
 			//flux = fluxfac;
 			if(usenormmap == 1){
 				float r0 = sqrt(pr2);
@@ -78,7 +75,12 @@ void main(){
 				float norm = (texture2D(normmap, vec2(r0, r))).r;
 				//if(norm < 0.0) norm = 1.0;
 				flux = flux / norm;
-			}
+			}else{
+                //be careful to the units
+                //flux = fluxfac * 4.0/(1.0+pr2)/(1.0+pr2) * profile(prev(xyr), dtheta);
+                //
+                flux = fluxfac * profile(prev(xyr), dtheta) *  4.0/(1.0+pr2)/(1.0+pr2);
+            }
 			
 
 			gl_FragColor = vec4(flux, 0, 0, 1.0);

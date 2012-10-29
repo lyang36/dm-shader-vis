@@ -34,15 +34,20 @@ float profile(vec3 r1,float dtheta){
     //costheta = clamp(costheta, -1.0, 1.0);
     //float t2 = acos(costheta);
     //t2 = t2*t2;
-    float d2 = clamp(t2 / dtheta / dtheta, 0.0, 1.0);
+    float d2 = (t2 / dtheta / dtheta, 0.0, 1.0);
+    if(t2 > 1.0){
+        return 0.0;
+    }
+    if(t2 < 0.0){
+        t2 = 0.0;
+    }
     return exp(- 1.5 * d2);         //here comes the problems
-    //return 1.0 - 1.5 * d2;
     
 }
 
 //reverse stereoprojection
 vec3 prev(vec2 xy){
-    xy /= scale_factor;
+    xy = xy / scale_factor;
     float r2 = xy.x*xy.x + xy.y*xy.y;
     return vec3(2.0 * xy.x/(1.0 + r2), 2.0 * xy.y/(1.0 + r2), (r2 - 1.0)/(r2 + 1.0));
 }
@@ -70,22 +75,15 @@ float calc_norm(vec2 svec, float newsize, float dtheta){
             vec2 xyp = xy * (newsize / 2.0) + coor;
             vec2 xyr = xyp / (geofac.y / 2.0);
             float pr2 = dot(xyr, xyr);
+            
+            //here changed, be careful to the units
             norm += 4.0/(1.0+pr2)/(1.0+pr2) * profile(prev(xyr), dtheta);
-            //norm += 1.0;
+            //here changed, be careful to the units
+            //norm += profile(prev(xyr), dtheta);
             
         }
     }
     return 1.0/norm;
-    //return 1.0 / (newsize * newsize);
-}
-
-float calc_norm1(float theta0){
-    return 2.0*(-1.0 + e32) * PI * theta0 * theta0 / (3.0 * e32) -
-        (PI * (-5.0 + 2.0 * e32) * theta0 * theta0 * theta0 * theta0) / (27.0 * e32)
-        +(PI * (-29.0 + 8.0 * e32) * PI * theta0 * theta0 * theta0 * theta0 * theta0 * theta0) / ( 1620.0 * e32);
-    //(2 (-1 + E^(3/2)) \[Pi] \[Theta]0^2)/(
-    //                                      3 E^(3/2)) - (((-5 + 2 E^(3/2)) \[Pi]) \[Theta]0^4)/(27 E^(3/2))
-	//normfac = 1.0 / (geofac.y * geofac.y) / calc_norm1(dtheta) * 4.0;
 }
 
 void main(){
@@ -112,21 +110,19 @@ void main(){
     vec3 npvec = normalize(rotmatrix * pvec);
     
     
-    float costheta = npvec.z;//dot(npvec, nzaxis);
-    //costheta -3.0 / 5.0;
+    float costheta = clamp(npvec.z, -1.0, 1.0);//dot(npvec, nzaxis);
     float theta = acos(costheta);      //0.955
-    scale_factor = 1.0 / (sin(lim_angle) / (1.0 - cos(lim_angle)));
+    scale_factor = 1.0 / (sin(PI - lim_angle) / (1.0 - cos(PI - lim_angle)));
+    //scale_factor = 1.83;
     viewangle_scale_factor = scale_factor;
     
-    //vec3 newpvec = vec3(dot(npvec, nxaxis), dot(npvec, nyaxis),costheta);
-    
-    if((theta > lim_angle || theta + dtheta >= lim_angle) && dtheta < PI / 2.0)
+    if((theta > (PI - lim_angle) || theta + dtheta >= (PI - lim_angle)) && dtheta < PI / 2.0)
+    //if(theta > PI / 2.0)
     {
         float sintheta = sin(theta);
         float sinphi;
         float cosphi;
         if(sintheta < 1.0e-8 ){
-            //phi = 0.0;
             sinphi = 0.0;
             cosphi = 1.0;
         }else{
@@ -155,15 +151,13 @@ void main(){
         yc = prho * sinphi;
         
         //xc, yc, r scale:
-        xc *= scale_factor;
-        yc *= scale_factor;
-        r *= scale_factor;
+        xc = scale_factor * xc;
+        yc  = scale_factor * yc;
+        r = scale_factor * r;
         
-        float newsize = floor(r *geofac.y); ///!!!!!!!!!!!!!!!!
+        float newsize = floor(r * geofac.y); ///!!!!!!!!!!!!!!!!
         
         newpos = vec4(xc * geofac.x, yc * geofac.x, 0.0, 1.0);
-        
-
         
         if(newsize > geofac.z){
             dsize = geofac.z / newsize * r;
@@ -185,8 +179,7 @@ void main(){
         float d2 = dtheta * dtheta;
         {
             if(usenormmap == 0 && newsize != 1.0){
-                //normfac = calc_norm(vec2(xc, yc), newsize, dtheta);
-				normfac = 1.0 / (geofac.y * geofac.y) / calc_norm1(dtheta) * 4.0;
+                normfac = calc_norm(vec2(xc, yc), newsize, dtheta);
             }else{
                 normfac = 1.0;
             }
