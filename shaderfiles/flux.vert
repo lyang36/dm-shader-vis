@@ -115,7 +115,7 @@ void main(){
     vec3 npvec = normalize(rotmatrix * pvec);
     
     
-    float costheta = npvec.z;//dot(npvec, nzaxis);
+    float costheta = clamp(npvec.z, -1.0, 1.0);//dot(npvec, nzaxis);
     //costheta -3.0 / 5.0;
     float theta = acos(costheta);      //0.955
     
