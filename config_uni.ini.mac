@@ -33,16 +33,20 @@ DATAFILE /users/lyang/Documents/temp/data_float.bin
 #distance factor: the length 1 of simulation coordinates of how many kpcs?
 DISFACTOR 4000.0
 
+##MINOR AXIS: Theta = 1.53195 Phi = 1.78401
+#MAJOR AXIS: Theta = 2.86085 Phi = -3.06358
 #the view position's phi coodinates relative to the center position
 #VIEWPHI 0.0
-VIEWPHI 0.0
+VIEWPHI 1.78401
+#VIEWPHI -3.06358
 
 #the view position's theta coodinates relative to the center postion
 #VIEWTHETA 0.7
-VIEWTHETA 1.57074
+VIEWTHETA 1.53195
+#VIEWTHETA 2.86085
 
 #the distance to the center position in kpc
-VIEWDISTANCE 8.0
+VIEWDISTANCE 8.5
 
 #Center position in simulation coordinate
 #CPOS 3.612030e-01  2.106580e-01  6.877260e-03 
@@ -67,7 +71,8 @@ FLUXFACTOR 1.2620584e-06
 #whether on screen
 ONSCREEN
 
-#ViewAngle
+#ViewAngle #38deg in agular radius is about to the res of Fermi
+#VIEWANGLE 0.663225
 VIEWANGLE 1.5
 
 #whther measure time
@@ -75,5 +80,6 @@ VIEWANGLE 1.5
 
 #-1 to avoid test
 #set n to get numbers of particles read
-#TEST 10000000
-TEST -1 
+TEST 1000000
+#TEST -1 
+
