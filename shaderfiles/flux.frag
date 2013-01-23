@@ -65,7 +65,10 @@ void main(){
 			vec2 xyp = p * (newsize / 2.0) + coor;
 			vec2 xyr = xyp / (geofac.y / 2.0);
 			float pr2 = dot(xyr, xyr);
-			flux = fluxfac * 4.0/(1.0+pr2)/(1.0+pr2) * profile(prev(xyr), dtheta);
+            //use the actual norm
+			flux = fluxfac  * profile(prev(xyr), dtheta) * 4.0/(1.0+pr2)/(1.0+pr2);
+            //use analytical norm
+            //flux = fluxfac  * profile(prev(xyr), dtheta) * 4.0/(1.0+pr2)/(1.0+pr2);
 			//flux = fluxfac;
 			if(usenormmap == 1){
 				float r0 = sqrt(pr2);

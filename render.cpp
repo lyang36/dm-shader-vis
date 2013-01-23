@@ -254,9 +254,12 @@ void render::drawFlux(){
         
         
         
-        
         kk++;
         if(kk % (outc) == 0){
+            //test
+            //    printf(">>>> %f\n", ((reader->getBuf())[0]).mass);
+
+
             cout << "*";
             cout.flush();
         }
@@ -763,7 +766,7 @@ void render::saveHealPix(){
         flux = (y2 - yc) / (y2 - y1) * fr1 + (yc - y1) / (y2 - y1) * fr2;
         
         healmap[i] = flux / (4.0 / (1 + pr*pr)/(1 + pr*pr)) * windowSize * windowSize / 4.0;
-        //printf("read ok %d\n", i);
+        
         total_f += healmap[i];
         // * 
         //4 * PI * (windowSize * windowSize) / npix;// / (4.0 / (1 + pr*pr)/(1 + pr*pr));;

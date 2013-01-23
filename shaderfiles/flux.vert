@@ -181,7 +181,9 @@ void main(){
         float d2 = dtheta * dtheta;
         {
             if(usenormmap == 0 && newsize != 1.0){
+                //use actual norm
                 normfac = calc_norm(vec2(xc, yc), newsize, dtheta);
+                //use analytical norm
 				//normfac = 1.0 / (geofac.y * geofac.y) / calc_norm1(dtheta) * 4.0;
             }else{
                 normfac = 1.0;
