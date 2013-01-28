@@ -561,13 +561,13 @@ void render::start(int argc, char **argv){
     if(!initialed){
 
         fshaderL = new fluxShader(params->spriteVertexShader, params->spriteFragmentShader);
-        cshaderL = new colorShader();
+        cshaderL = new colorShader(params->colorvertexshader, params->colorfragmentshader);
         fbufferL = new fluxBuffer(windowSize, windowSize);
         cbufferL = new colorBuffer(windowSize, windowSize);
         fbufferL->setBuffer();
         
         fshaderU = new fluxShader(params->spriteVertexShader, params->spriteFragmentShader);
-        cshaderU = new colorShader();
+        cshaderU = new colorShader(params->colorvertexshader, params->colorfragmentshader);
         fbufferU = new fluxBuffer(windowSize, windowSize);
         cbufferU = new colorBuffer(windowSize, windowSize);
         fbufferU->setBuffer();

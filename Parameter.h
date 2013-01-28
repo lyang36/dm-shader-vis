@@ -46,7 +46,8 @@ public:
 
     string spriteVertexShader;
     string spriteFragmentShader;
-
+    string colorfragmentshader;
+    string colorvertexshader;
     
     
     REAL WSIZE, PSIZE;           //size of the projection plane (a side)
