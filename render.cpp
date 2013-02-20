@@ -13,6 +13,15 @@
 #include <cmath>
 #include <fstream>
 
+//fits and HEALPIX
+#include <healpix_base.h>
+#include <healpix_map.h>
+#include <arr.h>
+#include <fitsio.h>
+#include <fitshandle.h>
+#include <healpix_map_fitsio.h>
+
+
 #include "buffers.h"
 #include "shaders.h"
 #include "render.h"
@@ -27,6 +36,10 @@
 #include <GL/glew.h>
 #include <GL/glut.h>
 #endif
+
+
+
+
 using namespace std;
 
 colorBuffer * CB, *CBL, *CBU;       //for final rendering
@@ -791,6 +804,32 @@ void render::saveHealPix(){
         cout << "Writing Error!";
     }
     output_file.close();
+
+
+    //write a fits file
+    arr<double> maparr (healmap, npix);
+    Healpix_Map<double> outputmap (maparr, RING);
+    string fits_filename = params->HEALPIXFILE + ".fits";
+    ifstream ifile(fits_filename.c_str());
+    if (ifile) {
+       // The file exists, and is open for input
+       cout << "File exists! Owerite?" << endl;
+       char t;
+       cin >> t;
+       if( t == 'y'){
+            remove( fits_filename.c_str() );
+            fitshandle fitswriter;
+            fitswriter.create(fits_filename);
+            write_Healpix_map_to_fits<double>(fitswriter, outputmap, PLANCK_FLOAT64 );
+            fitswriter.close();
+       }   
+    }else{
+       cout << "Creating fits!..." << endl;
+       fitshandle fitswriter;
+       fitswriter.create(fits_filename);
+       write_Healpix_map_to_fits<double>(fitswriter, outputmap, PLANCK_FLOAT64 );
+       fitswriter.close();
+    }   
     free(healmap);
 }
 
