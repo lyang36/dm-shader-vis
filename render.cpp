@@ -224,8 +224,12 @@ void render::drawFlux(){
         glEnableClientState (GL_COLOR_ARRAY);
         glColorPointer (3, GL_FLOAT, 6*sizeof(GLfloat), &(vetexarray[0]));
         glVertexPointer (3, GL_FLOAT, 6*sizeof(GLfloat), &(vetexarray[3]));
+
+        //test
+        //printf("%e %e %e %e %e %e\n", vetexarray[0], vetexarray[1], vetexarray[2],
+        //                vetexarray[3], vetexarray[4], vetexarray[5]);
         
-	timeval tim;
+        timeval tim;
         gettimeofday(&tim, NULL);
         double t1=tim.tv_sec+(tim.tv_usec/1000000.0);
 
