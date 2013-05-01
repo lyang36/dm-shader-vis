@@ -57,7 +57,7 @@ void fluxShader::setrotm(bool updown){
     rotaxis[2] = -sin(otheta) * sin(ophi) / sqrt((sin(otheta)*sin(ophi)) * (sin(otheta)*sin(ophi)) + (cos(otheta) * cos(otheta)));
     
     Real c = -sin(otheta) * cos(ophi);
-    Real s = -sqrt((sin(otheta) * sin(ophi) * sin(otheta) * sin(ophi)) + 
+    Real s = -sqrt((sin(otheta) * sin(ophi) * sin(otheta) * sin(ophi)) +
                    (cos(otheta) * cos(otheta)));
     Real t = 1.0 - c;
     Real rotma[9];
@@ -80,20 +80,20 @@ void fluxShader::setrotm(bool updown){
     //cout << "ROT[0][0] " << rotmatrix[0][0] << endl;
     
     Real distance = radius;
-    Real tmpvec[] = {cpos[0] + distance * align_vec[0] - opos[0], 
-        cpos[1] + distance * align_vec[1] - opos[1], 
+    Real tmpvec[] = {cpos[0] + distance * align_vec[0] - opos[0],
+        cpos[1] + distance * align_vec[1] - opos[1],
         cpos[2] + distance * align_vec[2] - opos[2]};
     
-    Real xtmp = tmpvec[0] * rotma[0*3 + 0] + 
-    tmpvec[1] * rotma[1*3 + 0] + 
+    Real xtmp = tmpvec[0] * rotma[0*3 + 0] +
+    tmpvec[1] * rotma[1*3 + 0] +
     tmpvec[2] * rotma[2*3 + 0];
     
-    Real ytmp = tmpvec[0] * rotma[0 * 3 + 1] + 
-    tmpvec[1] * rotma[1 * 3 + 1] + 
+    Real ytmp = tmpvec[0] * rotma[0 * 3 + 1] +
+    tmpvec[1] * rotma[1 * 3 + 1] +
     tmpvec[2] * rotma[2 * 3 + 1];
-
-    Real ztmp = tmpvec[0] * rotma[0 * 3 + 2] + 
-    tmpvec[1] * rotma[1 * 3 + 2] + 
+    
+    Real ztmp = tmpvec[0] * rotma[0 * 3 + 2] +
+    tmpvec[1] * rotma[1 * 3 + 2] +
     tmpvec[2] * rotma[2 * 3 + 2];
     
     tmpvec[0] = xtmp;
@@ -107,9 +107,9 @@ void fluxShader::setrotm(bool updown){
     
     Real rotmatrix2[] = { 1.0, 0.0, 0.0,
         0.0, cos(gamma_t), sin(gamma_t),
-        0.0, sin(gamma_t), cos(gamma_t)};
+        0.0, -sin(gamma_t), cos(gamma_t)};
     
-    //static Real rottmp[3][3];       
+    //static Real rottmp[3][3];
     for (int i = 0; i<3; i++){
         for (int j =0; j<3; j++){
             Real val = 0;
@@ -121,7 +121,7 @@ void fluxShader::setrotm(bool updown){
         }
     }
     
-
+    
     //rotate
     if(!isRotm){
         for(int i = 0; i < 9 ; i ++){
@@ -168,7 +168,7 @@ void fluxShader::setrotm(bool updown){
         //rotmatrix[4] = 1;
         //rotmatrix[8] = 1;
     }
-
+    
     if(updown){
         rotmatrix[2] *= -1;
         rotmatrix[5] *= -1;
@@ -178,8 +178,9 @@ void fluxShader::setrotm(bool updown){
     printf("%f %f %f\n", rotmatrix[0], rotmatrix[1], rotmatrix[2]);
     printf("%f %f %f\n", rotmatrix[3], rotmatrix[4], rotmatrix[5]);
     printf("%f %f %f\n", rotmatrix[6], rotmatrix[7], rotmatrix[8]);
+    
+    return;
 
-    return;                 
     
 }
 

@@ -2,29 +2,26 @@
 
 CC=g++
 
-#FITSIOLIB=/Users/lyang/Tools/cfitsio
-#HEALPIXHOME=/Users/lyang/Tools/Healpix_3.00
-FITSIOLIB=/home/lyang/Tools/cfitsio
-HEALPIXHOME=/home/lyang/Tools/Healpix_3.00
-HEALPIXSRC=$(HEALPIXHOME)/src/cxx/basic_gcc/include
-HEALPIXLIB=$(HEALPIXHOME)/src/cxx/basic_gcc/lib
-HEALPIXCXX=$(HEALPIXHOME)/src/cxx/cxxsupport
-HEALPIXC=$(HEALPIXHOME)/cxx/Healpix_cxx
-GLEWINC=/home/lyang/Tools/glew/include/
-GLEWLIB=/home/lyang/Tools/glew/lib/libGLEW.a 
+FITSIOLIB=/Users/lyang/Tools/cfitsio
+HEALPIXHOME=/Users/lyang/Tools/Healpix_3.00
+#FITSIOLIB=/home/lyang/Tools/cfitsio
+#HEALPIXHOME=/home/lyang/Tools/Healpix_3.00
+HEALPIXSRC = $(HEALPIXHOME)/src/cxx/basic_gcc/include
+HEALPIXLIB = $(HEALPIXHOME)/src/cxx/basic_gcc/lib
+HEALPIXCXX = $(HEALPIXHOME)/src/cxx/cxxsupport
+HEALPIXC  = $(HEALPIXHOME)/cxx/Healpix_cxx
 
-#LFLAGS=-framework Carbon -framework OpenGL -framework GLUT \
+LFLAGS=-framework Carbon -framework OpenGL -framework GLUT \
 	$(HEALPIXLIB)/libhealpix_cxx.a\
 	   $(HEALPIXLIB)/libcxxsupport.a\
 	   $(FITSIOLIB)/libcfitsio.a
-LFLAGS=-lGL -lglut\
+#LFLAGS=-lGL -lglut -lGLEW\
 	   $(HEALPIXLIB)/libhealpix_cxx.a\
 	   $(HEALPIXLIB)/libcxxsupport.a\
 	   $(FITSIOLIB)/libcfitsio.a
 
-IFLAG= -I /usr/include/GL/ -I $(HEALPIXSRC) \
-	   -I ${GLEWINC} -I$(FITSIOLIB)
-GLEWO=${GLEWLIB}#/usr/lib/libGLEW.a
+IFLAG= -I /usr/include/GL/ -I $(HEALPIXSRC) -I$(FITSIOLIB)
+GLEWO=/usr/lib/libGLEW.a
 
 all: obj
 	$(CC) *.o $(GLEWO) -o dmvis $(LFLAGS)
