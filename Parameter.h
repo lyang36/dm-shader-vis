@@ -74,6 +74,8 @@ public:
     bool isOnScreenRend;    //whether show picture on screen
 
     bool isROTM;            //whether use the rotation matrix
+    
+    bool verbose;           //verbose
 
 };
 #endif

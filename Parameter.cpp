@@ -29,6 +29,7 @@ Parameter::Parameter(string conf){
     isUseNormMap = false;
     isOnScreenRend = false;
     isTimeMeasure = false;
+    verbose = false;
     isROTM = false;
     conffile = conf;
 
@@ -177,6 +178,10 @@ bool Parameter::readParameter(){
             }else if(word == "ONSCREEN"){
                 isOnScreenRend = true;
                 cout << "Show picture on screen?" << isOnScreenRend << endl;
+            }
+            else if(word == "VERBOSE"){
+                verbose = true;
+                cout << "Verbose: " << verbose << endl;
             }
         }
         //cout << word << " -- " << line << endl;

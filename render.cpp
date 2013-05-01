@@ -818,8 +818,8 @@ void render::saveHealPix(){
     if (ifile) {
        // The file exists, and is open for input
        cout << "File exists! Owerite?" << endl;
-       char t;
-       cin >> t;
+       char t = 'y';
+       if(params->verbose) cin >> t;
        if( t == 'y'){
             remove( fits_filename.c_str() );
             fitshandle fitswriter;
